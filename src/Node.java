@@ -11,7 +11,7 @@ public class Node {
     private LinkedList<Machine> pickupItems;
     private LinkedList<Machine> dropOffItems;
     private HashMap<MachineType, Stack<Machine>>  machines;
-    boolean depot;
+    private boolean depot;
 
 
     public Node(int nodeID, double latitude, double longitude, boolean depot) {
@@ -26,5 +26,61 @@ public class Node {
 
     public void setDepot(){
         this.depot=true;
+    }
+
+    public int getNodeID() {
+        return nodeID;
+    }
+
+    public void setNodeID(int nodeID) {
+        this.nodeID = nodeID;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public LinkedList<Machine> getPickupItems() {
+        return pickupItems;
+    }
+
+    public void setPickupItems(LinkedList<Machine> pickupItems) {
+        this.pickupItems = pickupItems;
+    }
+
+    public LinkedList<Machine> getDropOffItems() {
+        return dropOffItems;
+    }
+
+    public void setDropOffItems(LinkedList<Machine> dropOffItems) {
+        this.dropOffItems = dropOffItems;
+    }
+
+    public HashMap<MachineType, Stack<Machine>> getMachines() {
+        return machines;
+    }
+
+    public void setMachines(HashMap<MachineType, Stack<Machine>> machines) {
+        this.machines = machines;
+    }
+
+    public boolean isDepot() {
+        return depot;
+    }
+
+    public void setDepot(boolean depot) {
+        this.depot = depot;
     }
 }
