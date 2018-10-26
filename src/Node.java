@@ -9,7 +9,7 @@ public class Node {
     private double latitude;
     private double longitude;
     private LinkedList<Machine> pickupItems;
-    private LinkedList<Machine> dropOffItems;
+    private LinkedList<MachineType> dropOffItems;
     private HashMap<MachineType, Stack<Machine>>  machines;
     private boolean depot;
 
@@ -60,11 +60,11 @@ public class Node {
         this.pickupItems = pickupItems;
     }
 
-    public LinkedList<Machine> getDropOffItems() {
+    public LinkedList<MachineType> getDropOffItems() {
         return dropOffItems;
     }
 
-    public void setDropOffItems(LinkedList<Machine> dropOffItems) {
+    public void setDropOffItems(LinkedList<MachineType> dropOffItems) {
         this.dropOffItems = dropOffItems;
     }
 

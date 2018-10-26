@@ -42,10 +42,10 @@ public class Input {
         int aantalLocations = Integer.parseInt(sc.nextLine().split(" ")[1]);
 
         for (int i = 0; i < aantalLocations; i++) {
-            int a =sc.nextInt();
-            double b = sc.nextDouble();
-            double c = sc.nextDouble();
-            locations.add(new Node(a,b,c,false));
+            int locationId =sc.nextInt();
+            double latitude = sc.nextDouble();
+            double longitude = sc.nextDouble();
+            locations.add(new Node(locationId,latitude,longitude,false));
         }
 
 
@@ -68,8 +68,8 @@ public class Input {
             int truckId=sc.nextInt();
             int startLocationId= sc.nextInt();
             int endLocationId= sc.nextInt();
-            //@TODO constructor Truck
-            trucks.add(new Truck());
+            //@TODO controle constructor Truck
+            trucks.add(new Truck(truckId, startLocationId, endLocationId));
         }
 
 
@@ -83,8 +83,7 @@ public class Input {
             int machineTypeVolume=sc.nextInt();
             String machineTypeName= sc.next();
 
-            //@TODO constructor Machine types
-            machineTypes.add(new MachineType());
+            machineTypes.add(new MachineType(machineTypeId, machineTypeName, machineTypeVolume));
         }
 
         // MACHINES
@@ -110,7 +109,8 @@ public class Input {
             int machineTypeId=sc.nextInt();
             int locationId=sc.nextInt();
 
-            //@TODO handle drops
+            //@TODO check handling van drop
+            locations.get(locationId).getDropOffItems().add(machineTypes.get(machineTypeId));
         }
 
         //COLLECTS
@@ -122,7 +122,8 @@ public class Input {
             int machineId=sc.nextInt();
             int locationId=sc.nextInt();
 
-            //@TODO handle collects
+            //@TODO check handling van collect
+            locations.get(locationId).getPickupItems().add(machines.get(machineId));
         }
 
 
