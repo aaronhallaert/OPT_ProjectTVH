@@ -38,8 +38,12 @@ public class Input {
         // LOCATIONS
         locations = new ArrayList<Node>();
         int aantalLocations = Integer.parseInt(sc.nextLine().split(" ")[1]);
+
         for (int i = 0; i < aantalLocations; i++) {
-            locations.add(new Node(sc.nextInt(),sc.nextDouble(),sc.nextDouble(),false));
+            int a =sc.nextInt();
+            double b = sc.nextDouble(); //hier zit de fout
+            double c = sc.nextDouble();
+            locations.add(new Node(a,b,c,false));
         }
 
 
