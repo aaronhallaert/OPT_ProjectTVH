@@ -39,9 +39,7 @@ public class Input {
         locations = new ArrayList<Node>();
         int aantalLocations = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalLocations; i++) {
-            String nodeLine=sc.nextLine();
-            String [] eigenschappenNode= nodeLine.split(" ");
-            locations.add(new Node(Integer.parseInt(eigenschappenNode[0]),Double.parseDouble(eigenschappenNode[1]),Double.parseDouble(eigenschappenNode[2]),false));
+            locations.add(new Node(sc.nextInt(),sc.nextDouble(),sc.nextDouble(),false));
         }
 
 
@@ -49,9 +47,8 @@ public class Input {
         sc.nextLine();
         int aantalDepots= Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalDepots; i++) {
-            String depotLine= sc.nextLine();
-            String [] eigenschappenDepot= depotLine.split(" ");
-            locations.get(Integer.parseInt(eigenschappenDepot[1])).setDepot();
+            int depotId= sc.nextInt();
+            locations.get(sc.nextInt()).setDepot();
         }
 
         //TRUCKS
