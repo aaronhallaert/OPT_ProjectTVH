@@ -34,23 +34,33 @@ public class Input {
 
         sc.nextLine(); //weggooilijn
 
+
+        // LOCATIONS
         locations = new ArrayList<Node>();
         int aantalLocations = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalLocations; i++) {
             String nodeLine=sc.nextLine();
-            String [] eigenschappenArray= nodeLine.split(" ");
-            locations.add(new Node(Integer.parseInt(eigenschappenArray[0]),Double.parseDouble(eigenschappenArray[1]),Double.parseDouble(eigenschappenArray[2])));
+            String [] eigenschappenNode= nodeLine.split(" ");
+            locations.add(new Node(Integer.parseInt(eigenschappenNode[0]),Double.parseDouble(eigenschappenNode[1]),Double.parseDouble(eigenschappenNode[2]),false));
         }
 
 
+        //DEPOTS
+        sc.nextLine();
+        int aantalDepots= Integer.parseInt(sc.nextLine().split(" ")[1]);
+        for (int i = 0; i < aantalDepots; i++) {
+            String depotLine= sc.nextLine();
+            String [] eigenschappenDepot= depotLine.split(" ");
+            locations.get(Integer.parseInt(eigenschappenDepot[1])).setDepot();
+        }
 
-
+        //TRUCKS
         sc.nextLine();
         trucks= new ArrayList<>();
         int aantalTrucks= Integer.parseInt(sc.nextLine().split(" ")[1]);
 
 
-
+        //MACHINE_TIMES
 
 
 
