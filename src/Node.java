@@ -1,4 +1,7 @@
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Set;
+import java.util.Stack;
 
 public class Node {
 
@@ -7,6 +10,9 @@ public class Node {
     private double longitude;
     private LinkedList<Machine> pickupItems;
     private LinkedList<Machine> dropOffItems;
+    private HashMap<MachineType, Stack<Machine>>  machines;
+    boolean depot;
+
 
     public Node(int nodeID, double latitude, double longitude) {
         this.nodeID = nodeID;
