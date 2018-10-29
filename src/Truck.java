@@ -6,13 +6,13 @@ public class Truck {
     private ArrayList<Stop> route;
     private int totaleDuur; //van de rit
     private int totaleAfstand;
-    private int startLocationId;
-    private int endLocationId;
+    private Node startLocation;
+    private Node endLocation;
 
-    public Truck(int truckId, int startLocationId, int endLocationId){
+    public Truck(int truckId, Node startLocation, Node endLocation){
         this.truckId=truckId;
-        this.startLocationId= startLocationId;
-        this.endLocationId=endLocationId;
+        this.startLocation= startLocation;
+        this.endLocation=endLocation;
     }
 
     //@TODO: goeie manier vinden om bij te houden welke machines op welk moment op de truck zitten eventueel met intervaltree met laad en los node
@@ -51,21 +51,19 @@ public class Truck {
         this.totaleAfstand = totaleAfstand;
     }
 
-    public int getStartLocationId() {
-        return startLocationId;
+    public Node getStartLocation() {
+        return startLocation;
     }
 
-    public void setStartLocationId(int startLocationId) {
-        this.startLocationId = startLocationId;
+    public void setStartLocation(Node startLocation) {
+        this.startLocation = startLocation;
     }
 
-    public int getEndLocationId() {
-        return endLocationId;
+    public Node getEndLocation() {
+        return endLocation;
     }
 
-    public void setEndLocationId(int endLocationId) {
-        this.endLocationId = endLocationId;
+    public void setEndLocation(Node endLocation) {
+        this.endLocation = endLocation;
     }
-
-
 }

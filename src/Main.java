@@ -8,8 +8,7 @@ public class Main {
         File inputFile = new File("input.txt");
 
         try {
-            Input input= new Input();
-            input.fromTxt(inputFile);
+            Problem problem = new Problem(inputFile);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();

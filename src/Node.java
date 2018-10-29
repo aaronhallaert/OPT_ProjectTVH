@@ -1,7 +1,4 @@
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class Node {
 
@@ -11,6 +8,7 @@ public class Node {
     private LinkedList<Machine> pickupItems;
     private LinkedList<MachineType> dropOffItems;
     private HashMap<MachineType, Stack<Machine>>  machines;
+    private LinkedList<Edge> edgeList;
     private boolean depot;
 
 
@@ -21,7 +19,29 @@ public class Node {
         pickupItems = new LinkedList<>();
         dropOffItems = new LinkedList<>();
         machines= new HashMap<>();
+        edgeList = new LinkedList<>();
         this.depot=depot;
+    }
+
+    public void addEdge(Edge edge){
+        edgeList.add(edge);
+        //Edge list moet altijd gesorteerd blijven op basis van afstand
+        edgeList.sort(Comparator.comparing(Edge::getDistance));
+    }
+
+    public void addMachine(Machine m){
+        Stack<Machine> stack = machines.get(m.getType());
+        if(machines.get(m.getType()) != null){
+            stack.push(m);
+        }
+        else{
+            machines.put(m.getType(), new Stack<>());
+            machines.get(m.getType()).push(m);
+        }
+    }
+
+    public Node(int nodeID) {
+        this.nodeID = nodeID;
     }
 
     public void setDepot(){
@@ -82,5 +102,18 @@ public class Node {
 
     public void setDepot(boolean depot) {
         this.depot = depot;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Node)) return false;
+        Node node = (Node) o;
+        return nodeID == node.nodeID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nodeID);
     }
 }

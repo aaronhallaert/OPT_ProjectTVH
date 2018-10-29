@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class MachineType {
     private int id;
     private String name;
@@ -7,6 +9,24 @@ public class MachineType {
         this.id = id;
         this.name = name;
         this.volume = volume;
+    }
+
+    //Constructor die enkel dient om machinetypes op te zoeken
+    public MachineType(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MachineType)) return false;
+        MachineType that = (MachineType) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     public int getId() {
@@ -32,4 +52,6 @@ public class MachineType {
     public void setVolume(int volume) {
         this.volume = volume;
     }
+
+
 }
