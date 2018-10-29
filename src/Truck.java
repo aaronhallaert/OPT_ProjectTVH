@@ -4,15 +4,31 @@ public class Truck {
 
     private int truckId;
     private ArrayList<Stop> route;
-    private int totaleDuur; //van de rit
-    private int totaleAfstand;
-    private Node startLocation;
-    private Node endLocation;
+    private int totalTime; //van de rit
+    private int totalDistance;
+    private Location startLocation;
+    private Location endLocation;
 
-    public Truck(int truckId, Node startLocation, Node endLocation){
+    public Truck(int truckId, Location startLocation, Location endLocation){
         this.truckId=truckId;
         this.startLocation= startLocation;
         this.endLocation=endLocation;
+    }
+
+    //Copy constructor
+    public Truck(Truck t) {
+        this.truckId = t.truckId;
+        this.totalTime = t.totalTime;
+        this.totalDistance = t.totalDistance;
+        this.startLocation = t.startLocation;
+        this.endLocation = t.endLocation;
+
+        //route kopieren
+        this.route = new ArrayList<>();
+        for(Stop s: t.route){
+            route.add(new Stop(s));
+        }
+
     }
 
     //@TODO: goeie manier vinden om bij te houden welke machines op welk moment op de truck zitten eventueel met intervaltree met laad en los node
@@ -35,35 +51,32 @@ public class Truck {
         this.route = route;
     }
 
-    public int getTotaleDuur() {
-        return totaleDuur;
+    public int getTotalTime() {
+        return totalTime;
     }
 
-    public void setTotaleDuur(int totaleDuur) {
-        this.totaleDuur = totaleDuur;
+    public void setTotalTime(int totalTime) {
+        this.totalTime = totalTime;
     }
 
-    public int getTotaleAfstand() {
-        return totaleAfstand;
+    public int getTotalDistance() {
+        return totalDistance;
     }
 
-    public void setTotaleAfstand(int totaleAfstand) {
-        this.totaleAfstand = totaleAfstand;
+    public void setTotalDistance(int totalDistance) {
+        this.totalDistance = totalDistance;
     }
 
-    public Node getStartLocation() {
+    public Location getStartLocation() {
         return startLocation;
     }
 
-    public void setStartLocation(Node startLocation) {
+    public void setStartLocation(Location startLocation) {
         this.startLocation = startLocation;
     }
 
-    public Node getEndLocation() {
-        return endLocation;
-    }
-
-    public void setEndLocation(Node endLocation) {
+    public void setEndLocation(Location endLocation) {
         this.endLocation = endLocation;
     }
+
 }

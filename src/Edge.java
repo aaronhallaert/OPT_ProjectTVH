@@ -1,29 +1,30 @@
+
 public class Edge {
-    Node from;
-    Node to;
+    Location from;
+    Location to;
     int time;
     int distance;
 
-    public Edge(Node from, Node to, int time, int distance) {
+    public Edge(Location from, Location to, int time, int distance) {
         this.from = from;
         this.to = to;
         this.time = time;
         this.distance = distance;
     }
 
-    public Node getFrom() {
+    public Location getFrom() {
         return from;
     }
 
-    public void setFrom(Node from) {
+    public void setFrom(Location from) {
         this.from = from;
     }
 
-    public Node getTo() {
+    public Location getTo() {
         return to;
     }
 
-    public void setTo(Node to) {
+    public void setTo(Location to) {
         this.to = to;
     }
 

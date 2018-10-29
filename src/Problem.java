@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Problem {
@@ -10,7 +11,9 @@ public class Problem {
     public int TRUCK_WORKING_TIME;
     public int SERVICE_TIME;
 
-    public ArrayList<Node> nodes = new ArrayList<>();
+    public ArrayList<Location> locations = new ArrayList<>();
+    public ArrayList<Depot> depots = new ArrayList<>();
+    public HashMap<Location,Job> jobs = new HashMap<>();
     public ArrayList<Truck> trucks = new ArrayList<>();
     public ArrayList<MachineType> machineTypes = new ArrayList<>();
     public ArrayList<Machine> machines = new ArrayList<>();
@@ -29,31 +32,24 @@ public class Problem {
 
 
         // LOCATIONS
-        /*
-            Alle nodes inlezen met lat en long
-         */
         int aantalLocations = Integer.parseInt(sc.nextLine().split(" ")[1]);
 
         for (int i = 0; i < aantalLocations; i++) {
             int locationId =sc.nextInt();
             double latitude = sc.nextDouble();
             double longitude = sc.nextDouble();
-            nodes.add(new Node(locationId,latitude,longitude,false));
+            locations.add(new Location(locationId,latitude,longitude));
         }
 
 
         //DEPOTS
-
-        /*
-            Depots zien wij ook gewoon als nodes, het enige wat we moeten doen is een boolean op true zetten;
-         */
         sc.nextLine();
         sc.nextLine();
         int aantalDepots= Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalDepots; i++) {
             int depotId=sc.nextInt();
-            int nodeId= sc.nextInt();
-            nodes.get(nodeId).setDepot();
+            int locationId= sc.nextInt();
+            depots.add(new Depot(locations.get(locationId)));
         }
 
         //TRUCKS
@@ -65,9 +61,9 @@ public class Problem {
         int aantalTrucks= Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalTrucks; i++) {
             int truckId=sc.nextInt();
-            Node startLocation = nodes.get(sc.nextInt());
-            Node endLocation= nodes.get(sc.nextInt());
-            //@TODO controle constructor Truck
+            Location startLocation = locations.get(sc.nextInt());
+            Location endLocation= locations.get(sc.nextInt());
+
             trucks.add(new Truck(truckId, startLocation, endLocation));
         }
 
@@ -96,19 +92,22 @@ public class Problem {
         for (int i = 0; i < aantalMachines; i++) {
             int machineId=sc.nextInt();
             MachineType machineType=machineTypes.get(sc.nextInt());
-            Node node= nodes.get(sc.nextInt());
-            Machine machine = new Machine(machineId, machineType, node);
+            Location location = locations.get(sc.nextInt());
+            Machine machine = new Machine(machineId, machineType);
 
-            //machine toevoegen aan de depot lijst;
-            if(node.isDepot()){
-                node.addMachine(machine);
+            //Indien een machine in een depot staat moet deze worden toegevoegd aan het depot;
+            for(Depot d: depots){
+                if(d.getLocation() == location){
+                    d.addMachine(machine);
+                }
             }
+            //toevoegen in algemene lijst
             machines.add(machine);
         }
 
         //DROPS
         /*
-            Alle drops toevoegen aan de juiste node;
+            Alle drops toevoegen aan de juiste job;
          */
         sc.nextLine();
         sc.nextLine();
@@ -116,14 +115,21 @@ public class Problem {
         for (int i = 0; i < aantalDrops; i++) {
             int dropId=sc.nextInt();
             MachineType machineType=machineTypes.get(sc.nextInt());
-            Node node = nodes.get(sc.nextInt());
+            Location location = locations.get(sc.nextInt());
+            if(jobs.containsKey(location)){
+                jobs.get(location).addToDropItems(machineType);
+            }
+            else{
+                Job job = new Job(location);
+                job.addToDropItems(machineType);
+                jobs.put(location, new Job(location));
+            }
 
-            node.getDropOffItems().add(machineType);
         }
 
         //COLLECTS
         /*
-            Alle collects toevoegen aan de juiste node;
+            Alle collects toevoegen aan de juiste job;
          */
         sc.nextLine();
         sc.nextLine();
@@ -131,10 +137,15 @@ public class Problem {
         for (int i = 0; i < aantalCollects; i++) {
             int collectId=sc.nextInt();
             Machine machine=machines.get(sc.nextInt());
-            Node node = nodes.get(sc.nextInt());
-
-            //@TODO check handling van collect
-            node.getPickupItems().add(machine);
+            Location location = locations.get(sc.nextInt());
+            if(jobs.containsKey(location)){
+                jobs.get(location).addToCollectItems(machine);
+            }
+            else{
+                Job job = new Job(location);
+                job.addToCollectItems(machine);
+                jobs.put(location, new Job(location));
+            }
         }
 
 
@@ -162,18 +173,18 @@ public class Problem {
             }
         }
 
-        //Edges aanmaken met time en distance info, en koppelen aan nodes
+        //Edges aanmaken met time en distance info, en koppelen aan jobs
         for (int from = 0; from < distanceMatrixSize; from++) {
             for (int to = 0; to < distanceMatrixSize; to++) {
                 int time = timeMatrix[from][to];
                 int distance = distanceMatrix[from][to];
                 if(!(time == 0 && distance == 0)){
-                    Node fromNode = nodes.get(from);
-                    Node toNode = nodes.get(to);
-                    Edge edge = new Edge(fromNode, toNode, time, distance);
+                    Location fromLoc = locations.get(from);
+                    Location toLoc = locations.get(to);
+                    Edge edge = new Edge(fromLoc, toLoc, time, distance);
                     edges.add(edge);
-                    //We voegen ook nog een verwijzing naar de edge toe aan de "from edge" (handig zoeken);
-                    fromNode.addEdge(edge);
+                    //We voegen ook nog een verwijzing naar de edge toe aan de "from location" (handig zoeken);
+                    fromLoc.addEdge(edge);
                 }
 
             }

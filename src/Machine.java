@@ -3,16 +3,10 @@ import java.util.Objects;
 public class Machine {
     private int id;
     private MachineType type;
-    private Node location;
 
-    public Machine(int id, MachineType type, Node location) {
+    public Machine(int id, MachineType type) {
         this.id = id;
         this.type = type;
-        this.location = location;
-    }
-
-    public Machine(int id) {
-        this.id = id;
     }
 
     @Override
@@ -44,11 +38,4 @@ public class Machine {
         this.type = type;
     }
 
-    public Node getLocation() {
-        return location;
-    }
-
-    public void setLocation(Node location) {
-        this.location = location;
-    }
 }
