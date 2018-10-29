@@ -99,8 +99,10 @@ public class Problem {
             Node node= nodes.get(sc.nextInt());
             Machine machine = new Machine(machineId, machineType, node);
 
-            //machine toevoegen aan de juiste node en ook aan de algemene lijst;
-            node.addMachine(machine);
+            //machine toevoegen aan de depot lijst;
+            if(node.isDepot()){
+                node.addMachine(machine);
+            }
             machines.add(machine);
         }
 
