@@ -1,9 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Problem {
 
@@ -195,6 +192,27 @@ public class Problem {
     }
 
     public Solution createInitialSolution(){
+        /*
+        Eerst moeten we zien te vinden welke te leveren machines niet in de depots zitten.
+        Deze machines zullen sowieso moeten opgehaald worden.
+        */
+
+        //We maken een hashmap aan met alle mogelijke modellen
+        HashMap<MachineType, Integer> machinesInDepot = new HashMap<>();
+        for(MachineType mt: machineTypes){
+            machinesInDepot.put(mt, 0);
+        }
+
+        //We overlopen de depots en tellen de aantallen per type op;
+        for(Depot d: depots){
+            for(MachineType mt : d.getMachines().keySet()){
+                machinesInDepot.put(mt , machinesInDepot.get(mt)+d.getNumberOfMachinesOfType(mt));
+            };
+        }
+
+        //Kijken welke
+
+        return null;
 
     }
 
