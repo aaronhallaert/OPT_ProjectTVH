@@ -1,4 +1,5 @@
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -6,19 +7,26 @@ public class Location {
     private int locationID;
     private double latitude;
     private double longitude;
-    private LinkedList<Edge> edgeList;
+    private HashMap<Location ,Edge> edgeMap;
+    private LinkedList<Edge> sortedEdgeList;
 
     public Location(int locationID, double latitude, double longitude) {
         this.locationID = locationID;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.edgeList = new LinkedList<>();
+        this.edgeMap = new HashMap<>();
+        this.sortedEdgeList = new LinkedList<>();
     }
 
     public void addEdge(Edge edge){
-        edgeList.add(edge);
+        edgeMap.put(edge.getTo(), edge);
         //Edge list moet altijd gesorteerd blijven op basis van afstand
-        edgeList.sort(Comparator.comparing(Edge::getDistance));
+        sortedEdgeList.add(edge);
+        sortedEdgeList.sort(Comparator.comparing(Edge::getDistance));
+    }
+
+    public int distanceTo(Location l){
+        return edgeMap.get(l).getDistance();
     }
 
     @Override

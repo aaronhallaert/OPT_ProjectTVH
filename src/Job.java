@@ -30,6 +30,15 @@ public class Job {
         toDropItems.add(machineType);
     }
 
+    public boolean hasMachine(MachineType mt){
+        for(Machine m: toCollectItems){
+            if(m.getType() == mt) return true;
+        }
+        return false;
+    }
+
+
+
     public LinkedList<Machine> getToCollectItems() {
         return toCollectItems;
     }
@@ -53,5 +62,13 @@ public class Job {
 
     public void setFinished(boolean finished) {
         this.finished = finished;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 }

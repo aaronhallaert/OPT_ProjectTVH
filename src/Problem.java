@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Problem {
@@ -192,4 +193,9 @@ public class Problem {
         System.out.println("Input read");
 
     }
+
+    public Solution createInitialSolution(){
+
+    }
+
 }

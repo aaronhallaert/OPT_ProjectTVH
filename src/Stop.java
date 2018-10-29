@@ -1,28 +1,46 @@
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Stop {
 
     private Job locatie;
-    private double gevuldPercentage;
-    private List<Machine> collectItems;
-    private List<Machine> dropItems;
-    private List<Machine> onTruck;
+    private int fillRate; //na stop
+    private ArrayList<Machine> collectItems;
+    private ArrayList<Machine> dropItems;
+    private LinkedList<Machine> onTruck;
 
 
-    public Stop(Job locatie, double gevuldPercentage, List<Machine> collectItems, List<Machine> dropItems, List<Machine> onTruck) {
+    public Stop(Job locatie, ArrayList<Machine> collectItems, ArrayList<Machine> dropItems, LinkedList<Machine> onTruck) {
         this.locatie = locatie;
-        this.gevuldPercentage = gevuldPercentage;
         this.collectItems = collectItems;
         this.dropItems = dropItems;
         this.onTruck = onTruck;
+        calculateFillRate();
     }
 
     public Stop(Stop s){
         this.locatie = new Job(s.locatie);
-        this.gevuldPercentage = s.gevuldPercentage;
+        this.fillRate = s.fillRate;
         this.collectItems = new ArrayList<>(s.collectItems);
         this.dropItems = new ArrayList<>(s.dropItems);
-        this.onTruck = new ArrayList<>(s.onTruck);
+        this.onTruck = new LinkedList<>(s.onTruck);
+    }
+
+    public void removeFromTruck(Machine machine){
+        onTruck.remove(machine);
+        calculateFillRate();
+    }
+
+    public void addToTruck(Machine machine){
+        onTruck.add(machine);
+        calculateFillRate();
+    }
+
+    private void calculateFillRate(){
+        fillRate = 0;
+        for(Machine m: onTruck){
+            fillRate =+ m.getType().getVolume();
+        }
     }
 }
