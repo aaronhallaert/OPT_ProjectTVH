@@ -7,11 +7,11 @@ public class Problem {
     public String info;
     public int TRUCK_CAPACITY;
     public int TRUCK_WORKING_TIME;
-    public int SERVICE_TIME;
 
     public ArrayList<Location> locations = new ArrayList<>();
     public ArrayList<Depot> depots = new ArrayList<>();
     public HashMap<Location,Job> jobs = new HashMap<>();
+    public HashMap<Machine, Location> machineLocations = new HashMap<>();
     public ArrayList<Truck> trucks = new ArrayList<>();
     public ArrayList<MachineType> machineTypes = new ArrayList<>();
     public ArrayList<Machine> machines = new ArrayList<>();
@@ -24,7 +24,6 @@ public class Problem {
         info = sc.nextLine().split(": ")[1];
         TRUCK_CAPACITY= Integer.parseInt(sc.nextLine().split(": ")[1]);
         TRUCK_WORKING_TIME=Integer.parseInt(sc.nextLine().split(": ")[1]);
-        SERVICE_TIME=Integer.parseInt(sc.nextLine().split(": ")[1]);
 
         sc.nextLine(); //weggooilijn
 
@@ -36,7 +35,8 @@ public class Problem {
             int locationId =sc.nextInt();
             double latitude = sc.nextDouble();
             double longitude = sc.nextDouble();
-            locations.add(new Location(locationId,latitude,longitude));
+            String name = sc.next();
+            locations.add(new Location(locationId, name, latitude,longitude));
         }
 
 
@@ -76,8 +76,9 @@ public class Problem {
         for (int i = 0; i < aantalMachineTypes; i++) {
             int machineTypeId=sc.nextInt();
             int machineTypeVolume=sc.nextInt();
+            int serviceTime = sc.nextInt();
             String machineTypeName= sc.next();
-            machineTypes.add(new MachineType(machineTypeId, machineTypeName, machineTypeVolume));
+            machineTypes.add(new MachineType(machineTypeId, machineTypeName, machineTypeVolume, serviceTime));
         }
 
         // MACHINES
@@ -101,6 +102,7 @@ public class Problem {
             }
             //toevoegen in algemene lijst
             machines.add(machine);
+            machineLocations.put(machine, location);
         }
 
         //DROPS
@@ -120,7 +122,7 @@ public class Problem {
             else{
                 Job job = new Job(location);
                 job.addToDropItems(machineType);
-                jobs.put(location, new Job(location));
+                jobs.put(location, job);
             }
 
         }
@@ -135,14 +137,14 @@ public class Problem {
         for (int i = 0; i < aantalCollects; i++) {
             int collectId=sc.nextInt();
             Machine machine=machines.get(sc.nextInt());
-            Location location = locations.get(sc.nextInt());
+            Location location = machineLocations.get(machine);
             if(jobs.containsKey(location)){
                 jobs.get(location).addToCollectItems(machine);
             }
             else{
                 Job job = new Job(location);
                 job.addToCollectItems(machine);
-                jobs.put(location, new Job(location));
+                jobs.put(location, job);
             }
         }
 
@@ -192,25 +194,6 @@ public class Problem {
     }
 
     public Solution createInitialSolution(){
-        /*
-        Eerst moeten we zien te vinden welke te leveren machines niet in de depots zitten.
-        Deze machines zullen sowieso moeten opgehaald worden.
-        */
-
-        //We maken een hashmap aan met alle mogelijke modellen
-        HashMap<MachineType, Integer> machinesInDepot = new HashMap<>();
-        for(MachineType mt: machineTypes){
-            machinesInDepot.put(mt, 0);
-        }
-
-        //We overlopen de depots en tellen de aantallen per type op;
-        for(Depot d: depots){
-            for(MachineType mt : d.getMachines().keySet()){
-                machinesInDepot.put(mt , machinesInDepot.get(mt)+d.getNumberOfMachinesOfType(mt));
-            };
-        }
-
-        //Kijken welke
 
         return null;
 

@@ -19,7 +19,7 @@ public class Machine {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return id;
     }
 
     public int getId() {

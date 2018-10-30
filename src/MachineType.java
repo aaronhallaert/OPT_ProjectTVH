@@ -4,11 +4,13 @@ public class MachineType {
     private int id;
     private String name;
     private int volume;
+    private int serviceTime;
 
-    public MachineType(int id, String name, int volume) {
+    public MachineType(int id, String name, int volume, int serviceTime) {
         this.id = id;
         this.name = name;
         this.volume = volume;
+        this.serviceTime = serviceTime;
     }
 
     //Constructor die enkel dient om machinetypes op te zoeken

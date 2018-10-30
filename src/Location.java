@@ -7,11 +7,13 @@ public class Location {
     private int locationID;
     private double latitude;
     private double longitude;
+    private String name;
     private HashMap<Location ,Edge> edgeMap;
     private LinkedList<Edge> sortedEdgeList;
 
-    public Location(int locationID, double latitude, double longitude) {
+    public Location(int locationID,String name ,double latitude, double longitude) {
         this.locationID = locationID;
+        this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.edgeMap = new HashMap<>();
