@@ -58,29 +58,31 @@ public class Cluster {
      */
     private void calculateLocations(List<Location> locations){
         for (Location location : locations) {
-
+            calculateClosestCluster(location).locations.add(location);
         }
-
+//        Reset the changed property as to detect when the system will find a stable location
+        changed = false;
     }
 
+    /**
+     * Calculate which cluster is closest to a a g
+     * @param location
+     * @return
+     */
     private Cluster calculateClosestCluster(Location location){
-//        TODO: replace with something more elegant to do infinity
-        double diffLat = 100000000000.0;
-        double diffLon = 100000000000.0;
-        Cluster closest = null;
-        double tempLat = 0.0;
-        double tempLon = 0.0;
+        double distance = Double.POSITIVE_INFINITY;
+        double tempLat, tempLon, tempDistance = 0.0;
+        Cluster closest = clusters.get(0);
 
         for (Cluster cluster : clusters) {
             tempLat = Math.abs(location.getLatitude() - cluster.latitude);
             tempLon = Math.abs(location.getLongitude() - cluster.longitude);
-
-
-
-
-
+            tempDistance = Math.hypot(tempLat, tempLon);
+            if (tempDistance < distance){
+                distance = tempDistance;
+                closest = cluster;
+            }
         }
-
-
+        return closest;
     }
 }
