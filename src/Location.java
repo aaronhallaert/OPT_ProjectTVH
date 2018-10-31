@@ -39,6 +39,54 @@ public class Location {
         return locationID == location.locationID;
     }
 
+    public int getLocationID() {
+        return locationID;
+    }
+
+    public void setLocationID(int locationID) {
+        this.locationID = locationID;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public HashMap<Location, Edge> getEdgeMap() {
+        return edgeMap;
+    }
+
+    public void setEdgeMap(HashMap<Location, Edge> edgeMap) {
+        this.edgeMap = edgeMap;
+    }
+
+    public LinkedList<Edge> getSortedEdgeList() {
+        return sortedEdgeList;
+    }
+
+    public void setSortedEdgeList(LinkedList<Edge> sortedEdgeList) {
+        this.sortedEdgeList = sortedEdgeList;
+    }
+
     @Override
     public int hashCode() {
         return locationID;

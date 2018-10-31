@@ -193,10 +193,32 @@ public class Problem {
 
     }
 
-    public Solution createInitialSolution(){
+    public Solution solve(){
+        Solution solution = new Solution(trucks);
+        /*
+        * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
+        * 1) Initial result:
+        *   We make clusters which contain stops. These clusters have a net list of needed items ot provided items.
+        *   From this list we search for the nearest depot or the nearest stop from another cluster that contains the needed items.
+        *   This will be a fairly fixed result where local search cant get out, so we increase the number of clusters until no improvement is found.
+        *
+        * 2) Optimisation phase
+        *
+        * */
+
+
+
+        return solution;
+    }
+
+    /**
+     * This will use clusters to decide initial routes of trucks.
+     * @return
+     */
+    public Solution createInitialSolution(int nrOfClusters){
+
 
         return null;
-
     }
 
 }
