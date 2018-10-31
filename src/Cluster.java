@@ -1,109 +1,79 @@
 import java.util.*;
 
+/**
+ * This class creates clusters of nodes based on the k-medoids algorithm (PAM algorithm more specifically) which uses a
+ * point in the cluster as node center
+ * 
+ * https://www.youtube.com/watch?v=OWpRBCrx5-M
+ */
+
 public class Cluster {
 
-    private static double latMin = Double.POSITIVE_INFINITY;
-    private static double latMax = Double.NEGATIVE_INFINITY;
-    private static double lonMin = Double.POSITIVE_INFINITY;
-    private static double lonMax = Double.NEGATIVE_INFINITY;;
-    private static List<Cluster> clusters = new LinkedList<>();
-    private static boolean changed = false;
+    private static List<Location> allLocations = new ArrayList<>();
+    private static List<Location> allLocationsNonMedoid = new LinkedList<>();
+    private static List<Cluster> clusters = new ArrayList<>();
+    private static boolean changed;
 
-    List<Location> locations = new ArrayList<>();
-    List<Location> oldLocations = new ArrayList<>();
-    double longitude;
-    double latitude;
+    List<Location> members = new ArrayList<>();
+    List<Location> oldMembers = new ArrayList<>();
+    Location medoid;
 
-    /**
-     * This constructor will create an initial random point in the space defined by the furthest locations.
+    /*
+     * private constructor, because cluster class is singleton
+     * we choose a random location for our medoid from the list of locations that aren't already a medoid.
      */
     private Cluster(){
-        /*
-        A cluster will start at a random point in the space.
-         */
-        Random rand = new Random();
-        latitude = rand.nextDouble() * (latMax-latMin) + latMin;
-        longitude = rand.nextDouble() * (lonMax-lonMin) + lonMin;
+        int randomLocation = (int) (Math.random()*allLocationsNonMedoid.size());
+        medoid = allLocationsNonMedoid.get(randomLocation);
+        allLocationsNonMedoid.remove(medoid);
 
     }
 
-    public static List<Cluster> createClusters(int nrOfClusters, List<Job> jobs){
-        List<Location> allLocations = new ArrayList<>();
+    public static List<Cluster> createClusters(int nClusters, List<Job> jobs){
+        //Each job has a location has to be in our cluster;
         for(Job job: jobs){
             Location loc = job.getLocation();
             allLocations.add(loc);
-            if(loc.getLatitude() < latMin) latMin = loc.getLatitude();
-            if(loc.getLatitude() > latMax) latMax = loc.getLatitude();
-            if(loc.getLongitude() < lonMin) lonMin = loc.getLongitude();
-            if(loc.getLongitude() > lonMax) lonMax = loc.getLongitude();
+            allLocationsNonMedoid.add(loc);
         }
-
-        for (int i = 0; i < nrOfClusters; i++) {
+        
+        for (int i = 0; i < nClusters; i++) {
             clusters.add(new Cluster());
         }
-        //Form the clusters;
-        do {
-            //        Reset the changed property as to detect when the system will find a stable location
+        /*
+            Creating the clusters consists of 2 steps:
+                - Assign all locations to a cluster.
+                - Calculate new medoid location of each cluster.
+                - Repeat if changes are detected.
+         */
+        changed = true;
+        while(changed) {
             changed = false;
-            System.out.println(clusters);
-            calculateLocations(allLocations);
-            calculateNewCenters();
-
-        } while (changed);
-
+            assignCluster();
+            findNewMedoids();
+        }
         return clusters;
     }
 
     /**
-     * Calculate a new center based on a list of locations.
-     * When the calculated location differs from the previous location it indicates that the list with location
-     * can still change. So we use a boolean to track this.
+     * This method will assign each location to a cluster based on it's proximity to the medoid of that cluster;
      */
-    private static void calculateNewCenters(){
-        double tempLat, tempLon;
-
+    private static void assignCluster(){
+        //Save the old members to detect changes later on;
         for (Cluster cluster : clusters) {
-            tempLat = 0.0;
-            tempLon = 0.0;
-            List<Location> locations = cluster.locations;
-
-            for (Location location : locations) {
-                tempLat += location.getLatitude();
-                tempLon += location.getLongitude();
-            }
-            tempLat /= locations.size();
-            tempLon /= locations.size();
-
-            cluster.latitude = tempLat;
-            cluster.longitude = tempLon;
-
-//            System.out.println(cluster);
+            cluster.oldMembers = cluster.members;
+            cluster.members.clear();
         }
-    }
 
-    /**
-     * This method serves to update the list of locations of each cluster.
-     * We will look at each Location and calculate which cluster center is closest.
-     */
-    private static void calculateLocations(List<Location> locations){
-//        First we reset the location lists in the clusters
+        //Redistribute the members based on new medoids
+        for (Location location : allLocations) {
+            getClosestCluster(location).members.add(location);
+
+        }
+
+        //Detect changes in members of cluster
         for (Cluster cluster : clusters) {
-            cluster.oldLocations = locations;
-            cluster.locations = new ArrayList<>();
-        }
-
-        try {
-            for (Location location : locations) {
-                getClosestCluster(location).locations.add(location);
-
-            }
-        }
-        catch(NullPointerException ne){
-            ne.printStackTrace();
-        }
-
-        for (Cluster cluster : clusters) {
-            if (!cluster.oldLocations.equals(cluster.locations)){
+            if (!cluster.oldMembers.equals(cluster.members)){
                 changed = true;
             }
         }
@@ -115,30 +85,49 @@ public class Cluster {
      * @return
      */
     private static Cluster getClosestCluster(Location location){
-        double distance = Double.POSITIVE_INFINITY;
-        double tempLat, tempLon, tempDistance = 0.0;
-        Cluster closest = clusters.get(0);
+        double minDistance = Double.POSITIVE_INFINITY;
+        Cluster closest = null;
 
         for (Cluster cluster : clusters) {
-            tempLat = Math.abs(location.getLatitude() - cluster.latitude);
-            tempLon = Math.abs(location.getLongitude() - cluster.longitude);
-            tempDistance = Math.hypot(tempLat, tempLon);
-            if (tempDistance < distance){
-                distance = tempDistance;
+            double distance = location.getEdgeMap().get(cluster.medoid).distance;
+            if (distance < minDistance){
+                minDistance = distance;
                 closest = cluster;
             }
         }
         return closest;
     }
 
-    public static List<Cluster> getClusters() {
-        return clusters;
+    /**
+     *  This method finds a new mediods of a cluster. Every member of a cluster is a candidate to be the new medoid.
+     *  The member with the smallest overal distance from each other member to itself becomes the new mediod.
+     */
+    private static void findNewMedoids(){
+
+        for (Cluster cluster : clusters) {
+            int minDistance = Integer.MAX_VALUE;
+            Location newMedoid = cluster.medoid;
+
+            for (Location medoidCandidate : cluster.members) {
+                int distance = 0;
+                for(Location member: cluster.members) {
+                    Edge edge = medoidCandidate.getEdgeMap().get(member);
+                    distance =+ edge.getDistance();
+                }
+                if(distance < minDistance){
+                    minDistance = distance;
+                    newMedoid = medoidCandidate;
+                    //Detect changes in medoid location
+                }
+            }
+            if(cluster.medoid != newMedoid){
+                changed = true;
+                cluster.medoid = newMedoid;
+            }
+        }
     }
 
-    @Override
-    public String toString() {
-        return "Cluster{" +
-                "longitude=" + longitude +
-                ", latitude=" + latitude + '}';
+    public static List<Cluster> getClusters() {
+        return clusters;
     }
 }

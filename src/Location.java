@@ -32,13 +32,6 @@ public class Location {
         return edgeMap.get(l).getDistance();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Location)) return false;
-        Location location = (Location) o;
-        return locationID == location.locationID;
-    }
 
     public int getLocationID() {
         return locationID;
@@ -91,5 +84,13 @@ public class Location {
     @Override
     public int hashCode() {
         return locationID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Location)) return false;
+        Location location = (Location) o;
+        return locationID == location.locationID;
     }
 }
