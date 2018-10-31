@@ -1,14 +1,15 @@
+package Entities;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Objects;
 
 public class Location {
     private int locationID;
     private double latitude;
     private double longitude;
     private String name;
-    private HashMap<Location ,Edge> edgeMap;
+    private HashMap<Location , Edge> edgeMap;
     private LinkedList<Edge> sortedEdgeList;
 
     public Location(int locationID,String name ,double latitude, double longitude) {
@@ -22,7 +23,7 @@ public class Location {
 
     public void addEdge(Edge edge){
         edgeMap.put(edge.getTo(), edge);
-        //Edge list moet altijd gesorteerd blijven op basis van afstand
+        //Entities.Edge list moet altijd gesorteerd blijven op basis van afstand
         sortedEdgeList.add(edge);
         sortedEdgeList.sort(Comparator.comparing(Edge::getDistance));
     }
@@ -37,6 +38,54 @@ public class Location {
         if (!(o instanceof Location)) return false;
         Location location = (Location) o;
         return locationID == location.locationID;
+    }
+
+    public int getLocationID() {
+        return locationID;
+    }
+
+    public void setLocationID(int locationID) {
+        this.locationID = locationID;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public HashMap<Location, Edge> getEdgeMap() {
+        return edgeMap;
+    }
+
+    public void setEdgeMap(HashMap<Location, Edge> edgeMap) {
+        this.edgeMap = edgeMap;
+    }
+
+    public LinkedList<Edge> getSortedEdgeList() {
+        return sortedEdgeList;
+    }
+
+    public void setSortedEdgeList(LinkedList<Edge> sortedEdgeList) {
+        this.sortedEdgeList = sortedEdgeList;
     }
 
     @Override

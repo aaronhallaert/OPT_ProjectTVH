@@ -1,3 +1,6 @@
+package Entities;
+
+import Entities.Location;
 
 public class Edge {
     Location from;

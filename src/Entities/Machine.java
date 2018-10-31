@@ -1,4 +1,4 @@
-import java.util.Objects;
+package Entities;
 
 public class Machine {
     private int id;
