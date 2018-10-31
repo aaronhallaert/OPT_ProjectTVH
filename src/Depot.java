@@ -1,3 +1,5 @@
+import sun.awt.image.ImageWatched;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -9,6 +11,15 @@ public class Depot {
     public Depot(Location location) {
         this.location = location;
         machines = new HashMap<>();
+    }
+
+    //Copy constructor
+    public Depot(Depot toCopy){
+        this.location = toCopy.location;
+        machines = new HashMap<>();
+        for(LinkedList<Machine> machinelist: toCopy.machines.values()){
+            machines.put(machinelist.getFirst().getType(), new LinkedList<>(machinelist));
+        }
     }
 
     public void addMachine(Machine m){

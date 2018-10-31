@@ -20,8 +20,8 @@ public class Graph extends ApplicationFrame{
         for (Cluster cluster : clusters) {
             final XYSeries clusterPoints = new XYSeries("Cluster "+i);
             allClusters.add(clusterPoints);
-            for(Location member : cluster.members){
-                clusterPoints.add(member.getLatitude(), member.getLongitude());
+            for(Location loc : cluster.members){
+                clusterPoints.add(loc.getLatitude(), loc.getLongitude());
             }
             i++;
         }

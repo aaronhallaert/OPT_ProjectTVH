@@ -10,33 +10,50 @@ import java.util.*;
 public class Cluster {
 
     private static List<Location> allLocations = new ArrayList<>();
-    private static List<Location> allLocationsNonMedoid = new LinkedList<>();
+    private static List<Location> allLocationsNotMedoid = new LinkedList<>();
     private static List<Cluster> clusters = new ArrayList<>();
+    private static HashMap<Location, Depot> locationDepotMap = new HashMap<>();
+    private static HashMap<Location, Job> locationJobMap = new HashMap<>();
     private static boolean changed;
 
-    List<Location> members = new ArrayList<>();
-    List<Location> oldMembers = new ArrayList<>();
+    Set<Location> members = new HashSet<>();
+    Set<Location> oldMembers = new HashSet<>();
     Location medoid;
+
+
+    List<MachineType> machinesNeeded = new LinkedList<>();
 
     /*
      * private constructor, because cluster class is singleton
      * we choose a random location for our medoid from the list of locations that aren't already a medoid.
      */
     private Cluster(){
-        int randomLocation = (int) (Math.random()*allLocationsNonMedoid.size());
-        medoid = allLocationsNonMedoid.get(randomLocation);
-        allLocationsNonMedoid.remove(medoid);
+        int randomLocation = (int) (Math.random()* allLocationsNotMedoid.size());
+        medoid = allLocationsNotMedoid.get(randomLocation);
+        allLocationsNotMedoid.remove(medoid);
+
+        members.add(medoid);
 
     }
 
-    public static List<Cluster> createClusters(int nClusters, List<Job> jobs){
-        //Each job has a location has to be in our cluster;
-        for(Job job: jobs){
-            Location loc = job.getLocation();
-            allLocations.add(loc);
-            allLocationsNonMedoid.add(loc);
+    public static List<Cluster> createClusters(int nClusters, HashMap<Location, Job> jobs, List<Depot> depotList){
+
+        for(Job j: jobs.values()){
+            allLocations.add(j.getLocation());
         }
-        
+
+        allLocationsNotMedoid.addAll(allLocations);
+
+        //We deep copy the jobs;
+        for(Job j: jobs.values()){
+            locationJobMap.put(j.getLocation(), new Job(j));
+        }
+
+        //We deep copy the depot list
+        for(Depot d: depotList){
+            locationDepotMap.put(d.getLocation(),new Depot(d));
+        }
+
         for (int i = 0; i < nClusters; i++) {
             clusters.add(new Cluster());
         }
@@ -47,11 +64,14 @@ public class Cluster {
                 - Repeat if changes are detected.
          */
         changed = true;
+        int timesRun = 0;
         while(changed) {
             changed = false;
             assignCluster();
             findNewMedoids();
+            timesRun++;
         }
+        System.out.println("Cluster needed " + timesRun +" runs");
         return clusters;
     }
 
@@ -66,8 +86,8 @@ public class Cluster {
         }
 
         //Redistribute the members based on new medoids
-        for (Location location : allLocations) {
-            getClosestCluster(location).members.add(location);
+        for (Location loc : allLocations) {
+            getClosestCluster(loc).members.add(loc);
 
         }
 
@@ -81,15 +101,13 @@ public class Cluster {
 
     /**
      * Calculate which cluster is closest to a given location.
-     * @param location
-     * @return
      */
-    private static Cluster getClosestCluster(Location location){
+    private static Cluster getClosestCluster(Location loc){
         double minDistance = Double.POSITIVE_INFINITY;
         Cluster closest = null;
 
         for (Cluster cluster : clusters) {
-            double distance = location.getEdgeMap().get(cluster.medoid).distance;
+            double distance = loc.getEdgeMap().get(cluster.medoid).distance;
             if (distance < minDistance){
                 minDistance = distance;
                 closest = cluster;
@@ -127,7 +145,84 @@ public class Cluster {
         }
     }
 
+    /**
+     * This function gives an idea about the remoteness of a certain cluster. It takes the other medoids of other
+     * clusters into account aswell as the locationDepotMap.
+     * This method is used for sorting, the higher the returned number the more remote.
+     * @param depots
+     * @return
+     */
+    public int getRemoteness(List<Depot> depots){
+        int remoteFactor = 0;
+        for(Cluster c: clusters){
+            remoteFactor =+ medoid.getEdgeMap().get(c.medoid).distance;
+        }
+        for(Depot d: depots){
+            remoteFactor =+ medoid.getEdgeMap().get(d.getLocation()).distance;
+        }
+        return remoteFactor;
+    }
+
+    public void calculateMachinesNeeded(){
+        for(Location loc: members){
+            Job j = locationJobMap.get(loc);
+            machinesNeeded.addAll(j.getToDropItems());
+            for(Machine m: j.getToCollectItems()){
+                machinesNeeded.remove(m.getType());
+            }
+        }
+    }
+
+    public void expand(){
+        //We beginnen vanuit de medoid te zoeken naar nodes die dichtbijliggen die de machines hebben die nog tekort zijn.
+        List<Edge> sortedEdgeList = medoid.getSortedEdgeList();
+        for(Edge e: sortedEdgeList){
+            Location loc = e.getTo();
+            //Als deze locatie nog geen member is van de cluster:
+            if(!members.contains(loc)) {
+                //Zoeken als het om een job of een depot gaat:
+                if (locationJobMap.containsKey(loc)) {
+                    //Job opzoeken op deze locatie
+                    Job job = locationJobMap.get(loc);
+                    //Alle machines kijken die op deze locatie moeten worden opgenomen;
+                    for (Machine m : job.getToCollectItems()) {
+                        if (machinesNeeded.contains(m.getType())) {
+                            //Als we een machine van dit type nodig hebben dan verwijderen we hem uit de needed lijst en job,
+                            //We voegen vervolgens de job toe aan de cluster;
+                            machinesNeeded.remove(m.getType());
+                            job.removeFromCollectItems(m);
+                            members.add(loc);
+                        }
+                    }
+                }
+                if (locationDepotMap.containsKey(loc)) {
+                    Depot depot = locationDepotMap.get(loc);
+                    //We overlopen alle machinetypes die we nodig hebben in de cluster
+                    List<MachineType> machinesNeededCopy = new ArrayList<>(machinesNeeded);
+                    for (MachineType mt : machinesNeededCopy) {
+                        //Als een depot een machine in stock heeft:
+                        if (depot.getMachines().containsKey(mt) && depot.getMachines().get(mt).size() > 0) {
+                            //Machine verwijderen uit de needed lijst en het depot, locatie van depot toevoegen aan de cluster;
+                            machinesNeeded.remove(mt);
+                            depot.getMachines().get(mt).removeFirst();
+                            members.add(depot.getLocation());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public static List<Cluster> getClusters() {
         return clusters;
     }
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        for(Location loc: members){
+            sb.append(loc.getLocationID() + ","+loc.getLatitude()+","+loc.getLongitude()+"\n");
+        }
+        return sb.toString();
+    }
+
 }

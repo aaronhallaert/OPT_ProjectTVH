@@ -31,6 +31,14 @@ public class Job {
         toDropItems.add(machineType);
     }
 
+    public void removeFromCollectItems(Machine machine){
+        toCollectItems.remove(machine);
+    }
+
+    public void removeFromDropItems(MachineType machineType){
+        toDropItems.remove(machineType);
+    }
+
     public boolean hasMachine(MachineType mt){
         for(Machine m: toCollectItems){
             if(m.getType() == mt) return true;

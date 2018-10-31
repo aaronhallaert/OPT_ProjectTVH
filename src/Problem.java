@@ -196,7 +196,7 @@ public class Problem {
     }
 
     public Solution solve(){
-        Solution solution = new Solution(trucks);
+        Solution Init = createInitialSolution();
         /*
         * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
         * 1) Initial result:
@@ -208,14 +208,6 @@ public class Problem {
         *
         * */
 
-        List<Cluster> clusters = Cluster.createClusters(5, new ArrayList<>(jobs.values()));
-
-        //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn
-        final Graph clusterPlot = new Graph("Clusters",clusters, depots);
-        clusterPlot.pack();
-        RefineryUtilities.centerFrameOnScreen(clusterPlot);
-        clusterPlot.setVisible(true);
-
         return null;
     }
 
@@ -223,7 +215,30 @@ public class Problem {
      * This will use clusters to decide initial routes of trucks.
      * @return
      */
-    public Solution createInitialSolution(int nrOfClusters){
+    public Solution createInitialSolution(){
+
+        int n_clusters =(int) Math.round((double) jobs.size()/5);
+        List<Cluster> clusters = Cluster.createClusters(n_clusters, jobs, depots);
+
+        //Sort the clusters based on remoteness
+        clusters.sort((Cluster c1, Cluster c2)->c2.getRemoteness(depots)-c1.getRemoteness(depots));
+
+        //Calculate which machinetypes are not available in the current cluster
+        for(Cluster cluster : clusters){
+            cluster.calculateMachinesNeeded();
+            cluster.expand();
+            System.out.println(cluster);
+            System.out.println();
+        }
+
+
+
+        //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn
+        final Graph clusterPlot = new Graph("Clusters",clusters, depots);
+        clusterPlot.pack();
+        RefineryUtilities.centerFrameOnScreen(clusterPlot);
+        clusterPlot.setVisible(true);
+
 
 
         return null;
