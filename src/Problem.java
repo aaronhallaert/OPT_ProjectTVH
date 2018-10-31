@@ -1,3 +1,5 @@
+import org.jfree.ui.RefineryUtilities;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -207,7 +209,12 @@ public class Problem {
         * */
 
         List<Cluster> clusters = Cluster.createClusters(5, new ArrayList<>(jobs.values()));
-        System.out.println();
+
+        //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn
+        final Graph clusterPlot = new Graph("Clusters",clusters, depots);
+        clusterPlot.pack();
+        RefineryUtilities.centerFrameOnScreen(clusterPlot);
+        clusterPlot.setVisible(true);
 
         return null;
     }
