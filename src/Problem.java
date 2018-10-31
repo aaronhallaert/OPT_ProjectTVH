@@ -206,7 +206,7 @@ public class Problem {
         *
         * */
 
-
+        List<Cluster> clusters = Cluster.createClusters(5,1.0,10.0,1.0,10.0, locations);
 
         return solution;
     }

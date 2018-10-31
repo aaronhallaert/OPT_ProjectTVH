@@ -4,21 +4,24 @@ import java.util.Random;
 
 public class Cluster {
 
+    private static double latMin;
+    private static double latMax;
+    private static double lonMin;
+    private static double lonMax;
+    private static List<Cluster> clusters = new LinkedList<>();
+    private static boolean changed = false;
+
     double longitude;
     double latitude;
     List<Location> locations;
-    boolean changed = false;
-    private static List<Cluster> clusters = new LinkedList<>();
+
+
 
     /**
      * This constructor will create an initial random point in the space defined by the furthest locations.
      * This point will calculate all the nodes that are closest to it, add these to a list, and based on that list it will calculate a new center.
-     * @param lonMin
-     * @param lonMax
-     * @param latMin
-     * @param latMax
      */
-    public Cluster(double lonMin, double lonMax, double latMin, double latMax){
+    private Cluster(){
         /*
         A cluster will start at a random point in the space.
          */
@@ -27,7 +30,23 @@ public class Cluster {
         longitude = rand.nextDouble() * (lonMax-lonMin) + lonMin;
 
         clusters.add(this);
-//        System.out.println("lat: " + latitude + ", lon: " + longitude);
+    }
+
+    public static List<Cluster> createClusters(int nrOfClusters, double lonMin, double lonMax, double latMin, double latMax, List<Location> allLocations){
+        Cluster.lonMin = lonMin;
+        Cluster.lonMax = lonMax;
+        Cluster.latMin = latMin;
+        Cluster.latMax = latMax;
+        for (int i = 0; i < nrOfClusters; i++) {
+            clusters.add(new Cluster());
+        }
+//        Form the clusters;
+        do {
+            calculateLocations(allLocations);
+            calculateNewCenters();
+        } while (changed);
+
+        return clusters;
     }
 
     /**
@@ -35,41 +54,49 @@ public class Cluster {
      * When the calculated location differs from the previous location it indicates that the list with location
      * can still change. So we use a boolean to track this.
      */
-    private void calculateNewCenter(){
-        double tempLat = 0.0;
-        double tempLon = 0.0;
-        for (Location location : locations) {
-            tempLat += location.getLatitude();
-            tempLon += location.getLongitude();
+    private static void calculateNewCenters(){
+        double tempLat, tempLon;
+
+        for (Cluster cluster : clusters) {
+            tempLat = 0.0;
+            tempLon = 0.0;
+            List<Location> locations = cluster.locations;
+
+            for (Location location : locations) {
+                tempLat += location.getLatitude();
+                tempLon += location.getLongitude();
+            }
+            tempLat /= locations.size();
+            tempLon /= locations.size();
+
+            if (tempLat != cluster.latitude || tempLon != cluster.longitude)
+                changed = true;
+
+            cluster.latitude = tempLat;
+            cluster.longitude = tempLon;
+
+            System.out.println(cluster);
         }
-        tempLat /= locations.size();
-        tempLon /= locations.size();
-
-        if (tempLat != latitude || tempLon != longitude)
-            changed = true;
-
-        latitude = tempLat;
-        longitude = tempLon;
     }
 
     /**
      * This method serves to update the list of locations of each cluster.
      * We will look at each Location and calculate which cluster center is closest.
      */
-    private void calculateLocations(List<Location> locations){
+    private static void calculateLocations(List<Location> locations){
         for (Location location : locations) {
-            calculateClosestCluster(location).locations.add(location);
+            getClosestCluster(location).locations.add(location);
         }
 //        Reset the changed property as to detect when the system will find a stable location
         changed = false;
     }
 
     /**
-     * Calculate which cluster is closest to a a g
+     * Calculate which cluster is closest to a given location.
      * @param location
      * @return
      */
-    private Cluster calculateClosestCluster(Location location){
+    private static Cluster getClosestCluster(Location location){
         double distance = Double.POSITIVE_INFINITY;
         double tempLat, tempLon, tempDistance = 0.0;
         Cluster closest = clusters.get(0);
@@ -84,5 +111,18 @@ public class Cluster {
             }
         }
         return closest;
+    }
+
+    public static List<Cluster> getClusters() {
+        return clusters;
+    }
+
+    @Override
+    public String toString() {
+        return "Cluster{" +
+                "longitude=" + longitude +
+                ", latitude=" + latitude +
+                ", locations=" + locations +
+                '}';
     }
 }

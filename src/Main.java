@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 public class Main {
 
@@ -9,9 +10,9 @@ public class Main {
 
         try {
             Problem problem = new Problem(inputFile);
-//            Solution solution = problem.solve();
+            Solution solution = problem.solve();
 
-            Cluster cluster = new Cluster(1.2,2.4,1.2,2.4);
+
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
