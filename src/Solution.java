@@ -10,7 +10,7 @@ public class Solution {
         this.trucks = new ArrayList<>();
         //Current state van trucks kopiëren;
         for(Truck t: trucks){
-            trucks.add(new Truck(t));
+            this.trucks.add(new Truck(t));
         }
 
     }

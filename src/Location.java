@@ -8,6 +8,7 @@ public class Location {
     private double latitude;
     private double longitude;
     private String name;
+    //snelle manier om van de ene location naar de andere te gaan;
     private HashMap<Location ,Edge> edgeMap;
     private LinkedList<Edge> sortedEdgeList;
 

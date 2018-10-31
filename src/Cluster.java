@@ -1,19 +1,21 @@
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 public class Cluster {
 
-    private static double latMin;
-    private static double latMax;
-    private static double lonMin;
-    private static double lonMax;
+    private static double latMin = Double.POSITIVE_INFINITY;
+    private static double latMax = Double.NEGATIVE_INFINITY;
+    private static double lonMin = Double.POSITIVE_INFINITY;
+    private static double lonMax = Double.NEGATIVE_INFINITY;;
     private static List<Cluster> clusters = new LinkedList<>();
     private static boolean changed = false;
 
+
+    List<Location> locations = new ArrayList<>();
     double longitude;
     double latitude;
-    List<Location> locations;
 
 
 
@@ -29,18 +31,23 @@ public class Cluster {
         latitude = rand.nextDouble() * (latMax-latMin) + latMin;
         longitude = rand.nextDouble() * (lonMax-lonMin) + lonMin;
 
-        clusters.add(this);
     }
 
-    public static List<Cluster> createClusters(int nrOfClusters, double lonMin, double lonMax, double latMin, double latMax, List<Location> allLocations){
-        Cluster.lonMin = lonMin;
-        Cluster.lonMax = lonMax;
-        Cluster.latMin = latMin;
-        Cluster.latMax = latMax;
+    public static List<Cluster> createClusters(int nrOfClusters, List<Job> jobs){
+        List<Location> allLocations = new ArrayList<>();
+        for(Job job: jobs){
+            Location loc = job.getLocation();
+            allLocations.add(loc);
+            if(loc.getLatitude() < latMin) latMin = loc.getLatitude();
+            if(loc.getLatitude() > latMax) latMax = loc.getLatitude();
+            if(loc.getLongitude() < lonMin) lonMin = loc.getLongitude();
+            if(loc.getLongitude() > lonMax) lonMax = loc.getLongitude();
+        }
+
         for (int i = 0; i < nrOfClusters; i++) {
             clusters.add(new Cluster());
         }
-//        Form the clusters;
+        //Form the clusters;
         do {
             calculateLocations(allLocations);
             calculateNewCenters();
@@ -84,8 +91,13 @@ public class Cluster {
      * We will look at each Location and calculate which cluster center is closest.
      */
     private static void calculateLocations(List<Location> locations){
-        for (Location location : locations) {
-            getClosestCluster(location).locations.add(location);
+        try {
+            for (Location location : locations) {
+                getClosestCluster(location).locations.add(location);
+            }
+        }
+        catch(NullPointerException ne){
+            ne.printStackTrace();
         }
 //        Reset the changed property as to detect when the system will find a stable location
         changed = false;

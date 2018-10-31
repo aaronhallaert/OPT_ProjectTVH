@@ -8,6 +8,8 @@ public class Main {
 
         File inputFile = new File("input.txt");
 
+
+        long startTIme = System.currentTimeMillis();
         try {
             Problem problem = new Problem(inputFile);
             Solution solution = problem.solve();
@@ -17,6 +19,9 @@ public class Main {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        long endTIme = System.currentTimeMillis();
+
+        System.out.println(endTIme - startTIme);
 
 
     }

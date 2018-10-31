@@ -13,6 +13,7 @@ public class Truck {
         this.truckId=truckId;
         this.startLocation= startLocation;
         this.endLocation=endLocation;
+        this.route = new ArrayList<>();
     }
 
     //Copy constructor
