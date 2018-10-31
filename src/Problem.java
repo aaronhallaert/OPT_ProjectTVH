@@ -19,7 +19,7 @@ public class Problem {
 
     public Problem(File inputFile) throws FileNotFoundException {
 
-        Scanner sc = new Scanner(inputFile);
+        Scanner sc = new Scanner(inputFile).useLocale(Locale.US);;
 
         info = sc.nextLine().split(": ")[1];
         TRUCK_CAPACITY= Integer.parseInt(sc.nextLine().split(": ")[1]);
