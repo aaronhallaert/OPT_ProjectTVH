@@ -207,6 +207,7 @@ public class Problem {
         * */
 
         List<Cluster> clusters = Cluster.createClusters(5, new ArrayList<>(jobs.values()));
+        System.out.println();
 
         return null;
     }

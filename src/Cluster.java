@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Cluster {
 
@@ -12,16 +9,13 @@ public class Cluster {
     private static List<Cluster> clusters = new LinkedList<>();
     private static boolean changed = false;
 
-
     List<Location> locations = new ArrayList<>();
+    List<Location> oldLocations = new ArrayList<>();
     double longitude;
     double latitude;
 
-
-
     /**
      * This constructor will create an initial random point in the space defined by the furthest locations.
-     * This point will calculate all the nodes that are closest to it, add these to a list, and based on that list it will calculate a new center.
      */
     private Cluster(){
         /*
@@ -49,15 +43,19 @@ public class Cluster {
         }
         //Form the clusters;
         do {
+            //        Reset the changed property as to detect when the system will find a stable location
+            changed = false;
+            System.out.println(clusters);
             calculateLocations(allLocations);
             calculateNewCenters();
+
         } while (changed);
 
         return clusters;
     }
 
     /**
-     * This method calculates a new center based on a list of locations.
+     * Calculate a new center based on a list of locations.
      * When the calculated location differs from the previous location it indicates that the list with location
      * can still change. So we use a boolean to track this.
      */
@@ -76,13 +74,10 @@ public class Cluster {
             tempLat /= locations.size();
             tempLon /= locations.size();
 
-            if (tempLat != cluster.latitude || tempLon != cluster.longitude)
-                changed = true;
-
             cluster.latitude = tempLat;
             cluster.longitude = tempLon;
 
-            System.out.println(cluster);
+//            System.out.println(cluster);
         }
     }
 
@@ -91,16 +86,27 @@ public class Cluster {
      * We will look at each Location and calculate which cluster center is closest.
      */
     private static void calculateLocations(List<Location> locations){
+//        First we reset the location lists in the clusters
+        for (Cluster cluster : clusters) {
+            cluster.oldLocations = locations;
+            cluster.locations = new ArrayList<>();
+        }
+
         try {
             for (Location location : locations) {
                 getClosestCluster(location).locations.add(location);
+
             }
         }
         catch(NullPointerException ne){
             ne.printStackTrace();
         }
-//        Reset the changed property as to detect when the system will find a stable location
-        changed = false;
+
+        for (Cluster cluster : clusters) {
+            if (!cluster.oldLocations.equals(cluster.locations)){
+                changed = true;
+            }
+        }
     }
 
     /**
@@ -133,8 +139,6 @@ public class Cluster {
     public String toString() {
         return "Cluster{" +
                 "longitude=" + longitude +
-                ", latitude=" + latitude +
-                ", locations=" + locations +
-                '}';
+                ", latitude=" + latitude + '}';
     }
 }
