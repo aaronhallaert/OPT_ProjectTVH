@@ -12,7 +12,8 @@ public class Main {
 
         try {
             Problem problem = new Problem(inputFile);
-            final Grafiek plot= new Grafiek("locaties", problem.locations, problem.depots);
+            problem.createInitialSolution();
+            final Grafiek plot= new Grafiek("locaties", problem.clusters, problem.depots);
             plot.pack();
             RefineryUtilities.centerFrameOnScreen(plot);
             plot.setVisible(true);

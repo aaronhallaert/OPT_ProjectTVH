@@ -2,6 +2,7 @@ package PlotPackage;
 
 
 import Entities.Depot;
+import Entities.Job;
 import Entities.Location;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -11,33 +12,45 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 
-import java.util.List;
+import java.util.*;
 
 public class Grafiek extends ApplicationFrame{
 
-    public Grafiek(String title, List<Location> locations, List<Depot> depots){
+    public Grafiek(String title, HashMap<Depot, Set<Job>> clusters, HashMap<Location, Depot> depots){
         super(title);
 
 
-        final XYSeries locationPoints = new XYSeries("Locations");
+        // PLOTTEN VAN CLUSTERS
+        ArrayList<XYSeries> clusterPoints= new ArrayList<>();
 
-        for (Location location : locations) {
-            double lat= location.getLatitude();
-            double lng= location.getLongitude();
-            locationPoints.add(lat, lng);
+        int i= 1;
+        for (Map.Entry<Depot, Set<Job>> entry : clusters.entrySet()) {
+            final XYSeries locationPoints = new XYSeries("cluster "+i);
+            for (Job job : entry.getValue()) {
+                double lat= job.getLocation().getLatitude();
+                double lng= job.getLocation().getLongitude();
+                locationPoints.add(lat, lng);
+            }
+            clusterPoints.add(locationPoints);
+
+            i++;
         }
 
+
+        // PLOTTEN VAN DEPOTS
         final XYSeries depotPoints = new XYSeries("Depots");
 
-        for (Depot depot : depots) {
-            double lat= depot.getLocation().getLatitude();
-            double lng= depot.getLocation().getLongitude();
+        for (Map.Entry<Location, Depot> entry : depots.entrySet()) {
+            double lat= entry.getKey().getLatitude();
+            double lng= entry.getKey().getLongitude();
             depotPoints.add(lat, lng);
         }
 
         final XYSeriesCollection data = new XYSeriesCollection();
         data.addSeries(depotPoints);
-        data.addSeries(locationPoints);
+        for (XYSeries clusterPoint : clusterPoints) {
+            data.addSeries(clusterPoint);
+        }
         final JFreeChart chart = ChartFactory.createScatterPlot("Locations", "Longitude", "Latitude",
                 data, PlotOrientation.VERTICAL, true, true, false);
 

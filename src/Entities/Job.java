@@ -41,6 +41,8 @@ public class Job {
 
 
 
+
+
     public LinkedList<Machine> getToCollectItems() {
         return toCollectItems;
     }

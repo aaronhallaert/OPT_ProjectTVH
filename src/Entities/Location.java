@@ -21,6 +21,7 @@ public class Location {
         this.sortedEdgeList = new LinkedList<>();
     }
 
+
     public void addEdge(Edge edge){
         edgeMap.put(edge.getTo(), edge);
         //Entities.Edge list moet altijd gesorteerd blijven op basis van afstand

@@ -11,13 +11,18 @@ public class Problem {
     public int TRUCK_WORKING_TIME;
 
     public ArrayList<Location> locations = new ArrayList<>();
-    public ArrayList<Depot> depots = new ArrayList<>();
+    public HashMap<Location, Depot> depots = new HashMap<>();
     public HashMap<Location,Job> jobs = new HashMap<>();
     public HashMap<Machine, Location> machineLocations = new HashMap<>();
     public ArrayList<Truck> trucks = new ArrayList<>();
     public ArrayList<MachineType> machineTypes = new ArrayList<>();
     public ArrayList<Machine> machines = new ArrayList<>();
     public ArrayList<Edge> edges = new ArrayList<>();
+
+
+
+    // BEREKEND
+    public HashMap<Depot, Set<Job>> clusters;
 
     public Problem(File inputFile) throws FileNotFoundException {
 
@@ -49,7 +54,7 @@ public class Problem {
         for (int i = 0; i < aantalDepots; i++) {
             int depotId=sc.nextInt();
             int locationId= sc.nextInt();
-            depots.add(new Depot(locations.get(locationId)));
+            depots.put(locations.get(locationId),new Depot(locations.get(locationId)));
         }
 
         //TRUCKS
@@ -97,9 +102,9 @@ public class Problem {
             Machine machine = new Machine(machineId, machineType);
 
             //Indien een machine in een depot staat moet deze worden toegevoegd aan het depot;
-            for(Depot d: depots){
-                if(d.getLocation() == location){
-                    d.addMachine(machine);
+            for (Map.Entry<Location, Depot> entry : depots.entrySet()) {
+                if(entry.getKey() == location){
+                    entry.getValue().addMachine(machine);
                 }
             }
             //toevoegen in algemene lijst
@@ -197,8 +202,41 @@ public class Problem {
 
     public Solution createInitialSolution(){
 
+        // DICHTSTE DEPOT VOOR ELKE JOB BEREKENEN
+        HashMap<Job, Depot> nearestDepot=new HashMap<>();
+        // itereren over alle jobs <Location, Job>
+        for (Map.Entry<Location, Job> entry : jobs.entrySet()) {
+            // voor elke job gesorteerde lijst van edges eruit halen en eerste depot = dichtste depot voor die job
+            for (Edge edge : entry.getValue().getLocation().getSortedEdgeList()) {
+                // edgeTo is een depot
+                if(depots.containsKey(edge.getTo())){
+                    nearestDepot.put(entry.getValue(), depots.get(edge.getTo()));
+                    break;
+                }
+            }
+        }
+
+
+        // SET VAN CLUSTERS MAKEN PER DEPOT
+        clusters= new HashMap<>();
+        // itereren over alle nearestDepot
+        for (Map.Entry<Job, Depot> entry : nearestDepot.entrySet()) {
+            if(clusters.get(entry.getValue())==null){
+                clusters.put(entry.getValue(), new HashSet<>());
+            }
+            clusters.get(entry.getValue()).add(entry.getKey());
+        }
+
+
+
+
+
         return null;
 
     }
+
+
+
+
 
 }
