@@ -54,7 +54,7 @@ public class Stop {
     public boolean calculateFillRate(){
         fillRate = 0;
         for(Machine m: onTruck){
-            fillRate =+ m.getType().getVolume();
+            fillRate += m.getType().getVolume();
         }
         return fillRate < 100;
     }

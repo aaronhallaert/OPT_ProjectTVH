@@ -27,8 +27,6 @@ public class Truck {
         locationStopMap = new HashMap<>();
     }
 
-    //TODO: ZEER BELANGRIJK, SERIVCE TIMES WORDEN NOG NIET MEEGEREKEND;
-
     //Copy constructor
     public Truck(Truck t) {
         this.truckId = t.truckId;
@@ -64,12 +62,14 @@ public class Truck {
         if(!(locationStopMap.containsKey(from) || from==startLocation)) {
             Stop newStop = new Stop(from);
             int index = findBestIndexToInsert(newStop);
+            newStop.setOnTruck(route.get(index-1).getOnTruck());
             route.add(index, newStop);
             locationStopMap.put(from, newStop);
         }
         if(!(locationStopMap.containsKey(to) || to==endLocation)){
             Stop newStop = new Stop(to);
             int index = findBestIndexToInsert(newStop);
+            newStop.setOnTruck(route.get(index-1).getOnTruck());
             route.add(index, newStop);
             locationStopMap.put(to, newStop);
         }
@@ -87,13 +87,14 @@ public class Truck {
         //Add the machine to the right stops, and check the fillrate constraint;
         collectStop.addCollectItem(machine);
         dropStop.addDropItem(machine);
-        int collectIndex = route.indexOf(collectStop);
+        if(!recalculateOnTruck()) return false;
+        /*int collectIndex = route.indexOf(collectStop);
         int dropIndex = route.indexOf(dropStop);
         for(int i = collectIndex; i < dropIndex; i++){
             if(!route.get(i).addToTruck(machine)){
                 return false;
             }
-        }
+        }*/
         //Total time is recalculated and checked;
         if(!recalculateTime()) return false;
 
@@ -114,12 +115,25 @@ public class Truck {
         //Time to drive to each stop
         for (int i = 1; i < route.size(); i++) {
             totalTime += prevStop.getLocation().timeTo(route.get(i).getLocation());
+            prevStop = route.get(i);
         }
         //Time spend at each stop to load/unload
         for(Stop s: route){
             totalTime += s.getTimeSpend();
         }
         return totalTime < Problem.TRUCK_WORKING_TIME;
+    }
+    public boolean recalculateOnTruck(){
+        LinkedList<Machine> onTruck = new LinkedList<>();
+        for(Stop s: route){
+            onTruck.addAll(s.getCollectItems());
+            onTruck.removeAll(s.getDropItems());
+            s.setOnTruck(new LinkedList<>(onTruck));
+            if (!s.calculateFillRate()){
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -200,7 +214,7 @@ public class Truck {
         totalDistance = 0;
         for (int i = 0; i < route.size()-1; i++) {
             Location A = route.get(i).getLocation();
-            Location B = route.get(i).getLocation();
+            Location B = route.get(i+1).getLocation();
             totalDistance += A.distanceTo(B);
         }
         return totalDistance;

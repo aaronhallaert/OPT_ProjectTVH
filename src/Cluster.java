@@ -335,6 +335,8 @@ public class Cluster {
                 are passing through one or both of the locations of the move. The next step is to make a sortedlist
                 of the trucks who are passing somewhere near the origin or destination;
              */
+
+            //TODO: dit hier fixen grt
             System.out.println("Wooooops");
 
         }

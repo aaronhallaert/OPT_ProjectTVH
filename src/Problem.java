@@ -237,7 +237,9 @@ public class Problem {
 
         int totalDistance = 0;
         for(Truck t: trucks){
-            totalDistance += t.getTotalDistance();
+            int distance = t.getTotalDistance();
+            System.out.println("Truck "+t.getTruckId()+":\t"+distance);
+            totalDistance += distance;
         }
         System.out.println("Total Distance: "+totalDistance);
 
