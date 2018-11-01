@@ -1,3 +1,4 @@
+import javax.crypto.Mac;
 import java.util.*;
 
 public class Job {
@@ -37,6 +38,24 @@ public class Job {
 
     public void removeFromDropItems(MachineType machineType){
         toDropItems.remove(machineType);
+    }
+
+    public boolean collectItemsContains(MachineType mt){
+        for(Machine m: toCollectItems){
+            if(m.getType() == mt){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Machine getMachineToCollect(MachineType mt){
+        for(Machine m: toCollectItems){
+            if(m.getType() == mt){
+                return m;
+            }
+        }
+        return null;
     }
 
     public boolean hasMachine(MachineType mt){

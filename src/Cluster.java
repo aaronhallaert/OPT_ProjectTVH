@@ -17,11 +17,14 @@ public class Cluster {
     private static boolean changed;
 
     Set<Location> members = new HashSet<>();
+    Set<Location> depots = new HashSet<>();
+    Set<Location> expandedMembers = new HashSet<>();
     Set<Location> oldMembers = new HashSet<>();
     Location medoid;
 
 
     List<MachineType> machinesNeeded = new LinkedList<>();
+    Map<Location, Stop> certainStops = new HashMap<>();
 
     /*
      * private constructor, because cluster class is singleton
@@ -44,14 +47,9 @@ public class Cluster {
 
         allLocationsNotMedoid.addAll(allLocations);
 
-        //We deep copy the jobs;
-        for(Job j: jobs.values()){
-            locationJobMap.put(j.getLocation(), new Job(j));
-        }
-
-        //We deep copy the depot list
+        locationJobMap = jobs;
         for(Depot d: depotList){
-            locationDepotMap.put(d.getLocation(),new Depot(d));
+            locationDepotMap.put(d.getLocation(), d);
         }
 
         for (int i = 0; i < nClusters; i++) {
@@ -174,6 +172,19 @@ public class Cluster {
     }
 
     public void expand(){
+        //We deep copy the jobs and depots so we can delete certain machines from jobs temporarily;
+        HashMap<Location, Job> locationJobMapCopy = new HashMap<>();
+        HashMap<Location, Depot> locationDepotMapCopy = new HashMap<>();
+
+        for(Job j: locationJobMap.values()){
+            locationJobMapCopy.put(j.getLocation(), new Job(j));
+        }
+
+        for(Depot d: locationDepotMap.values()){
+            locationDepotMapCopy.put(d.getLocation(),new Depot(d));
+        }
+
+
         //We beginnen vanuit de medoid te zoeken naar nodes die dichtbijliggen die de machines hebben die nog tekort zijn.
         List<Edge> sortedEdgeList = medoid.getSortedEdgeList();
         for(Edge e: sortedEdgeList){
@@ -181,9 +192,9 @@ public class Cluster {
             //Als deze locatie nog geen member is van de cluster:
             if(!members.contains(loc)) {
                 //Zoeken als het om een job of een depot gaat:
-                if (locationJobMap.containsKey(loc)) {
+                if (locationJobMapCopy.containsKey(loc)) {
                     //Job opzoeken op deze locatie
-                    Job job = locationJobMap.get(loc);
+                    Job job = locationJobMapCopy.get(loc);
                     //Alle machines kijken die op deze locatie moeten worden opgenomen;
                     for (Machine m : job.getToCollectItems()) {
                         if (machinesNeeded.contains(m.getType())) {
@@ -191,12 +202,12 @@ public class Cluster {
                             //We voegen vervolgens de job toe aan de cluster;
                             machinesNeeded.remove(m.getType());
                             job.removeFromCollectItems(m);
-                            members.add(loc);
+                            expandedMembers.add(loc);
                         }
                     }
                 }
-                if (locationDepotMap.containsKey(loc)) {
-                    Depot depot = locationDepotMap.get(loc);
+                if (locationDepotMapCopy.containsKey(loc)) {
+                    Depot depot = locationDepotMapCopy.get(loc);
                     //We overlopen alle machinetypes die we nodig hebben in de cluster
                     List<MachineType> machinesNeededCopy = new ArrayList<>(machinesNeeded);
                     for (MachineType mt : machinesNeededCopy) {
@@ -205,12 +216,53 @@ public class Cluster {
                             //Machine verwijderen uit de needed lijst en het depot, locatie van depot toevoegen aan de cluster;
                             machinesNeeded.remove(mt);
                             depot.getMachines().get(mt).removeFirst();
-                            members.add(depot.getLocation());
+                            depots.add(depot.getLocation());
                         }
                     }
                 }
             }
         }
+    }
+
+    public void solve(){
+        //We sorteren de members op basis van hun afstand van de medoid.
+        ArrayList<Location> membersList = new ArrayList<>(members);
+        membersList.sort((Location l1, Location l2)->l2.distanceTo(medoid)-l1.distanceTo(medoid));
+        //We overlopen alle locations die moeten gedropt worden
+        List<Move> machineMoves = new ArrayList<>();
+        for(Location drop: membersList){
+            for(MachineType mt: locationJobMap.get(drop).getToDropItems()){
+                for(Edge e: drop.getSortedEdgeList()){
+                    if(members.contains(e.getTo()) || expandedMembers.contains(e.getTo()) || depots.contains(e.getTo())) {
+                        if (locationJobMap.containsKey(e.getTo())) {
+                            Job j = locationJobMap.get(e.getTo());
+                            if (j.collectItemsContains(mt)) {
+                                Machine m = j.getMachineToCollect(mt);
+                                machineMoves.add(new Move(m, j.getLocation(), drop));
+                                j.removeFromCollectItems(m);
+                                break;
+                            }
+                            continue;
+                        }
+                        if (locationDepotMap.containsKey(e.getTo())) {
+                            Depot d = locationDepotMap.get(e.getTo());
+                            if (d.hasMachine(mt)) {
+                                Machine m = d.getMachineFromDepot(mt);
+                                machineMoves.add(new Move(d.getMachineFromDepot(mt), d.getLocation(), drop));
+                                d.removeMachine(m);
+                                break;
+                            }
+                        }
+                    }
+
+                }
+                System.out.println("ERROR, NO MACHINE FOUND");
+
+            }
+        }
+        System.out.println("memberslist");
+
+
     }
 
     public static List<Cluster> getClusters() {
@@ -219,9 +271,19 @@ public class Cluster {
 
     public String toString(){
         StringBuilder sb = new StringBuilder();
+        sb.append("Members: \n");
         for(Location loc: members){
             sb.append(loc.getLocationID() + ","+loc.getLatitude()+","+loc.getLongitude()+"\n");
         }
+        sb.append("Depots: \n");
+        for(Location loc: depots){
+            sb.append(loc.getLocationID() + ","+loc.getLatitude()+","+loc.getLongitude()+"\n");
+        }
+        sb.append("Expanded: \n");
+        for(Location loc: expandedMembers){
+            sb.append(loc.getLocationID() + ","+loc.getLatitude()+","+loc.getLongitude()+"\n");
+        }
+
         return sb.toString();
     }
 

@@ -6,18 +6,18 @@ import java.util.*;
 
 public class Problem {
 
-    public String info;
-    public int TRUCK_CAPACITY;
-    public int TRUCK_WORKING_TIME;
+    public static String info;
+    public static int TRUCK_CAPACITY;
+    public static int TRUCK_WORKING_TIME;
 
-    public ArrayList<Location> locations = new ArrayList<>();
-    public ArrayList<Depot> depots = new ArrayList<>();
-    public HashMap<Location,Job> jobs = new HashMap<>();
-    public HashMap<Machine, Location> machineLocations = new HashMap<>();
-    public ArrayList<Truck> trucks = new ArrayList<>();
-    public ArrayList<MachineType> machineTypes = new ArrayList<>();
-    public ArrayList<Machine> machines = new ArrayList<>();
-    public ArrayList<Edge> edges = new ArrayList<>();
+    public static ArrayList<Location> locations = new ArrayList<>();
+    public static ArrayList<Depot> depots = new ArrayList<>();
+    public static HashMap<Location,Job> jobs = new HashMap<>();
+    public static HashMap<Machine, Location> machineLocations = new HashMap<>();
+    public static ArrayList<Truck> trucks = new ArrayList<>();
+    public static ArrayList<MachineType> machineTypes = new ArrayList<>();
+    public static ArrayList<Machine> machines = new ArrayList<>();
+    public static ArrayList<Edge> edges = new ArrayList<>();
 
     public Problem(File inputFile) throws FileNotFoundException {
 
@@ -223,7 +223,7 @@ public class Problem {
         //Sort the clusters based on remoteness
         clusters.sort((Cluster c1, Cluster c2)->c2.getRemoteness(depots)-c1.getRemoteness(depots));
 
-        //Calculate which machinetypes are not available in the current cluster
+        //Calculate the machines that are still needed inside the cluster, and expand the cluster until it is self-sufficient;
         for(Cluster cluster : clusters){
             cluster.calculateMachinesNeeded();
             cluster.expand();
@@ -231,6 +231,9 @@ public class Problem {
             System.out.println();
         }
 
+        for(Cluster cluster: clusters){
+            cluster.solve();
+        }
 
 
         //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn

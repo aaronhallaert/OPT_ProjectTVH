@@ -32,7 +32,6 @@ public class Location {
         return edgeMap.get(l).getDistance();
     }
 
-
     public int getLocationID() {
         return locationID;
     }

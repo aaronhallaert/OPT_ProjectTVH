@@ -32,6 +32,20 @@ public class Depot {
             machines.get(m.getType()).add(m);
         }
     }
+    public void removeMachine(Machine m){
+        machines.get(m.getType()).remove(m);
+    }
+
+    public Machine getMachineFromDepot(MachineType mt){
+        if(hasMachine(mt)){
+            return machines.get(mt).getFirst();
+        }
+        return null;
+    }
+
+    public boolean hasMachine(MachineType mt){
+        return machines.containsKey(mt) && machines.get(mt).size() > 0;
+    }
 
     public Location getLocation() {
         return location;
