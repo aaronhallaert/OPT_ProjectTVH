@@ -15,6 +15,7 @@ import java.util.Set;
  */
 public class Cluster {
 
+    private int id;
     private Depot depot;
     private Set<Job> clusterJobs;
     private HashMap<MachineType, Integer> beschikbaar;
@@ -24,7 +25,8 @@ public class Cluster {
     private Set<MachineType> genoegMachineTypes=new HashSet<>();
 
 
-    public Cluster(Depot depot){
+    public Cluster(Depot depot, int id){
+        this.id=id;
         this.depot=depot;
         clusterJobs=new HashSet<>();
         beschikbaar=new HashMap<>();
@@ -58,6 +60,21 @@ public class Cluster {
         System.out.println("\n");
     }
 
+    public void fillNeeded(HashMap<Depot, Cluster> clusters){
+        //overlopen van nodige machine types
+        for(Map.Entry<MachineType, Integer> nodigeMachineType: nodigeMachineTypes.entrySet()){
+
+            //overlopen van alles clusters op zoek naar nodige machine type
+            for(Map.Entry<Depot, Cluster> cluster: clusters.entrySet()){
+                // TODO werkt niet
+                if(cluster.getValue().getOverbodigeMachineTypes().containsKey(nodigeMachineType.getKey())){
+                    System.out.println("gevonden voor cluster "+id+" => cluster "+cluster.getValue().getId()+" heeft een machinetype "+nodigeMachineType.getKey()+" over" );
+                }
+            }
+
+        }
+    }
+
     /**
      * berekend aantal nodige machine types en van welk type
      *                 overbodige
@@ -80,6 +97,15 @@ public class Cluster {
             }
         }
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public HashMap<MachineType, Integer> getNodigeMachineTypes() {
         return nodigeMachineTypes;
     }

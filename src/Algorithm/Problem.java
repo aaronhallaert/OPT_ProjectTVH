@@ -231,9 +231,12 @@ public class Problem {
 
         // SET VAN CLUSTERS MAKEN PER DEPOT
         clusters= new HashMap<>();
+        int clusterCount=1;
         // itereren over alle nearestDepot
         for (Map.Entry<Job, Depot> entry : nearestDepot.entrySet()) {
-            clusters.putIfAbsent(entry.getValue(), new Cluster(entry.getValue()));
+            if(clusters.putIfAbsent(entry.getValue(), new Cluster(entry.getValue(), clusterCount))!=null){
+                clusterCount++;
+            }
             clusters.get(entry.getValue()).getClusterJobs().add(entry.getKey());
         }
 
@@ -281,7 +284,7 @@ public class Problem {
 
 
 
-
+            huidigeCluster.fillNeeded(clusters);
 
 
 
