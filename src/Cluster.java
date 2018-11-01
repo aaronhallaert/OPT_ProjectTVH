@@ -82,13 +82,12 @@ public class Cluster {
         //Save the old members to detect changes later on;
         for (Cluster cluster : clusters) {
             cluster.oldMembers = cluster.members;
-            cluster.members.clear();
+            cluster.members = new HashSet<>();
         }
 
         //Redistribute the members based on new medoids
         for (Location loc : allLocations) {
             getClosestCluster(loc).members.add(loc);
-
         }
 
         //Detect changes in members of cluster
@@ -103,11 +102,11 @@ public class Cluster {
      * Calculate which cluster is closest to a given location.
      */
     private static Cluster getClosestCluster(Location loc){
-        double minDistance = Double.POSITIVE_INFINITY;
+        int minDistance = Integer.MAX_VALUE;
         Cluster closest = null;
 
         for (Cluster cluster : clusters) {
-            double distance = loc.getEdgeMap().get(cluster.medoid).distance;
+            int distance = loc.getEdgeMap().get(cluster.medoid).distance;
             if (distance < minDistance){
                 minDistance = distance;
                 closest = cluster;
@@ -117,20 +116,20 @@ public class Cluster {
     }
 
     /**
-     *  This method finds a new mediods of a cluster. Every member of a cluster is a candidate to be the new medoid.
+     *  This method finds a new mediod of a cluster. Every member of a cluster is a candidate to be the new medoid.
      *  The member with the smallest overal distance from each other member to itself becomes the new mediod.
      */
     private static void findNewMedoids(){
+        int minDistance, distance;
 
         for (Cluster cluster : clusters) {
-            int minDistance = Integer.MAX_VALUE;
+            minDistance = Integer.MAX_VALUE;
             Location newMedoid = cluster.medoid;
 
             for (Location medoidCandidate : cluster.members) {
-                int distance = 0;
-                for(Location member: cluster.members) {
-                    Edge edge = medoidCandidate.getEdgeMap().get(member);
-                    distance =+ edge.getDistance();
+                distance = 0;
+                for(Location member : cluster.members) {
+                    distance += medoidCandidate.getEdgeMap().get(member).getDistance();
                 }
                 if(distance < minDistance){
                     minDistance = distance;
@@ -147,7 +146,7 @@ public class Cluster {
 
     /**
      * This function gives an idea about the remoteness of a certain cluster. It takes the other medoids of other
-     * clusters into account aswell as the locationDepotMap.
+     * clusters into account as well as the locationDepotMap.
      * This method is used for sorting, the higher the returned number the more remote.
      * @param depots
      * @return
@@ -155,10 +154,12 @@ public class Cluster {
     public int getRemoteness(List<Depot> depots){
         int remoteFactor = 0;
         for(Cluster c: clusters){
-            remoteFactor =+ medoid.getEdgeMap().get(c.medoid).distance;
+//            How far a given mediod in a cluster is from other mediods.
+            remoteFactor += medoid.getEdgeMap().get(c.medoid).distance;
         }
         for(Depot d: depots){
-            remoteFactor =+ medoid.getEdgeMap().get(d.getLocation()).distance;
+//            How far a given mediod is from the depots on the map.
+            remoteFactor += medoid.getEdgeMap().get(d.getLocation()).distance;
         }
         return remoteFactor;
     }
