@@ -55,5 +55,11 @@ public class MachineType {
         this.volume = volume;
     }
 
+    public int getServiceTime() {
+        return serviceTime;
+    }
 
+    public void setServiceTime(int serviceTime) {
+        this.serviceTime = serviceTime;
+    }
 }

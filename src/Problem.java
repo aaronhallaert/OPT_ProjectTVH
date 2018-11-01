@@ -12,7 +12,7 @@ public class Problem {
 
     public static ArrayList<Location> locations = new ArrayList<>();
     public static ArrayList<Depot> depots = new ArrayList<>();
-    public static HashMap<Location,Job> jobs = new HashMap<>();
+    public static HashMap<Location, Client> jobs = new HashMap<>();
     public static HashMap<Machine, Location> machineLocations = new HashMap<>();
     public static ArrayList<Truck> trucks = new ArrayList<>();
     public static ArrayList<MachineType> machineTypes = new ArrayList<>();
@@ -122,9 +122,9 @@ public class Problem {
                 jobs.get(location).addToDropItems(machineType);
             }
             else{
-                Job job = new Job(location);
-                job.addToDropItems(machineType);
-                jobs.put(location, job);
+                Client client = new Client(location);
+                client.addToDropItems(machineType);
+                jobs.put(location, client);
             }
 
         }
@@ -144,9 +144,9 @@ public class Problem {
                 jobs.get(location).addToCollectItems(machine);
             }
             else{
-                Job job = new Job(location);
-                job.addToCollectItems(machine);
-                jobs.put(location, job);
+                Client client = new Client(location);
+                client.addToCollectItems(machine);
+                jobs.put(location, client);
             }
         }
 
@@ -235,6 +235,11 @@ public class Problem {
             cluster.solve();
         }
 
+        int totalDistance = 0;
+        for(Truck t: trucks){
+            totalDistance += t.getTotalDistance();
+        }
+        System.out.println("Total Distance: "+totalDistance);
 
         //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn
         final Graph clusterPlot = new Graph("Clusters",clusters, depots);

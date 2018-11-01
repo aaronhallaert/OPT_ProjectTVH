@@ -1,3 +1,5 @@
+import com.google.common.collect.HashMultimap;
+
 import java.util.*;
 
 /**
@@ -13,7 +15,7 @@ public class Cluster {
     private static List<Location> allLocationsNotMedoid = new LinkedList<>();
     private static List<Cluster> clusters = new ArrayList<>();
     private static HashMap<Location, Depot> locationDepotMap = new HashMap<>();
-    private static HashMap<Location, Job> locationJobMap = new HashMap<>();
+    private static HashMap<Location, Client> locationClientMap = new HashMap<>();
     private static boolean changed;
 
     Set<Location> members = new HashSet<>();
@@ -24,7 +26,6 @@ public class Cluster {
 
 
     List<MachineType> machinesNeeded = new LinkedList<>();
-    Map<Location, Stop> certainStops = new HashMap<>();
 
     /*
      * private constructor, because cluster class is singleton
@@ -39,15 +40,15 @@ public class Cluster {
 
     }
 
-    public static List<Cluster> createClusters(int nClusters, HashMap<Location, Job> jobs, List<Depot> depotList){
+    public static List<Cluster> createClusters(int nClusters, HashMap<Location, Client> jobs, List<Depot> depotList){
 
-        for(Job j: jobs.values()){
+        for(Client j: jobs.values()){
             allLocations.add(j.getLocation());
         }
 
         allLocationsNotMedoid.addAll(allLocations);
 
-        locationJobMap = jobs;
+        locationClientMap = jobs;
         for(Depot d: depotList){
             locationDepotMap.put(d.getLocation(), d);
         }
@@ -164,7 +165,7 @@ public class Cluster {
 
     public void calculateMachinesNeeded(){
         for(Location loc: members){
-            Job j = locationJobMap.get(loc);
+            Client j = locationClientMap.get(loc);
             machinesNeeded.addAll(j.getToDropItems());
             for(Machine m: j.getToCollectItems()){
                 machinesNeeded.remove(m.getType());
@@ -174,11 +175,11 @@ public class Cluster {
 
     public void expand(){
         //We deep copy the jobs and depots so we can delete certain machines from jobs temporarily;
-        HashMap<Location, Job> locationJobMapCopy = new HashMap<>();
+        HashMap<Location, Client> locationJobMapCopy = new HashMap<>();
         HashMap<Location, Depot> locationDepotMapCopy = new HashMap<>();
 
-        for(Job j: locationJobMap.values()){
-            locationJobMapCopy.put(j.getLocation(), new Job(j));
+        for(Client j: locationClientMap.values()){
+            locationJobMapCopy.put(j.getLocation(), new Client(j));
         }
 
         for(Depot d: locationDepotMap.values()){
@@ -194,15 +195,15 @@ public class Cluster {
             if(!members.contains(loc)) {
                 //Zoeken als het om een job of een depot gaat:
                 if (locationJobMapCopy.containsKey(loc)) {
-                    //Job opzoeken op deze locatie
-                    Job job = locationJobMapCopy.get(loc);
+                    //Client opzoeken op deze locatie
+                    Client client = locationJobMapCopy.get(loc);
                     //Alle machines kijken die op deze locatie moeten worden opgenomen;
-                    for (Machine m : job.getToCollectItems()) {
+                    for (Machine m : client.getToCollectItems()) {
                         if (machinesNeeded.contains(m.getType())) {
-                            //Als we een machine van dit type nodig hebben dan verwijderen we hem uit de needed lijst en job,
-                            //We voegen vervolgens de job toe aan de cluster;
+                            //Als we een machine van dit type nodig hebben dan verwijderen we hem uit de needed lijst en client,
+                            //We voegen vervolgens de client toe aan de cluster;
                             machinesNeeded.remove(m.getType());
-                            job.removeFromCollectItems(m);
+                            client.removeFromCollectItems(m);
                             expandedMembers.add(loc);
                         }
                     }
@@ -226,30 +227,41 @@ public class Cluster {
     }
 
     public void solve(){
-        //We sorteren de members op basis van hun afstand van de medoid.
+        /*
+         * First step of the solution is determining which machine goes where. This is saved in a "Move" object.
+         * Since every cluster is self sufficient we only need to move machines to and from other members of the cluster.
+         *
+         * Second step is to determine which Truck does which move.
+         */
+
+
+        //Sort the members based on their distance to the medoid.
         ArrayList<Location> membersList = new ArrayList<>(members);
         membersList.sort((Location l1, Location l2)->l2.distanceTo(medoid)-l1.distanceTo(medoid));
-        //We overlopen alle locations die moeten gedropt worden
-        List<Move> machineMoves = new ArrayList<>();
+        //Go over every location where a drop must be made
+        List<Move> movesList = new ArrayList<>();
         for(Location drop: membersList){
-            for(MachineType mt: locationJobMap.get(drop).getToDropItems()){
+            for(MachineType mt: locationClientMap.get(drop).getToDropItems()){
+                //Search for each machineType needed, the closest member of the cluster that has this machineType
                 for(Edge e: drop.getSortedEdgeList()){
                     if(members.contains(e.getTo()) || expandedMembers.contains(e.getTo()) || depots.contains(e.getTo())) {
-                        if (locationJobMap.containsKey(e.getTo())) {
-                            Job j = locationJobMap.get(e.getTo());
+                        //In case the location is a Client
+                        if (locationClientMap.containsKey(e.getTo())) {
+                            Client j = locationClientMap.get(e.getTo());
                             if (j.collectItemsContains(mt)) {
                                 Machine m = j.getMachineToCollect(mt);
-                                machineMoves.add(new Move(m, j.getLocation(), drop));
+                                movesList.add(new Move(m, j.getLocation(), drop));
                                 j.removeFromCollectItems(m);
                                 break;
                             }
                             continue;
                         }
+                        //In case the location is a depot
                         if (locationDepotMap.containsKey(e.getTo())) {
                             Depot d = locationDepotMap.get(e.getTo());
                             if (d.hasMachine(mt)) {
                                 Machine m = d.getMachineFromDepot(mt);
-                                machineMoves.add(new Move(d.getMachineFromDepot(mt), d.getLocation(), drop));
+                                movesList.add(new Move(d.getMachineFromDepot(mt), d.getLocation(), drop));
                                 d.removeMachine(m);
                                 break;
                             }
@@ -257,12 +269,76 @@ public class Cluster {
                     }
 
                 }
-                System.out.println("ERROR, NO MACHINE FOUND");
 
             }
         }
-        System.out.println("memberslist");
+        //After all the drop moves are made, the collect moves are made.
+        for(Location collect: membersList){
+            for(Machine m: locationClientMap.get(collect).getToCollectItems()){
+                for(Edge e: collect.getSortedEdgeList()){
+                    //We search the closest depot to drop the machine
+                    if(depots.contains(e.getTo())){
+                        movesList.add(new Move(m, collect, e.getTo()));
+                        break;
+                    }
+                }
+            }
+        }
+        System.out.println("Moves created");
 
+        //Next step is to let the trucks handle the moves
+        //First step is making a list of the available trucks to handle the moves;
+        HashMultimap<Location, Truck> trucks = HashMultimap.create();
+        for(Truck t: Problem.trucks){
+            //Check if truck is not yet being used by other cluster;
+            if(!t.isUsed()){
+                trucks.put(t.getStartLocation(),t);
+            }
+        }
+        for(Move m: movesList){
+            Location from = m.getFrom();
+            //First we check if we have any trucks that are passing in either both origin and destination of the move
+            //Or one of the two
+            ArrayList<Truck> trucksPassingBoth = new ArrayList<>();
+            ArrayList<Truck> trucksPassingOne = new ArrayList<>();
+            for(Truck t: trucks.values()){
+                if(t.doesTruckPass(m.getFrom()) && t.doesTruckPass(m.getTo())){
+                    trucksPassingBoth.add(t);
+                }else if(t.doesTruckPass(m.getFrom()) || t.doesTruckPass(m.getTo())){
+                    trucksPassingOne.add(t);
+                }
+            }
+            //We merge them together in a list;
+            LinkedList<Truck> sortedTruckList = new LinkedList<>();
+            sortedTruckList.addAll(trucksPassingBoth);
+            sortedTruckList.addAll(trucksPassingOne);
+            boolean truckFound = false;
+            while(!sortedTruckList.isEmpty()){
+                //First we need to select a truck to do the move;
+                Truck selected = sortedTruckList.getFirst();
+                //Make a deep copy backup to roll back the truck in case it can't handle the move;
+                Truck backup = new Truck(selected);
+                if(selected.doMove(m)){
+                    truckFound = true;
+                    break;
+                }
+                else {
+                    sortedTruckList.removeFirst();
+                    selected = backup;
+                }
+            }
+            //If a truck was found to do the move, we go to the next move
+            if(truckFound) continue;
+
+            /*
+                If we reach this part of the code, it means that the move can't be executed by any of the trucks that
+                are passing through one or both of the locations of the move. The next step is to make a sortedlist
+                of the trucks who are passing somewhere near the origin or destination;
+             */
+            System.out.println("Wooooops");
+
+        }
+        System.out.println("done");
 
     }
 

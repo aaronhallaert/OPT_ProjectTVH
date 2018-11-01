@@ -31,6 +31,9 @@ public class Location {
     public int distanceTo(Location l){
         return edgeMap.get(l).getDistance();
     }
+    public int timeTo(Location l){
+        return edgeMap.get(l).getTime();
+    }
 
     public int getLocationID() {
         return locationID;
