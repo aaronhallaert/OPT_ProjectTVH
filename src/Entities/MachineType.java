@@ -58,4 +58,10 @@ public class MachineType {
     }
 
 
+    @Override
+    public String toString() {
+        return "MachineType{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

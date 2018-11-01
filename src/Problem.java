@@ -24,6 +24,11 @@ public class Problem {
     // BEREKEND
     public HashMap<Depot, Set<Job>> clusters;
 
+    /**
+     * inlezen van het probleem uit file
+     * @param inputFile txt file
+     * @throws FileNotFoundException
+     */
     public Problem(File inputFile) throws FileNotFoundException {
 
         Scanner sc = new Scanner(inputFile);
@@ -200,6 +205,10 @@ public class Problem {
 
     }
 
+    /**
+     * zoekt een initiële oplossing
+     * @return solution: lijst van trucks (die lijst van stops bevatten) en totaal aantal km
+     */
     public Solution createInitialSolution(){
 
         // DICHTSTE DEPOT VOOR ELKE JOB BEREKENEN
@@ -227,6 +236,45 @@ public class Problem {
             clusters.get(entry.getValue()).add(entry.getKey());
         }
 
+        // OVERLOPEN VAN CLUSTERS
+        for (Map.Entry<Depot, Set<Job>> entry : clusters.entrySet()) {
+            HashMap<MachineType, Integer> beschikbaar=new HashMap<>();
+            HashMap<MachineType, Integer> afTeLeveren= new HashMap<>();
+
+            // machine types beschikbaar in depot
+            for(Map.Entry<MachineType, LinkedList<Machine>> entry1: entry.getKey().getMachines().entrySet()){
+                for (int i = 0; i < entry1.getValue().size(); i++) {
+                    if(beschikbaar.get(entry1.getKey())==null){
+                        beschikbaar.put(entry1.getKey(), 0);
+                    }
+                    beschikbaar.replace(entry1.getKey(), beschikbaar.get(entry1.getKey())+1);
+                }
+            }
+
+            // machine types beschikbaar op locaties en af te leveren op locatie
+            for (Job job : entry.getValue()) {
+                for (Machine toCollectItem : job.getToCollectItems()) {
+                    if(beschikbaar.get(toCollectItem.getType())==null){
+                        beschikbaar.put(toCollectItem.getType(), 0);
+                    }
+                    beschikbaar.replace(toCollectItem.getType(), beschikbaar.get(toCollectItem.getType())+1);
+                }
+
+                for (MachineType toDropItem : job.getToDropItems()) {
+                    if(afTeLeveren.get(toDropItem)==null){
+                        afTeLeveren.put(toDropItem, 0);
+                    }
+                    afTeLeveren.replace(toDropItem, afTeLeveren.get(toDropItem)+1);
+                }
+
+            }
+
+
+            System.out.println("nieuwe cluster");
+            for (MachineType machineType : machineTypes) {
+                System.out.println(machineType.toString() + ": "+beschikbaar.get(machineType)+" beschikbaar  --  "+afTeLeveren.get(machineType)+" af te leveren");
+            }
+        }
 
 
 
