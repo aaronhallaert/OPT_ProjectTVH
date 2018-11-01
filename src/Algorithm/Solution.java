@@ -1,3 +1,5 @@
+package Algorithm;
+
 import Entities.Truck;
 
 import java.util.ArrayList;

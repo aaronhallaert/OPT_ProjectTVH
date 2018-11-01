@@ -1,3 +1,5 @@
+package Algorithm;
+
 import PlotPackage.GraphBuilder;
 import org.jfree.ui.RefineryUtilities;
 
@@ -5,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 public class Main {
+
 
     public static void main(String[] args) {
 

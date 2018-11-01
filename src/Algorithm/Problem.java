@@ -1,4 +1,7 @@
+package Algorithm;
+
 import Entities.*;
+import SolutionEntities.Cluster;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,8 +24,8 @@ public class Problem {
 
 
 
-    // BEREKEND
-    public HashMap<Depot, Set<Job>> clusters;
+    //computed
+    public HashMap<Depot, Cluster> clusters;
 
     /**
      * inlezen van het probleem uit file
@@ -230,59 +233,59 @@ public class Problem {
         clusters= new HashMap<>();
         // itereren over alle nearestDepot
         for (Map.Entry<Job, Depot> entry : nearestDepot.entrySet()) {
-            if(clusters.get(entry.getValue())==null){
-                clusters.put(entry.getValue(), new HashSet<>());
-            }
-            clusters.get(entry.getValue()).add(entry.getKey());
+            clusters.putIfAbsent(entry.getValue(), new Cluster(entry.getValue()));
+            clusters.get(entry.getValue()).getClusterJobs().add(entry.getKey());
         }
 
+
+
         // OVERLOPEN VAN CLUSTERS
-        for (Map.Entry<Depot, Set<Job>> entry : clusters.entrySet()) {
-            HashMap<MachineType, Integer> beschikbaar=new HashMap<>();
-            HashMap<MachineType, Integer> afTeLeveren= new HashMap<>();
+        for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
+
+            Cluster huidigeCluster= entry.getValue();
+            Depot huidigDepot= entry.getKey();
 
             for (MachineType machineType : machineTypes) {
-                beschikbaar.put(machineType,0);
-                afTeLeveren.put(machineType, 0);
+                huidigeCluster.getBeschikbaar().put(machineType,0);
+                huidigeCluster.getAfTeLeveren().put(machineType, 0);
             }
+
+
             // machine types beschikbaar in depot
-            for(Map.Entry<MachineType, LinkedList<Machine>> entry1: entry.getKey().getMachines().entrySet()){
+            for(Map.Entry<MachineType, LinkedList<Machine>> entry1: huidigDepot.getMachines().entrySet()){
                 for (int i = 0; i < entry1.getValue().size(); i++) {
-                    if(beschikbaar.get(entry1.getKey())==null){
-                        beschikbaar.put(entry1.getKey(), 0);
-                    }
-                    beschikbaar.replace(entry1.getKey(), beschikbaar.get(entry1.getKey())+1);
+                    huidigeCluster.getBeschikbaar().putIfAbsent(entry1.getKey(), 0);
+                    huidigeCluster.getBeschikbaar().replace(entry1.getKey(), huidigeCluster.getBeschikbaar().get(entry1.getKey())+1);
                 }
             }
 
             // machine types beschikbaar op locaties en af te leveren op locatie
-            for (Job job : entry.getValue()) {
+            for (Job job : huidigeCluster.getClusterJobs()) {
                 for (Machine toCollectItem : job.getToCollectItems()) {
-                    if(beschikbaar.get(toCollectItem.getType())==null){
-                        beschikbaar.put(toCollectItem.getType(), 0);
-                    }
-                    beschikbaar.replace(toCollectItem.getType(), beschikbaar.get(toCollectItem.getType())+1);
+                    huidigeCluster.getBeschikbaar().putIfAbsent(toCollectItem.getType(), 0);
+                    huidigeCluster.getBeschikbaar().replace(toCollectItem.getType(), huidigeCluster.getBeschikbaar().get(toCollectItem.getType())+1);
                 }
 
                 for (MachineType toDropItem : job.getToDropItems()) {
-                    if(afTeLeveren.get(toDropItem)==null){
-                        afTeLeveren.put(toDropItem, 0);
-                    }
-                    afTeLeveren.replace(toDropItem, afTeLeveren.get(toDropItem)+1);
+                    huidigeCluster.getAfTeLeveren().putIfAbsent(toDropItem, 0);
+                    huidigeCluster.getAfTeLeveren().replace(toDropItem, huidigeCluster.getAfTeLeveren().get(toDropItem)+1);
                 }
 
             }
 
 
-            System.out.println("nieuwe cluster");
-            for (MachineType machineType : machineTypes) {
 
-                if (beschikbaar.get(machineType) < afTeLeveren.get(machineType)) {
-                    System.out.println("NIET VOLDAAN");
-                }
+            huidigeCluster.computeNeeded(this);
+            huidigeCluster.printBehoeftesOverbodige();
 
-                System.out.println(machineType.toString() + ": "+beschikbaar.get(machineType)+" beschikbaar  --  "+afTeLeveren.get(machineType)+" af te leveren");
-            }
+
+
+
+
+
+
+
+
         }
 
 

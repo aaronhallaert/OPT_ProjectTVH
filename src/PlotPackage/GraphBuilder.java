@@ -4,6 +4,7 @@ package PlotPackage;
 import Entities.Depot;
 import Entities.Job;
 import Entities.Location;
+import SolutionEntities.Cluster;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -12,11 +13,13 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GraphBuilder extends ApplicationFrame{
 
-    public GraphBuilder(String title, HashMap<Depot, Set<Job>> clusters, HashMap<Location, Depot> depots){
+    public GraphBuilder(String title, HashMap<Depot, Cluster> clusters, HashMap<Location, Depot> depots){
         super(title);
 
 
@@ -24,9 +27,9 @@ public class GraphBuilder extends ApplicationFrame{
         ArrayList<XYSeries> clusterPoints= new ArrayList<>();
 
         int i= 1;
-        for (Map.Entry<Depot, Set<Job>> entry : clusters.entrySet()) {
+        for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
             final XYSeries locationPoints = new XYSeries("cluster "+i);
-            for (Job job : entry.getValue()) {
+            for (Job job : entry.getValue().getClusterJobs()) {
                 double lat= job.getLocation().getLatitude();
                 double lng= job.getLocation().getLongitude();
                 locationPoints.add(lat, lng);
