@@ -241,6 +241,10 @@ public class Problem {
             HashMap<MachineType, Integer> beschikbaar=new HashMap<>();
             HashMap<MachineType, Integer> afTeLeveren= new HashMap<>();
 
+            for (MachineType machineType : machineTypes) {
+                beschikbaar.put(machineType,0);
+                afTeLeveren.put(machineType, 0);
+            }
             // machine types beschikbaar in depot
             for(Map.Entry<MachineType, LinkedList<Machine>> entry1: entry.getKey().getMachines().entrySet()){
                 for (int i = 0; i < entry1.getValue().size(); i++) {
@@ -272,6 +276,11 @@ public class Problem {
 
             System.out.println("nieuwe cluster");
             for (MachineType machineType : machineTypes) {
+
+                if (beschikbaar.get(machineType) < afTeLeveren.get(machineType)) {
+                    System.out.println("NIET VOLDAAN");
+                }
+
                 System.out.println(machineType.toString() + ": "+beschikbaar.get(machineType)+" beschikbaar  --  "+afTeLeveren.get(machineType)+" af te leveren");
             }
         }

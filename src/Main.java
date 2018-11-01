@@ -1,4 +1,4 @@
-import PlotPackage.Grafiek;
+import PlotPackage.GraphBuilder;
 import org.jfree.ui.RefineryUtilities;
 
 import java.io.File;
@@ -13,7 +13,7 @@ public class Main {
         try {
             Problem problem = new Problem(inputFile);
             problem.createInitialSolution();
-            final Grafiek plot= new Grafiek("locaties", problem.clusters, problem.depots);
+            final GraphBuilder plot= new GraphBuilder("locaties", problem.clusters, problem.depots);
             plot.pack();
             RefineryUtilities.centerFrameOnScreen(plot);
             plot.setVisible(true);

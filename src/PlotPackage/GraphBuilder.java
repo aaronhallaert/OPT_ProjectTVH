@@ -14,9 +14,9 @@ import org.jfree.ui.ApplicationFrame;
 
 import java.util.*;
 
-public class Grafiek extends ApplicationFrame{
+public class GraphBuilder extends ApplicationFrame{
 
-    public Grafiek(String title, HashMap<Depot, Set<Job>> clusters, HashMap<Location, Depot> depots){
+    public GraphBuilder(String title, HashMap<Depot, Set<Job>> clusters, HashMap<Location, Depot> depots){
         super(title);
 
 

@@ -1,4 +1,4 @@
-package Entities;
+import Entities.Truck;
 
 import java.util.ArrayList;
 import java.util.List;
