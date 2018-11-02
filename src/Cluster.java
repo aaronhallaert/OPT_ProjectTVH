@@ -174,7 +174,7 @@ public class Cluster {
     }
 
     public void expand(){
-        //We deep copy the jobs and depots so we can delete certain machines from jobs temporarily;
+        //We deep copy the clients and depots so we can delete certain machines from clients temporarily;
         HashMap<Location, Client> locationJobMapCopy = new HashMap<>();
         HashMap<Location, Depot> locationDepotMapCopy = new HashMap<>();
 

@@ -243,4 +243,8 @@ public class Truck {
     public void setUsed(boolean used) {
         this.used = used;
     }
+
+    public LinkedList<Stop> getRoute() {
+        return route;
+    }
 }

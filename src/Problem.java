@@ -1,5 +1,3 @@
-import org.jfree.ui.RefineryUtilities;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -12,7 +10,7 @@ public class Problem {
 
     public static ArrayList<Location> locations = new ArrayList<>();
     public static ArrayList<Depot> depots = new ArrayList<>();
-    public static HashMap<Location, Client> jobs = new HashMap<>();
+    public static HashMap<Location, Client> clients = new HashMap<>();
     public static HashMap<Machine, Location> machineLocations = new HashMap<>();
     public static ArrayList<Truck> trucks = new ArrayList<>();
     public static ArrayList<MachineType> machineTypes = new ArrayList<>();
@@ -118,13 +116,13 @@ public class Problem {
             int dropId=sc.nextInt();
             MachineType machineType=machineTypes.get(sc.nextInt());
             Location location = locations.get(sc.nextInt());
-            if(jobs.containsKey(location)){
-                jobs.get(location).addToDropItems(machineType);
+            if(clients.containsKey(location)){
+                clients.get(location).addToDropItems(machineType);
             }
             else{
                 Client client = new Client(location);
                 client.addToDropItems(machineType);
-                jobs.put(location, client);
+                clients.put(location, client);
             }
 
         }
@@ -140,13 +138,13 @@ public class Problem {
             int collectId=sc.nextInt();
             Machine machine=machines.get(sc.nextInt());
             Location location = machineLocations.get(machine);
-            if(jobs.containsKey(location)){
-                jobs.get(location).addToCollectItems(machine);
+            if(clients.containsKey(location)){
+                clients.get(location).addToCollectItems(machine);
             }
             else{
                 Client client = new Client(location);
                 client.addToCollectItems(machine);
-                jobs.put(location, client);
+                clients.put(location, client);
             }
         }
 
@@ -175,7 +173,7 @@ public class Problem {
             }
         }
 
-        //Edges aanmaken met time en distance info, en koppelen aan jobs
+        //Edges aanmaken met time en distance info, en koppelen aan clients
         for (int from = 0; from < distanceMatrixSize; from++) {
             for (int to = 0; to < distanceMatrixSize; to++) {
                 int time = timeMatrix[from][to];
@@ -217,8 +215,8 @@ public class Problem {
      */
     public Solution createInitialSolution(){
 
-        int n_clusters =(int) Math.round((double) jobs.size()/5);
-        List<Cluster> clusters = Cluster.createClusters(n_clusters, jobs, depots);
+        int n_clusters =(int) Math.round((double) clients.size()/5);
+        List<Cluster> clusters = Cluster.createClusters(n_clusters, clients, depots);
 
         //Sort the clusters based on remoteness
         clusters.sort((Cluster c1, Cluster c2)->c2.getRemoteness(depots)-c1.getRemoteness(depots));
@@ -235,6 +233,7 @@ public class Problem {
             cluster.solve();
         }
 
+        Visualisation.start(new Solution(trucks), clusters, depots);
         int totalDistance = 0;
         for(Truck t: trucks){
             int distance = t.getTotalDistance();
@@ -244,11 +243,6 @@ public class Problem {
         System.out.println("Total Distance: "+totalDistance);
 
         //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn
-        final Graph clusterPlot = new Graph("Clusters",clusters, depots);
-        clusterPlot.pack();
-        RefineryUtilities.centerFrameOnScreen(clusterPlot);
-        clusterPlot.setVisible(true);
-
 
 
         return null;
