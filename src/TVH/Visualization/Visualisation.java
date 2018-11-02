@@ -5,8 +5,10 @@ import TVH.Entities.Depot;
 import TVH.Entities.Location;
 import TVH.Entities.Truck;
 import TVH.Solution;
+import com.google.common.collect.HashMultimap;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -25,6 +27,9 @@ public class Visualisation extends Application {
     public static double maxLon = Double.MIN_VALUE;
     public static double minLat = Double.MAX_VALUE;
     public static double maxLat = Double.MIN_VALUE;
+    public static HashMap<Location, Circle> circleMap = new HashMap<>();
+    public static HashMultimap<Truck, Line> lineMap = HashMultimap.create();
+    public static boolean allTrucksShown = true;
     public static final int HEIGHT = 900;
     public static final int WIDTH = 1700;
     public static final int BORDER = 50;
@@ -66,7 +71,6 @@ public class Visualisation extends Application {
     @Override
     public void start(Stage primaryStage) {
         Pane root = new Pane();
-        HashMap<Location, Circle> circleMap = new HashMap<>();
         LinkedList<Color> colorList = new LinkedList<Color>(){{
             add(Color.LIGHTGREEN);
             add(Color.LIGHTBLUE);
@@ -99,7 +103,6 @@ public class Visualisation extends Application {
                 for (int i = 0; i < t.getRoute().size() - 1; i++) {
                     Location start = t.getRoute().get(i).getLocation();
                     Location stop = t.getRoute().get(i + 1).getLocation();
-
                     Line line = new Line();
                     line.setStroke(color);
                     line.setStrokeWidth(3);
@@ -109,43 +112,37 @@ public class Visualisation extends Application {
                     line.startYProperty().bind(circle1.centerYProperty().add(circle1.translateYProperty()));
                     line.endXProperty().bind(circle2.centerXProperty().add(circle2.translateXProperty()));
                     line.endYProperty().bind(circle2.centerYProperty().add(circle2.translateYProperty()));
+                    line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+                        showSingleTruck(root, t);
+                    });
 
+                    lineMap.put(t, line);
                     root.getChildren().add(line);
                 }
             }
         }
-    /*Circle circle1 = new Circle(10, Color.GREEN);
-    root.getChildren().add(circle1);
-    Circle circle2 = new Circle(10, Color.RED);
-    root.getChildren().add(circle2);
-
-    // move circles so we can see them:
-
-    circle1.setTranslateX(100);
-
-    circle2.setTranslateY(50);*/
-
-
-    /*Line line = new Line();
-
-    // bind ends of line:
-    line.startXProperty().bind(circle1.centerXProperty().add(circle1.translateXProperty()));
-    line.startYProperty().bind(circle1.centerYProperty().add(circle1.translateYProperty()));
-    line.endXProperty().bind(circle2.centerXProperty().add(circle2.translateXProperty()));
-    line.endYProperty().bind(circle2.centerYProperty().add(circle2.translateYProperty()));
-
-    root.getChildren().add(line);*/
-
-        // create some animations for the circles to test the line binding:
-
-
 
         Scene scene = new Scene(root, WIDTH+2*BORDER, HEIGHT+2*BORDER);
         primaryStage.setScene(scene);
         primaryStage.show();
 
     }
-    public static void main(String[] args) {
-        Application.launch(args);
+    public void showSingleTruck(Pane root,Truck t){
+        if(allTrucksShown){
+            root.getChildren().removeAll(lineMap.values());
+            root.getChildren().addAll(lineMap.get(t));
+            allTrucksShown = false;
+        }
+        else{
+            root.getChildren().removeAll(lineMap.get(t));
+            root.getChildren().addAll(lineMap.values());
+            allTrucksShown = true;
+        }
+
+
+
+
     }
+
+
 }
