@@ -96,6 +96,8 @@ public class Visualisation extends Application {
             Color color = colors.pop();
             for(Location l: c.getMembers()){
                 Circle circle =  new Circle(6, color);
+                circle.setStroke(Color.BLACK);
+                circle.setStrokeWidth(1);
                 circle.setTranslateX(translateLong(l.getLongitude()));
                 circle.setTranslateY(translateLat(l.getLatitude()));
                 circleMap.put(l, circle);
@@ -105,7 +107,7 @@ public class Visualisation extends Application {
         }
         Color depotColor = colors.pop();
         for(Depot d: depots){
-            Circle circle = new Circle(6, depotColor);
+            Circle circle = new Circle(8, depotColor);
             circle.setStrokeWidth(3);
             circle.setStroke(Color.BLACK);
             circle.setTranslateX(translateLong(d.getLocation().getLongitude()));
