@@ -1,3 +1,7 @@
+package TVH;
+
+import TVH.Entities.Truck;
+
 import java.util.ArrayList;
 import java.util.List;
 

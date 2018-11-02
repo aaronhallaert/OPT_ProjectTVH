@@ -1,4 +1,4 @@
-import java.util.Objects;
+package TVH.Entities;
 
 public class Machine {
     private int id;

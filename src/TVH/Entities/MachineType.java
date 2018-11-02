@@ -1,3 +1,5 @@
+package TVH.Entities;
+
 import java.util.Objects;
 
 public class MachineType {

@@ -1,3 +1,8 @@
+package TVH;
+
+import TVH.Entities.*;
+import TVH.Visualization.Visualisation;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -16,6 +21,7 @@ public class Problem {
     public static ArrayList<MachineType> machineTypes = new ArrayList<>();
     public static ArrayList<Machine> machines = new ArrayList<>();
     public static ArrayList<Edge> edges = new ArrayList<>();
+    public static List<Cluster> clusters = new ArrayList<>();
 
     public Problem(File inputFile) throws FileNotFoundException {
 
@@ -216,7 +222,7 @@ public class Problem {
     public Solution createInitialSolution(){
 
         int n_clusters =(int) Math.round((double) clients.size()/5);
-        List<Cluster> clusters = Cluster.createClusters(n_clusters, clients, depots);
+        clusters = Cluster.createClusters(n_clusters, clients, depots);
 
 
         //Sort the clusters based on remoteness
@@ -237,7 +243,7 @@ public class Problem {
         int totalDistance = 0;
         for(Truck t: trucks){
             int distance = t.getTotalDistance();
-            System.out.println("Truck "+t.getTruckId()+":\t"+distance);
+            System.out.println("TVH.Entities.Truck "+t.getTruckId()+":\t"+distance);
             totalDistance += distance;
         }
         System.out.println("Total Distance: "+totalDistance);
@@ -247,12 +253,6 @@ public class Problem {
                 System.out.println("error");
             }
         }
-
-        Visualisation.start(new Solution(trucks), clusters, depots);
-
-
-        //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn
-
 
         return null;
     }

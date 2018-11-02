@@ -1,7 +1,8 @@
+package TVH.Entities;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Objects;
 
 public class Location {
     private int locationID;
@@ -23,7 +24,7 @@ public class Location {
 
     public void addEdge(Edge edge){
         edgeMap.put(edge.getTo(), edge);
-        //Edge list moet altijd gesorteerd blijven op basis van afstand
+        //TVH.Entities.Edge list moet altijd gesorteerd blijven op basis van afstand
         sortedEdgeList.add(edge);
         sortedEdgeList.sort(Comparator.comparing(Edge::getDistance));
     }

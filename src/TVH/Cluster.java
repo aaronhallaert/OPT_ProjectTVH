@@ -1,3 +1,6 @@
+package TVH;
+
+import TVH.Entities.*;
 import com.google.common.collect.HashMultimap;
 
 import java.util.*;
@@ -70,7 +73,7 @@ public class Cluster {
             findNewMedoids();
             timesRun++;
         }
-        System.out.println("Cluster needed " + timesRun +" runs");
+        System.out.println("TVH.Cluster needed " + timesRun +" runs");
         return clusters;
     }
 
@@ -105,7 +108,7 @@ public class Cluster {
         Cluster closest = null;
 
         for (Cluster cluster : clusters) {
-            int distance = loc.getEdgeMap().get(cluster.medoid).distance;
+            int distance = loc.getEdgeMap().get(cluster.medoid).getDistance();
             if (distance < minDistance){
                 minDistance = distance;
                 closest = cluster;
@@ -154,11 +157,11 @@ public class Cluster {
         int remoteFactor = 0;
         for(Cluster c: clusters){
 //            How far a given mediod in a cluster is from other mediods.
-            remoteFactor += medoid.getEdgeMap().get(c.medoid).distance;
+            remoteFactor += medoid.getEdgeMap().get(c.medoid).getDistance();
         }
         for(Depot d: depots){
 //            How far a given mediod is from the depots on the map.
-            remoteFactor += medoid.getEdgeMap().get(d.getLocation()).distance;
+            remoteFactor += medoid.getEdgeMap().get(d.getLocation()).getDistance();
         }
         return remoteFactor;
     }
@@ -195,7 +198,7 @@ public class Cluster {
             if(!members.contains(loc)) {
                 //Zoeken als het om een job of een depot gaat:
                 if (locationJobMapCopy.containsKey(loc)) {
-                    //Client opzoeken op deze locatie
+                    //TVH.Entities.Client opzoeken op deze locatie
                     Client client = locationJobMapCopy.get(loc);
                     //Alle machines kijken die op deze locatie moeten worden opgenomen;
                     for (Machine m : client.getToCollectItems()) {
@@ -215,7 +218,7 @@ public class Cluster {
                     for (MachineType mt : machinesNeededCopy) {
                         //Als een depot een machine in stock heeft:
                         if (depot.getMachines().containsKey(mt) && depot.getMachines().get(mt).size() > 0) {
-                            //Machine verwijderen uit de needed lijst en het depot, locatie van depot toevoegen aan de cluster;
+                            //TVH.Entities.Machine verwijderen uit de needed lijst en het depot, locatie van depot toevoegen aan de cluster;
                             machinesNeeded.remove(mt);
                             depot.getMachines().get(mt).removeFirst();
                             depots.add(depot.getLocation());
@@ -228,10 +231,10 @@ public class Cluster {
 
     public void solve(){
         /*
-         * First step of the solution is determining which machine goes where. This is saved in a "Move" object.
+         * First step of the solution is determining which machine goes where. This is saved in a "TVH.Move" object.
          * Since every cluster is self sufficient we only need to move machines to and from other members of the cluster.
          *
-         * Second step is to determine which Truck does which move.
+         * Second step is to determine which TVH.Entities.Truck does which move.
          */
 
 
@@ -245,7 +248,7 @@ public class Cluster {
                 //Search for each machineType needed, the closest member of the cluster that has this machineType
                 for(Edge e: drop.getSortedEdgeList()){
                     if(members.contains(e.getTo()) || expandedMembers.contains(e.getTo()) || depots.contains(e.getTo())) {
-                        //In case the location is a Client
+                        //In case the location is a TVH.Entities.Client
                         if (locationClientMap.containsKey(e.getTo())) {
                             Client j = locationClientMap.get(e.getTo());
                             if (j.collectItemsContains(mt)) {
@@ -376,4 +379,7 @@ public class Cluster {
         return sb.toString();
     }
 
+    public Set<Location> getMembers() {
+        return members;
+    }
 }

@@ -1,3 +1,8 @@
+package TVH.Entities;
+
+import TVH.Move;
+import TVH.Problem;
+
 import java.util.*;
 
 public class Truck {
@@ -50,7 +55,7 @@ public class Truck {
 
     /**
      * This method allows to make a truck handle a certain move
-     * @param m Move that has to be handled by the truck.
+     * @param m TVH.Move that has to be handled by the truck.
      * @return true if the truck can handle the move (no constraints are broken);
      */
     public boolean doMove(Move m){

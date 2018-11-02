@@ -1,3 +1,8 @@
+package TVH.Visualization;
+
+import TVH.Cluster;
+import TVH.Entities.Depot;
+import TVH.Entities.Location;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -18,9 +23,9 @@ public class Graph extends ApplicationFrame{
         List<XYSeries> allClusters = new ArrayList<>();
         int i = 0;
         for (Cluster cluster : clusters) {
-            final XYSeries clusterPoints = new XYSeries("Cluster "+i);
+            final XYSeries clusterPoints = new XYSeries("TVH.Cluster "+i);
             allClusters.add(clusterPoints);
-            for(Location loc : cluster.members){
+            for(Location loc : cluster.getMembers()){
                 clusterPoints.add(loc.getLatitude(), loc.getLongitude());
             }
             i++;

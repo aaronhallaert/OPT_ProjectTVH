@@ -1,3 +1,8 @@
+package TVH;
+
+import TVH.Entities.Location;
+import TVH.Entities.Machine;
+
 public class Move {
     private Machine machine;
     private Location from;

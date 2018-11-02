@@ -1,4 +1,4 @@
-import sun.awt.image.ImageWatched;
+package TVH.Entities;
 
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -1,21 +1,18 @@
-import javafx.animation.Animation;
-import javafx.animation.ParallelTransition;
-import javafx.animation.SequentialTransition;
-import javafx.animation.TranslateTransition;
+package TVH.Visualization;
+
+import TVH.Cluster;
+import TVH.Entities.Depot;
+import TVH.Entities.Location;
+import TVH.Entities.Truck;
+import TVH.Solution;
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +36,7 @@ public class Visualisation extends Application {
         depots = depots_input;
 
         for(Cluster c: clusters){
-            for(Location l: c.members){
+            for(Location l: c.getMembers()){
                 if(l.getLongitude() < minLon) minLon = l.getLongitude();
                 if(l.getLongitude() > maxLon) maxLon = l.getLongitude();
                 if(l.getLatitude() < minLat) minLat = l.getLatitude();
@@ -79,7 +76,7 @@ public class Visualisation extends Application {
         }};
         for(Cluster c: clusters){
             Color color = colorList.getFirst();
-            for(Location l: c.members){
+            for(Location l: c.getMembers()){
                 Circle circle =  new Circle(6, color);
                 circle.setTranslateX(translateLong(l.getLongitude()));
                 circle.setTranslateY(translateLat(l.getLatitude()));
@@ -98,7 +95,7 @@ public class Visualisation extends Application {
         }
         for(Truck t: solution.getTrucks()){
             if(t.getRoute().size() > 2) {
-                Color color = Color.color(Math.random(), Math.random(), Math.random());
+                Color color = Color.color(Math.random(), Math.random(), Math.random(), 0.5);
                 for (int i = 0; i < t.getRoute().size() - 1; i++) {
                     Location start = t.getRoute().get(i).getLocation();
                     Location stop = t.getRoute().get(i + 1).getLocation();
