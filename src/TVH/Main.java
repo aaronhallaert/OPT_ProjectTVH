@@ -4,9 +4,6 @@ import TVH.Visualisation.Visualisation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Main {
 
@@ -17,12 +14,9 @@ public class Main {
 
         try{
             Problem problem = new Problem(inputFile);
-            Solution solution= problem.solve();
-            Long timeRun = System.currentTimeMillis() - startTIme;
-            System.out.println("Time run: "+ timeRun + "ms");
-            Visualisation.start(solution, problem.clusters, problem.depots);
-
-
+            Solution solution = problem.solve();
+            System.out.println("Calculation time: "+(System.currentTimeMillis()-startTIme)+"ms");
+            Visualisation.run(solution, problem.clusters, problem.depots);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

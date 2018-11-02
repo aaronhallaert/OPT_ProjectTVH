@@ -57,7 +57,7 @@ public class Problem {
 
         //TRUCKS
         /*
-            Alle trucks inlezen en referenties meegeven naar hun start en stop locatie;
+            Alle trucks inlezen en referenties meegeven naar hun run en stop locatie;
          */
         sc.nextLine();
         sc.nextLine();
@@ -194,12 +194,12 @@ public class Problem {
 
             }
         }
-        System.out.println("Input read");
+        //System.out.println("Input read");
 
     }
 
     public Solution solve(){
-        Solution Init = createInitialSolution();
+        Solution Init = createInitialSolution(1);
         /*
         * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
         * 1) Initial result:
@@ -218,8 +218,8 @@ public class Problem {
      * This will use clusters to decide initial routes of trucks.
      * @return
      */
-    public Solution createInitialSolution(){
-        int n_clusters =(int) Math.round((double) clients.size()/5);
+    public Solution createInitialSolution(int n_clusters){
+        //int n_clusters =(int) Math.round((double) clients.size()/5);
         clusters = Cluster.createClusters(n_clusters, clients, depots);
 
 
@@ -230,8 +230,8 @@ public class Problem {
         for(Cluster cluster : clusters){
             cluster.calculateMachinesNeeded();
             cluster.expand();
-            System.out.println(cluster);
-            System.out.println();
+            //System.out.println(cluster);
+            //System.out.println();
         }
 
         for(Cluster cluster: clusters){
@@ -239,16 +239,19 @@ public class Problem {
         }
 
         int totalDistance = 0;
+        int totalTime = 0;
         for(Truck t: trucks){
+            int time = t.getTotalTime();
             int distance = t.getTotalDistance();
-            System.out.println("Truck "+t.getTruckId()+":\t"+distance);
+            System.out.println("Truck "+t.getTruckId()+":\t"+time+"min\t"+distance+"km");
             totalDistance += distance;
+            totalTime += time;
         }
-        System.out.println("Total Distance: "+totalDistance);
+        System.out.println("Total: \t\t"+totalTime+"min\t"+totalDistance+"km");
 
         for(Truck t: trucks){
             if(t.getRoute().getFirst().getLocation() != t.getRoute().getLast().getLocation()){
-                System.out.println("error");
+                //System.out.println("error");
             }
         }
 

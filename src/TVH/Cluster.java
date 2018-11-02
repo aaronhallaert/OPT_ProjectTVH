@@ -82,7 +82,7 @@ public class Cluster {
             searchNewMedoids();
             timesRun++;
         }
-        System.out.println("TVH.Cluster needed " + timesRun +" runs");
+        //System.out.println("TVH.Cluster needed " + timesRun +" runs");
         return clusters;
     }
 
@@ -388,7 +388,7 @@ public class Cluster {
             System.out.println("Wooooops");
 
         }
-        System.out.println("done");
+        //System.out.println("done");
 
     }
 

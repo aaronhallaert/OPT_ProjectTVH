@@ -42,7 +42,7 @@ public class Visualisation extends Application {
     public static Stack<Color> colors = new Stack<>();
 
 
-    public static void start(Solution solution_input, List<Cluster> clusters_input, List<Depot> depots_input) {
+    public static void run(Solution solution_input, List<Cluster> clusters_input, List<Depot> depots_input) {
         solution = solution_input;
         clusters = clusters_input;
         depots = depots_input;
@@ -57,12 +57,11 @@ public class Visualisation extends Application {
         }
         //Kleuren lezen uit file
         File inputFile = new File("./src/TVH/Visualisation\\colors.txt");
-        System.out.println(System.getProperty("user.dir"));
 
         try{
             Scanner sc = new Scanner(inputFile).useLocale(Locale.US);
             while(sc.hasNext()){
-                colors.push(Color.web(sc.nextLine()));
+                colors.push(Color.web(sc.nextLine(), 0.5));
             }
             Collections.shuffle(colors);
         }catch (FileNotFoundException e){
