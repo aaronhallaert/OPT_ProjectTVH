@@ -31,7 +31,7 @@ public class GraphBuilder extends ApplicationFrame{
             for (Job job : entry.getValue().getClusterJobs()) {
                 double lat= job.getLocation().getLatitude();
                 double lng= job.getLocation().getLongitude();
-                locationPoints.add(lat, lng);
+                locationPoints.add(lng, lat);
             }
             clusterPoints.add(locationPoints);
 
@@ -44,7 +44,7 @@ public class GraphBuilder extends ApplicationFrame{
         for (Map.Entry<Location, Depot> entry : depots.entrySet()) {
             double lat= entry.getKey().getLatitude();
             double lng= entry.getKey().getLongitude();
-            depotPoints.add(lat, lng);
+            depotPoints.add(lng, lat);
         }
 
         final XYSeriesCollection data = new XYSeriesCollection();
