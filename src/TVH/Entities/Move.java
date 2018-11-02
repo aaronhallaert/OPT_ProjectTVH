@@ -1,8 +1,12 @@
-package TVH;
+package TVH.Entities;
 
 import TVH.Entities.Location;
 import TVH.Entities.Machine;
 
+/**
+ * This class tells where a machine needs to go and from where.
+ * It doesn't give any information about how to accomplish this.
+ */
 public class Move {
     private Machine machine;
     private Location from;

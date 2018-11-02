@@ -6,8 +6,8 @@ import com.google.common.collect.HashMultimap;
 import java.util.*;
 
 /**
- * This class creates clusters of nodes based on the k-medoids algorithm (PAM algorithm more specifically) which uses a
- * point in the cluster as node center
+ * This class creates clusters of nodes based on the K-medoids algorithm (PAM algorithm more specifically) which uses a
+ * point in the cluster as cluster center.
  * 
  * https://www.youtube.com/watch?v=OWpRBCrx5-M
  */
@@ -31,8 +31,8 @@ public class Cluster {
     List<MachineType> machinesNeeded = new LinkedList<>();
 
     /*
-     * private constructor, because cluster class is singleton
-     * we choose a random location for our medoid from the list of locations that aren't already a medoid.
+     * private constructor
+     * We choose a random location for our medoid from the list of locations that aren't already a medoid.
      */
     private Cluster(){
         int randomLocation = (int) (Math.random()* allLocationsNotMedoid.size());
@@ -42,20 +42,20 @@ public class Cluster {
         members.add(medoid);
 
     }
-    public static void resetStaticFields(){
-        allLocations = new ArrayList<>();
-        allLocationsNotMedoid = new LinkedList<>();
-        clusters = new ArrayList<>();
-        locationDepotMap = new HashMap<>();
-        locationClientMap = new HashMap<>();
-    }
 
+    /**
+     * This method creates nClusters amount of clusters based on a list of clients and depots.
+     * @param nClusters amount of clusters needed
+     * @param clients list of clients
+     * @param depotList list of depots
+     * @return the newly created clusters;
+     */
     public static List<Cluster> createClusters(int nClusters, HashMap<Location, Client> clients, List<Depot> depotList){
 
+        //Copying the clients and depots
         for(Client j: clients.values()){
             allLocations.add(j.getLocation());
         }
-
         allLocationsNotMedoid.addAll(allLocations);
 
         locationClientMap = clients;
@@ -63,21 +63,23 @@ public class Cluster {
             locationDepotMap.put(d.getLocation(), d);
         }
 
+
+        //Creating the clusters
         for (int i = 0; i < nClusters; i++) {
             clusters.add(new Cluster());
         }
-        /*
-            Creating the clusters consists of 2 steps:
-                - Assign all locations to a cluster.
-                - Calculate new medoid location of each cluster.
-                - Repeat if changes are detected.
+        /**
+         * Balancing the clusters consists of 2 steps:
+         * - Assign all locations to a cluster based on proximity to the medoid.
+         * - Calculate new medoid location of each cluster.
+         * - Repeat if changes are detected.
          */
         changed = true;
         int timesRun = 0;
         while(changed) {
             changed = false;
             assignCluster();
-            findNewMedoids();
+            searchNewMedoids();
             timesRun++;
         }
         System.out.println("TVH.Cluster needed " + timesRun +" runs");
@@ -108,7 +110,9 @@ public class Cluster {
     }
 
     /**
-     * Calculate which cluster is closest to a given location.
+     * This method calculates which Cluster is closest to a given Location.
+     * @param loc given Location
+     * @return closest Cluster
      */
     private static Cluster getClosestCluster(Location loc){
         int minDistance = Integer.MAX_VALUE;
@@ -125,10 +129,10 @@ public class Cluster {
     }
 
     /**
-     *  This method finds a new mediod of a cluster. Every member of a cluster is a candidate to be the new medoid.
-     *  The member with the smallest overal distance from each other member to itself becomes the new mediod.
+     *  This method searches the new mediod of a cluster. Every member of a cluster is a candidate to be the new medoid.
+     *  The member with the smallest overall distance from each other member to itself becomes the new mediod.
      */
-    private static void findNewMedoids(){
+    private static void searchNewMedoids(){
         int minDistance, distance;
 
         for (Cluster cluster : clusters) {
@@ -158,21 +162,25 @@ public class Cluster {
      * clusters into account as well as the locationDepotMap.
      * This method is used for sorting, the higher the returned number the more remote.
      * @param depots
-     * @return
+     * @return The futher a cluster lies from other clusters and from depots the higher this number will be.
      */
     public int getRemoteness(List<Depot> depots){
         int remoteFactor = 0;
         for(Cluster c: clusters){
-//            How far a given mediod in a cluster is from other mediods.
+            //How far away a given mediod in a cluster is from other mediods.
             remoteFactor += medoid.getEdgeMap().get(c.medoid).getDistance();
         }
         for(Depot d: depots){
-//            How far a given mediod is from the depots on the map.
+            //How far away a given mediod is from the depots on the map.
             remoteFactor += medoid.getEdgeMap().get(d.getLocation()).getDistance();
         }
         return remoteFactor;
     }
 
+    /**
+     * This method calculates which machinesTypes are deficit.
+     * For a cluster to be self sufficient, it needs to have every machine it needs inside it.
+     */
     public void calculateMachinesNeeded(){
         for(Location loc: members){
             Client j = locationClientMap.get(loc);
@@ -183,8 +191,11 @@ public class Cluster {
         }
     }
 
+    /**
+     * This method expands a cluster until it is self sufficient (it doesn't need any machines from the outside).
+     */
     public void expand(){
-        //We deep copy the clients and depots so we can delete certain machines from clients temporarily;
+        //Deep copy the clients and depots into hashmaps so certain machines can deleted from clients/depots temporarily.
         HashMap<Location, Client> locationClientMapCopy = new HashMap<>();
         HashMap<Location, Depot> locationDepotMapCopy = new HashMap<>();
 
@@ -197,37 +208,38 @@ public class Cluster {
         }
 
 
-        //We beginnen vanuit de medoid te zoeken naar nodes die dichtbijliggen die de machines hebben die nog tekort zijn.
+        //Start by looking at the closest Locations that are not part of the cluster
         List<Edge> sortedEdgeList = medoid.getSortedEdgeList();
         for(Edge e: sortedEdgeList){
             Location loc = e.getTo();
-            //Als deze locatie nog geen member is van de cluster:
+            //Check if this location is not yet part of the cluster
             if(!members.contains(loc)) {
-                //Zoeken als het om een job of een depot gaat:
+                //Check if this location is a Client or a Depot.
                 if (locationClientMapCopy.containsKey(loc)) {
-                    //TVH.Entities.Client opzoeken op deze locatie
                     Client client = locationClientMapCopy.get(loc);
-                    //Alle machines kijken die op deze locatie moeten worden opgenomen;
+                    //If it's a client, check if the cluster needs any of the machines that need to be collected.
                     for (Machine m : client.getToCollectItems()) {
+                        //If a machine is this type is needed:
                         if (machinesNeeded.contains(m.getType())) {
-                            //Als we een machine van dit type nodig hebben dan verwijderen we hem uit de needed lijst en client,
-                            //We voegen vervolgens de client toe aan de cluster;
+                            //Delete it from the client job (temporarily) and machinesNeeded
                             machinesNeeded.remove(m.getType());
                             client.removeFromCollectItems(m);
+                            //Add the client to the expandedMembers list of the cluster;
                             expandedMembers.add(loc);
                         }
                     }
                 }
                 if (locationDepotMapCopy.containsKey(loc)) {
                     Depot depot = locationDepotMapCopy.get(loc);
-                    //We overlopen alle machinetypes die we nodig hebben in de cluster
+                    //We go through every machineType we still need inside the cluster
                     List<MachineType> machinesNeededCopy = new ArrayList<>(machinesNeeded);
                     for (MachineType mt : machinesNeededCopy) {
-                        //Als een depot een machine in stock heeft:
-                        if (depot.getMachines().containsKey(mt) && depot.getMachines().get(mt).size() > 0) {
-                            //TVH.Entities.Machine verwijderen uit de needed lijst en het depot, locatie van depot toevoegen aan de cluster;
+                        //If the depot still has a machine of this type in stock
+                        if (depot.getMachines().containsKey(mt)) {
+                            //Delete it from the depot (temporarily) and machinesNeeded;
                             machinesNeeded.remove(mt);
-                            depot.getMachines().get(mt).removeFirst();
+                            depot.removeMachine(mt);
+                            //Add the depot to the depots of the cluster;
                             depots.add(depot.getLocation());
                         }
                     }
@@ -236,32 +248,40 @@ public class Cluster {
         }
     }
 
+    /**
+     * This method solves a certain cluster
+     * @param trucks list of trucks that can be used to accomplish this.
+     */
     public void solve(List<Truck> trucks){
+
         /*
-         * First step of the solution is determining which machine goes where. This is saved in a "TVH.Move" object.
+         * First step of the solving the cluster is determining which machine goes where. This is saved in a "Move" object.
          * Since every cluster is self sufficient we only need to move machines to and from other members of the cluster.
          *
-         * Second step is to determine which TVH.Entities.Truck does which move.
+         * Second step is to determine which Truck can do which move.
          */
 
 
-        //Sort the members based on their distance to the medoid.
+        //Sort the members based on their distance to the medoid. Members who are further away from the medoid get priority.
         ArrayList<Location> membersList = new ArrayList<>(members);
         membersList.sort((Location l1, Location l2)->l2.distanceTo(medoid)-l1.distanceTo(medoid));
-        //Go over every location where a drop must be made
+        //Go over every location where a drop has to be made.
         List<Move> movesList = new ArrayList<>();
         for(Location drop: membersList){
             for(MachineType mt: locationClientMap.get(drop).getToDropItems()){
-                //Search for each machineType needed, the closest member of the cluster that has this machineType
+                //Search for each machineType needed what the closest location in this cluster is that has this machineType.
+                //There are 2 possibilities: Depot contains machine of type, Client contains a machine of this type that needs to be collected
                 for(Edge e: drop.getSortedEdgeList()){
                     if(members.contains(e.getTo()) || expandedMembers.contains(e.getTo()) || depots.contains(e.getTo())) {
                         //In case the location is a Client
                         if (locationClientMap.containsKey(e.getTo())) {
-                            Client j = locationClientMap.get(e.getTo());
-                            if (j.collectItemsContains(mt)) {
-                                Machine m = j.getMachineToCollect(mt);
-                                movesList.add(new Move(m, j.getLocation(), drop));
-                                j.removeFromCollectItems(m);
+                            Client c = locationClientMap.get(e.getTo());
+                            if (c.collectItemsContains(mt)) {
+                                Machine m = c.getMachineToCollect(mt);
+                                //Add the move to the list and delete machine from items that need to be collected.
+                                movesList.add(new Move(m, c.getLocation(), drop));
+                                c.removeFromCollectItems(m);
+                                //A location is found, break the for loop to go the next machine;
                                 break;
                             }
                             continue;
@@ -271,8 +291,10 @@ public class Cluster {
                             Depot d = locationDepotMap.get(e.getTo());
                             if (d.hasMachine(mt)) {
                                 Machine m = d.getMachineFromDepot(mt);
+                                //Add the move to the list and delete machine from the depot.
                                 movesList.add(new Move(d.getMachineFromDepot(mt), d.getLocation(), drop));
                                 d.removeMachine(m);
+                                //A location is found, break the for loop to go the next machine;
                                 break;
                             }
                         }
@@ -294,10 +316,11 @@ public class Cluster {
                 }
             }
         }
-        System.out.println("Moves created");
 
-        //Next step is to let the trucks handle the moves
-        //First step is making a list of the available trucks to handle the moves;
+        //Next step is to assign moves to trucks;
+
+
+        //Make a list of the available trucks to handle the moves;
         HashMultimap<Location, Truck> truckMap = HashMultimap.create();
         for(Truck t: trucks){
             //Check if truck is not yet being used by other cluster;
@@ -305,10 +328,13 @@ public class Cluster {
                 truckMap.put(t.getStartLocation(),t);
             }
         }
+        //Assign each move to a truck
         for(Move m: movesList){
             Location from = m.getFrom();
+
+
             //First we check if we have any trucks that are passing in either both origin and destination of the move
-            //Or one of the two
+            //or one of the two. We check these trucks first, because they are already passing at one of both locations.
             ArrayList<Truck> trucksPassingBoth = new ArrayList<>();
             ArrayList<Truck> trucksPassingOne = new ArrayList<>();
             for(Truck t: truckMap.values()){
@@ -318,44 +344,46 @@ public class Cluster {
                     trucksPassingOne.add(t);
                 }
             }
-            //We merge them together in a list;
+            //We merge them together in a list, trucks that pass both locations are in the front of the list;
             LinkedList<Truck> sortedTruckList = new LinkedList<>();
             sortedTruckList.addAll(trucksPassingBoth);
             sortedTruckList.addAll(trucksPassingOne);
-            //In case no trucks are pasing through either one of the locations
-            if(sortedTruckList.isEmpty()){
-                for(Edge e: from.getSortedEdgeList()){
-                    if (truckMap.containsKey(e.getTo())){
-                        sortedTruckList.addAll(truckMap.get(e.getTo()));
+
+            //All other available trucks (not passing) are added to
+            //the list sorted by their proximity to the "from" Location.
+            for(Edge e: from.getSortedEdgeList()){
+                if (truckMap.containsKey(e.getTo())){
+                    for(Truck t: truckMap.get(e.getTo())){
+                        if(!sortedTruckList.contains(t)) sortedTruckList.add(t);
                     }
                 }
             }
+
+            //Go through the sortedTruckList until a truck is found that is able to handle the move without breaking any
+            //constraints.
             boolean truckFound = false;
             while(!sortedTruckList.isEmpty()){
-                //First we need to select a truck to do the move;
                 Truck selected = sortedTruckList.getFirst();
                 //Make a deep copy backup to roll back the truck in case it can't handle the move;
                 Truck backup = new Truck(selected);
                 if(selected.doMove(m)){
+                    //Truck was able to handle the move without breaking any constraints;
                     truckFound = true;
                     break;
                 }
                 else {
+                    //Truck was not able to handle the move without breaking any constraints;
                     sortedTruckList.removeFirst();
+                    //Truck needs to be rolled back to previous state;
                     selected.rollBack(backup);
                 }
             }
             //If a truck was found to do the move, we go to the next move
             if(truckFound) continue;
 
-            /*
-                If we reach this part of the code, it means that the move can't be executed by any of the trucks that
-                are passing through one or both of the locations of the move. The next step is to make a sortedlist
-                of the trucks who are passing somewhere near the origin or destination;
-             */
 
-            //TODO: dit hier fixen grt
-
+            //If we reach this part of the code, it means that the move can't be executed by any available trucks.
+            //🤔🤔🤔🤔🤔🤔
 
             System.out.println("Wooooops");
 
@@ -388,5 +416,14 @@ public class Cluster {
 
     public Set<Location> getMembers() {
         return members;
+    }
+
+    public static void resetStaticFields(){
+        //TODO: beter oplossing zoeken hiervoor
+        allLocations = new ArrayList<>();
+        allLocationsNotMedoid = new LinkedList<>();
+        clusters = new ArrayList<>();
+        locationDepotMap = new HashMap<>();
+        locationClientMap = new HashMap<>();
     }
 }

@@ -1,50 +1,51 @@
 package TVH.Entities;
 
+import com.google.common.collect.HashMultimap;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Depot {
 
     private Location location;
-    private HashMap<MachineType, LinkedList<Machine>> machines;
+    private HashMultimap<MachineType,Machine> machines;
 
     public Depot(Location location) {
         this.location = location;
-        machines = new HashMap<>();
+        machines = HashMultimap.create();
     }
 
     //Copy constructor
     public Depot(Depot toCopy){
         this.location = toCopy.location;
-        machines = new HashMap<>();
-        for(LinkedList<Machine> machinelist: toCopy.machines.values()){
-            machines.put(machinelist.getFirst().getType(), new LinkedList<>(machinelist));
+        machines = HashMultimap.create();
+        for(Machine m: toCopy.machines.values()){
+            machines.put(m.getType(), m);
         }
     }
 
     public void addMachine(Machine m){
-        LinkedList<Machine> list = machines.get(m.getType());
-        if(machines.get(m.getType()) != null){
-            list.add(m);
-        }
-        else{
-            machines.put(m.getType(), new LinkedList<>());
-            machines.get(m.getType()).add(m);
-        }
+        machines.put(m.getType(), m);
     }
     public void removeMachine(Machine m){
         machines.get(m.getType()).remove(m);
     }
+    public void removeMachine(MachineType mt){
+        for(Machine m: machines.get(mt)){
+            machines.get(mt).remove(m);
+            return;
+        }
+    }
 
     public Machine getMachineFromDepot(MachineType mt){
-        if(hasMachine(mt)){
-            return machines.get(mt).getFirst();
+        for(Machine m: machines.get(mt)){
+            return m;
         }
         return null;
     }
 
     public boolean hasMachine(MachineType mt){
-        return machines.containsKey(mt) && machines.get(mt).size() > 0;
+        return machines.containsKey(mt);
     }
 
     public Location getLocation() {
@@ -55,11 +56,7 @@ public class Depot {
         this.location = location;
     }
 
-    public HashMap<MachineType, LinkedList<Machine>> getMachines() {
+    public HashMultimap<MachineType, Machine> getMachines() {
         return machines;
-    }
-
-    public void setMachines(HashMap<MachineType, LinkedList<Machine>> machines) {
-        this.machines = machines;
     }
 }

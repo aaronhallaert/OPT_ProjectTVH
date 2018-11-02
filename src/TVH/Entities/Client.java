@@ -4,7 +4,6 @@ import java.util.*;
 
 public class Client {
 
-    //zaken die moeten gebeuren op 1 bepaalde location;
     private Location location;
     private LinkedList<Machine> toCollectItems;
     private LinkedList<MachineType> toDropItems;

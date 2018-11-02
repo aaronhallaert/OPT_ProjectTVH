@@ -1,6 +1,5 @@
 package TVH.Entities;
 
-import TVH.Move;
 import TVH.Problem;
 
 import java.util.*;
@@ -54,25 +53,33 @@ public class Truck {
     }
 
     /**
-     * This method allows to make a truck handle a certain move
-     * @param m TVH.Move that has to be handled by the truck.
-     * @return true if the truck can handle the move (no constraints are broken);
+     * This method let's a truck handle a move. It also checks if no constraints are broken by handling the new move.
+     * @param m Move that needs to be handled by the truck.
+     * @return true if the truck breaks no constraints while handling the new move. False if it does break a constraint;
      */
     public boolean doMove(Move m){
         Location from = m.getFrom();
         Location to = m.getTo();
         Machine machine = m.getMachine();
 
-        //If the origin and/or the destination of the move are not yet part of the route, it's necessary to add them.
+        /*
+            First step: Check if the truck already passes the origin and/or destination of the truck.
+            If so no new stops are needed.
+         */
+
         if(!(locationStopMap.containsKey(from) || from==startLocation)) {
+            //In case the Truck doesn't yet pass by Move.from.
             Stop newStop = new Stop(from);
+            //Add a new stop on the optimal location
             int index = findBestIndexToInsert(newStop);
             newStop.setOnTruck(route.get(index-1).getOnTruck());
             route.add(index, newStop);
             locationStopMap.put(from, newStop);
         }
         if(!(locationStopMap.containsKey(to) || to==endLocation)){
+            //In case the Truck doesn't yet pass by Move.to.
             Stop newStop = new Stop(to);
+            //Add a new stop on the optimal location
             int index = findBestIndexToInsert(newStop);
             newStop.setOnTruck(route.get(index-1).getOnTruck());
             route.add(index, newStop);
@@ -142,9 +149,10 @@ public class Truck {
     }
 
     /**
-     * This method searches the closest stop to a new stop. This method is used to determined where a stop is inserted in the route;
-     * @param toInsert
-     * @return
+     * This method determines where a new stop should be inserted in the route.
+     * It searches the place where inserting the new Stop adds the least amount of extra distance.
+     * @param toInsert new Stop
+     * @return index of where the new Stop should be inserted in the route.
      */
     public int findBestIndexToInsert(Stop toInsert){
         int minAddedDistance = Integer.MAX_VALUE;
@@ -163,39 +171,10 @@ public class Truck {
         return index;
     }
 
-    public int getTimeNewInsert(Stop s, int index){
-        /**
-         * Get the total time driven when a new stop is inserted;
-         * A and B represent the 2 original stops.
-         * X represents the new stop that is inserted in between A and B.
-         * before: A-B, after: A-X-B
-         */
-        int time = totalTime;
-        Location A = route.get(index-1).getLocation();
-        Location B = route.get(index).getLocation();
-        Location X = s.getLocation();
-        time -= A.timeTo(B);
-        time += A.timeTo(X);
-        time += X.timeTo(B);
-        return time;
-
-    }
-    public int getDistanceNewInsert(Stop s, int index){
-        /**
-         * Get the total distance driven when a new stop is inserted;
-         * A and B represent the 2 original stops.
-         * X represents the new stop that is inserted in between A and B.
-         * before: A-B, after: A-X-B
-         */
-        int distance = totalDistance;
-        Location A = route.get(index-1).getLocation();
-        Location B = route.get(index).getLocation();
-        Location X = s.getLocation();
-        distance -= A.distanceTo(B);
-        distance += A.distanceTo(X);
-        distance += X.distanceTo(B);
-        return distance;
-    }
+    /**
+     * This method is used to rollback the Truck to a previous state.
+     * @param t old state
+     */
     public void rollBack(Truck t){
         this.truckId = t.truckId;
         this.totalTime = t.totalTime;
@@ -224,7 +203,7 @@ public class Truck {
     }
 
     public int getTotalDistance() {
-        //TIJDELIJK GRT
+        //TODO:Efficienter maken;
 
         totalDistance = 0;
         for (int i = 0; i < route.size()-1; i++) {

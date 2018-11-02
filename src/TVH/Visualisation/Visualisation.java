@@ -20,6 +20,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+/**
+ * Disclaimer: Heel snel geschreven, code is slecht
+ */
+
+
 public class Visualisation extends Application {
     public static Solution solution;
     public static List<Cluster> clusters;

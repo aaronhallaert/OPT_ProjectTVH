@@ -3,6 +3,11 @@ package TVH.Entities;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+/**
+ * Each truck has stops. These stops define it's route. Stop objects give information about the state of the truck when
+ * it is ready to leave stop.
+ */
+
 public class Stop {
 
     private Location location;
@@ -54,6 +59,7 @@ public class Stop {
     }
 
     public boolean calculateFillRate(){
+        //TODO:Efficienter maken;
         fillRate = 0;
         for(Machine m: onTruck){
             fillRate += m.getType().getVolume();
@@ -61,6 +67,7 @@ public class Stop {
         return fillRate < 100;
     }
     public int getTimeSpend(){
+        //TODO:Efficienter maken
         int time = 0;
         for(Machine m: collectItems){
             time += m.getType().getServiceTime();

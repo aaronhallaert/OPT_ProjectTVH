@@ -15,19 +15,9 @@ public class Main {
         File inputFile = new File("input.txt");
         long startTIme = System.currentTimeMillis();
 
-        try {
-            Problem problem = null;
-            Solution solution = null;
-            List<Integer> distanceList = new ArrayList<>();
-            for(int i=0; i < 1; i++){
-                Cluster.resetStaticFields();
-                problem = new Problem(inputFile);
-                solution = problem.solve();
-                distanceList.add(solution.getTotalkm());
-            }
-            Collections.sort(distanceList);
-            System.out.println(distanceList);
-
+        try{
+            Problem problem = new Problem(inputFile);
+            Solution solution= problem.solve();
             Long timeRun = System.currentTimeMillis() - startTIme;
             System.out.println("Time run: "+ timeRun + "ms");
             Visualisation.start(solution, problem.clusters, problem.depots);
