@@ -312,6 +312,14 @@ public class Cluster {
             LinkedList<Truck> sortedTruckList = new LinkedList<>();
             sortedTruckList.addAll(trucksPassingBoth);
             sortedTruckList.addAll(trucksPassingOne);
+            //In case no trucks are pasing through either one of the locations
+            if(sortedTruckList.isEmpty()){
+                for(Edge e: from.getSortedEdgeList()){
+                    if (trucks.containsKey(e.getTo())){
+                        sortedTruckList.addAll(trucks.get(e.getTo()));
+                    }
+                }
+            }
             boolean truckFound = false;
             while(!sortedTruckList.isEmpty()){
                 //First we need to select a truck to do the move;
@@ -337,6 +345,8 @@ public class Cluster {
              */
 
             //TODO: dit hier fixen grt
+
+
             System.out.println("Wooooops");
 
         }
