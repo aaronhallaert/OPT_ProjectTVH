@@ -1,6 +1,6 @@
 package TVH;
 
-import TVH.Visualization.Visualisation;
+import TVH.Visualisation.Visualisation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,7 +19,7 @@ public class Main {
             Problem problem = null;
             Solution solution = null;
             List<Integer> distanceList = new ArrayList<>();
-            for(int i=0; i < 100; i++){
+            for(int i=0; i < 1; i++){
                 Cluster.resetStaticFields();
                 problem = new Problem(inputFile);
                 solution = problem.solve();

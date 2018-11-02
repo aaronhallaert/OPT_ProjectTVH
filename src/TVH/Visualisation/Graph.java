@@ -1,4 +1,4 @@
-package TVH.Visualization;
+package TVH.Visualisation;
 
 import TVH.Cluster;
 import TVH.Entities.Depot;

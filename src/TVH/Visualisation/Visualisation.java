@@ -1,4 +1,4 @@
-package TVH.Visualization;
+package TVH.Visualisation;
 
 import TVH.Cluster;
 import TVH.Entities.Depot;
@@ -7,6 +7,7 @@ import TVH.Entities.Truck;
 import TVH.Solution;
 import com.google.common.collect.HashMultimap;
 import javafx.application.Application;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -15,9 +16,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 public class Visualisation extends Application {
     public static Solution solution;
@@ -33,6 +34,7 @@ public class Visualisation extends Application {
     public static final int HEIGHT = 900;
     public static final int WIDTH = 1700;
     public static final int BORDER = 50;
+    public static Stack<Color> colors = new Stack<>();
 
 
     public static void start(Solution solution_input, List<Cluster> clusters_input, List<Depot> depots_input) {
@@ -47,6 +49,19 @@ public class Visualisation extends Application {
                 if(l.getLatitude() < minLat) minLat = l.getLatitude();
                 if(l.getLatitude() > maxLat) maxLat = l.getLatitude();
             }
+        }
+        //Kleuren lezen uit file
+        File inputFile = new File("./src/TVH/Visualisation\\colors.txt");
+        System.out.println(System.getProperty("user.dir"));
+
+        try{
+            Scanner sc = new Scanner(inputFile).useLocale(Locale.US);
+            while(sc.hasNext()){
+                colors.push(Color.web(sc.nextLine()));
+            }
+            Collections.shuffle(colors);
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
         }
 
         Application.launch();
@@ -71,15 +86,9 @@ public class Visualisation extends Application {
     @Override
     public void start(Stage primaryStage) {
         Pane root = new Pane();
-        LinkedList<Color> colorList = new LinkedList<Color>(){{
-            add(Color.LIGHTGREEN);
-            add(Color.LIGHTBLUE);
-            add(Color.BLACK);
-            add(Color.PINK);
-            add(Color.ORANGE);
-        }};
+        Scene scene = new Scene(root, WIDTH+2*BORDER, HEIGHT+2*BORDER);
         for(Cluster c: clusters){
-            Color color = colorList.getFirst();
+            Color color = colors.pop();
             for(Location l: c.getMembers()){
                 Circle circle =  new Circle(6, color);
                 circle.setTranslateX(translateLong(l.getLongitude()));
@@ -87,11 +96,13 @@ public class Visualisation extends Application {
                 circleMap.put(l, circle);
                 root.getChildren().add(circle);
             }
-            colorList.removeFirst();
 
         }
+        Color depotColor = colors.pop();
         for(Depot d: depots){
-            Circle circle = new Circle(6, Color.RED);
+            Circle circle = new Circle(6, depotColor);
+            circle.setStrokeWidth(3);
+            circle.setStroke(Color.BLACK);
             circle.setTranslateX(translateLong(d.getLocation().getLongitude()));
             circle.setTranslateY(translateLat(d.getLocation().getLatitude()));
             circleMap.put(d.getLocation(), circle);
@@ -99,7 +110,7 @@ public class Visualisation extends Application {
         }
         for(Truck t: solution.getTrucks()){
             if(t.getRoute().size() > 2) {
-                Color color = Color.color(Math.random(), Math.random(), Math.random(), 0.5);
+                Color color = colors.pop();
                 for (int i = 0; i < t.getRoute().size() - 1; i++) {
                     Location start = t.getRoute().get(i).getLocation();
                     Location stop = t.getRoute().get(i + 1).getLocation();
@@ -115,14 +126,20 @@ public class Visualisation extends Application {
                     line.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
                         showSingleTruck(root, t);
                     });
+                    line.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> {
+                        scene.setCursor(Cursor.HAND);
+                    });
+                    line.addEventHandler(MouseEvent.MOUSE_EXITED, e -> {
+                        scene.setCursor(Cursor.DEFAULT);
+                    });
 
                     lineMap.put(t, line);
                     root.getChildren().add(line);
+                    line.toBack();
                 }
             }
         }
 
-        Scene scene = new Scene(root, WIDTH+2*BORDER, HEIGHT+2*BORDER);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -144,6 +161,4 @@ public class Visualisation extends Application {
 
 
     }
-
-
 }
