@@ -13,15 +13,15 @@ public class Problem {
     public static int TRUCK_CAPACITY;
     public static int TRUCK_WORKING_TIME;
 
-    public static ArrayList<Location> locations = new ArrayList<>();
-    public static ArrayList<Depot> depots = new ArrayList<>();
-    public static HashMap<Location, Client> clients = new HashMap<>();
-    public static HashMap<Machine, Location> machineLocations = new HashMap<>();
-    public static ArrayList<Truck> trucks = new ArrayList<>();
-    public static ArrayList<MachineType> machineTypes = new ArrayList<>();
-    public static ArrayList<Machine> machines = new ArrayList<>();
-    public static ArrayList<Edge> edges = new ArrayList<>();
-    public static List<Cluster> clusters = new ArrayList<>();
+    public ArrayList<Location> locations = new ArrayList<>();
+    public ArrayList<Depot> depots = new ArrayList<>();
+    public HashMap<Location, Client> clients = new HashMap<>();
+    public HashMap<Machine, Location> machineLocations = new HashMap<>();
+    public ArrayList<Truck> trucks = new ArrayList<>();
+    public ArrayList<MachineType> machineTypes = new ArrayList<>();
+    public ArrayList<Machine> machines = new ArrayList<>();
+    public ArrayList<Edge> edges = new ArrayList<>();
+    public List<Cluster> clusters = new ArrayList<>();
 
     public Problem(File inputFile) throws FileNotFoundException {
 
@@ -212,7 +212,7 @@ public class Problem {
         *
         * */
 
-        return null;
+        return Init;
     }
 
     /**
@@ -220,7 +220,6 @@ public class Problem {
      * @return
      */
     public Solution createInitialSolution(){
-
         int n_clusters =(int) Math.round((double) clients.size()/5);
         clusters = Cluster.createClusters(n_clusters, clients, depots);
 
@@ -237,7 +236,7 @@ public class Problem {
         }
 
         for(Cluster cluster: clusters){
-            cluster.solve();
+            cluster.solve(trucks);
         }
 
         int totalDistance = 0;
@@ -254,7 +253,7 @@ public class Problem {
             }
         }
 
-        return null;
+        return new Solution(trucks);
     }
 
 }

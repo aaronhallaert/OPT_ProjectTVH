@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Solution {
-    private int totalkm;
+    private int totalkm = 0;
     private List<Truck> trucks;
 
 
@@ -15,8 +15,12 @@ public class Solution {
         //Current state van trucks kopiëren;
         for(Truck t: trucks){
             this.trucks.add(new Truck(t));
+            totalkm+= t.getTotalDistance();
         }
+    }
 
+    public int getTotalkm() {
+        return totalkm;
     }
 
     public List<Truck> getTrucks() {

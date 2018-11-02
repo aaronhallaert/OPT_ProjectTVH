@@ -42,6 +42,13 @@ public class Cluster {
         members.add(medoid);
 
     }
+    public static void resetStaticFields(){
+        allLocations = new ArrayList<>();
+        allLocationsNotMedoid = new LinkedList<>();
+        clusters = new ArrayList<>();
+        locationDepotMap = new HashMap<>();
+        locationClientMap = new HashMap<>();
+    }
 
     public static List<Cluster> createClusters(int nClusters, HashMap<Location, Client> clients, List<Depot> depotList){
 
@@ -229,7 +236,7 @@ public class Cluster {
         }
     }
 
-    public void solve(){
+    public void solve(List<Truck> trucks){
         /*
          * First step of the solution is determining which machine goes where. This is saved in a "TVH.Move" object.
          * Since every cluster is self sufficient we only need to move machines to and from other members of the cluster.
@@ -291,11 +298,11 @@ public class Cluster {
 
         //Next step is to let the trucks handle the moves
         //First step is making a list of the available trucks to handle the moves;
-        HashMultimap<Location, Truck> trucks = HashMultimap.create();
-        for(Truck t: Problem.trucks){
+        HashMultimap<Location, Truck> truckMap = HashMultimap.create();
+        for(Truck t: trucks){
             //Check if truck is not yet being used by other cluster;
             if(!t.isUsed()){
-                trucks.put(t.getStartLocation(),t);
+                truckMap.put(t.getStartLocation(),t);
             }
         }
         for(Move m: movesList){
@@ -304,7 +311,7 @@ public class Cluster {
             //Or one of the two
             ArrayList<Truck> trucksPassingBoth = new ArrayList<>();
             ArrayList<Truck> trucksPassingOne = new ArrayList<>();
-            for(Truck t: trucks.values()){
+            for(Truck t: truckMap.values()){
                 if(t.doesTruckPass(m.getFrom()) && t.doesTruckPass(m.getTo())){
                     trucksPassingBoth.add(t);
                 }else if(t.doesTruckPass(m.getFrom()) || t.doesTruckPass(m.getTo())){
@@ -318,8 +325,8 @@ public class Cluster {
             //In case no trucks are pasing through either one of the locations
             if(sortedTruckList.isEmpty()){
                 for(Edge e: from.getSortedEdgeList()){
-                    if (trucks.containsKey(e.getTo())){
-                        sortedTruckList.addAll(trucks.get(e.getTo()));
+                    if (truckMap.containsKey(e.getTo())){
+                        sortedTruckList.addAll(truckMap.get(e.getTo()));
                     }
                 }
             }
