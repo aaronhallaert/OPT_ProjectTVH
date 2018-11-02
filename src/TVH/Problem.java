@@ -113,7 +113,7 @@ public class Problem {
 
         //DROPS
         /*
-            Alle drops toevoegen aan de juiste job;
+            Alle drops toevoegen aan de juiste Client;
          */
         sc.nextLine();
         sc.nextLine();
@@ -135,7 +135,7 @@ public class Problem {
 
         //COLLECTS
         /*
-            Alle collects toevoegen aan de juiste job;
+            Alle collects toevoegen aan de juiste Client;
          */
         sc.nextLine();
         sc.nextLine();

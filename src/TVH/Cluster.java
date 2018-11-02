@@ -43,15 +43,15 @@ public class Cluster {
 
     }
 
-    public static List<Cluster> createClusters(int nClusters, HashMap<Location, Client> jobs, List<Depot> depotList){
+    public static List<Cluster> createClusters(int nClusters, HashMap<Location, Client> clients, List<Depot> depotList){
 
-        for(Client j: jobs.values()){
+        for(Client j: clients.values()){
             allLocations.add(j.getLocation());
         }
 
         allLocationsNotMedoid.addAll(allLocations);
 
-        locationClientMap = jobs;
+        locationClientMap = clients;
         for(Depot d: depotList){
             locationDepotMap.put(d.getLocation(), d);
         }
@@ -178,11 +178,11 @@ public class Cluster {
 
     public void expand(){
         //We deep copy the clients and depots so we can delete certain machines from clients temporarily;
-        HashMap<Location, Client> locationJobMapCopy = new HashMap<>();
+        HashMap<Location, Client> locationClientMapCopy = new HashMap<>();
         HashMap<Location, Depot> locationDepotMapCopy = new HashMap<>();
 
         for(Client j: locationClientMap.values()){
-            locationJobMapCopy.put(j.getLocation(), new Client(j));
+            locationClientMapCopy.put(j.getLocation(), new Client(j));
         }
 
         for(Depot d: locationDepotMap.values()){
@@ -197,9 +197,9 @@ public class Cluster {
             //Als deze locatie nog geen member is van de cluster:
             if(!members.contains(loc)) {
                 //Zoeken als het om een job of een depot gaat:
-                if (locationJobMapCopy.containsKey(loc)) {
+                if (locationClientMapCopy.containsKey(loc)) {
                     //TVH.Entities.Client opzoeken op deze locatie
-                    Client client = locationJobMapCopy.get(loc);
+                    Client client = locationClientMapCopy.get(loc);
                     //Alle machines kijken die op deze locatie moeten worden opgenomen;
                     for (Machine m : client.getToCollectItems()) {
                         if (machinesNeeded.contains(m.getType())) {
