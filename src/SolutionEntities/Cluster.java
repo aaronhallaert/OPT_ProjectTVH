@@ -42,6 +42,7 @@ public class Cluster {
      */
     public void printBehoeftesOverbodige(){
         // uitprinten behoeftes en eigendommen van clusters
+        System.out.println("EIGENSCHAPPEN CLUSTER "+ id);
         System.out.println("NODIG machines van type");
         for(Map.Entry<MachineType, Integer> entry2: nodigeMachineTypes.entrySet()){
             System.out.println("\t"+entry2.getKey().toString()+": "+entry2.getValue());
@@ -60,13 +61,17 @@ public class Cluster {
         System.out.println("\n");
     }
 
+
+    /**
+     * zoekt bij andere clusters nodige machinetypes
+     * @param clusters alle andere clusters
+     */
     public void fillNeeded(HashMap<Depot, Cluster> clusters){
         //overlopen van nodige machine types
         for(Map.Entry<MachineType, Integer> nodigeMachineType: nodigeMachineTypes.entrySet()){
 
             //overlopen van alles clusters op zoek naar nodige machine type
             for(Map.Entry<Depot, Cluster> cluster: clusters.entrySet()){
-                // TODO werkt niet
                 if(cluster.getValue().getOverbodigeMachineTypes().containsKey(nodigeMachineType.getKey())){
                     System.out.println("gevonden voor cluster "+id+" => cluster "+cluster.getValue().getId()+" heeft een machinetype "+nodigeMachineType.getKey()+" over" );
                 }

@@ -214,6 +214,32 @@ public class Problem {
      */
     public Solution createInitialSolution(){
 
+
+
+
+
+
+
+        HashMap<Depot, Cluster> clusters= setupClusters();
+
+
+
+
+        return null;
+
+    }
+
+
+
+    /**
+     *  deze methode maakt clusters op basis van dichtste depot
+     *  elke cluster bevat een depot
+     *  daarnaast wordt bij elke cluster berekend welke machinetypes tekort zijn en welke te veel zijn
+     *
+     *  @return HashMap met als key depot, en als value cluster bestaande uit lijst van jobs
+     */
+    private HashMap<Depot, Cluster> setupClusters(){
+
         // DICHTSTE DEPOT VOOR ELKE JOB BEREKENEN
         HashMap<Job, Depot> nearestDepot=new HashMap<>();
         // itereren over alle jobs <Location, Job>
@@ -232,9 +258,14 @@ public class Problem {
         // SET VAN CLUSTERS MAKEN PER DEPOT
         clusters= new HashMap<>();
         int clusterCount=1;
+
+
         // itereren over alle nearestDepot
         for (Map.Entry<Job, Depot> entry : nearestDepot.entrySet()) {
-            if(clusters.putIfAbsent(entry.getValue(), new Cluster(entry.getValue(), clusterCount))!=null){
+
+            if(clusters.get(entry.getValue())==null){
+                clusters.put(entry.getValue(), new Cluster(entry.getValue(), clusterCount));
+                System.out.println("clustercount " + clusterCount);
                 clusterCount++;
             }
             clusters.get(entry.getValue()).getClusterJobs().add(entry.getKey());
@@ -276,30 +307,22 @@ public class Problem {
 
             }
 
-
-
             huidigeCluster.computeNeeded(this);
             huidigeCluster.printBehoeftesOverbodige();
+        }
 
 
-
-
-            huidigeCluster.fillNeeded(clusters);
-
-
-
-
+        for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
+            entry.getValue().fillNeeded(clusters);
         }
 
 
 
-
-        return null;
-
+        return clusters;
     }
 
 
 
-
-
 }
+
+
