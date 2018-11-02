@@ -16,10 +16,7 @@ public class Main {
         try {
             Problem problem = new Problem(inputFile);
             problem.createInitialSolution();
-            final GraphBuilder plot= new GraphBuilder("locaties", problem.clusters, problem.depots);
-            plot.pack();
-            RefineryUtilities.centerFrameOnScreen(plot);
-            plot.setVisible(true);
+            printGraph(problem);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -28,5 +25,12 @@ public class Main {
 
 
 
+    }
+
+    public static void printGraph(Problem problem){
+        final GraphBuilder plot= new GraphBuilder("locaties", problem.clusters, problem.depots);
+        plot.pack();
+        RefineryUtilities.centerFrameOnScreen(plot);
+        plot.setVisible(true);
     }
 }

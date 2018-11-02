@@ -271,44 +271,30 @@ public class Problem {
             Cluster huidigeCluster= entry.getValue();
             Depot huidigDepot= entry.getKey();
 
-            for (MachineType machineType : machineTypes) {
-                huidigeCluster.getBeschikbaar().put(machineType,0);
-                huidigeCluster.getAfTeLeveren().put(machineType, 0);
-            }
 
 
-            // machine types beschikbaar in depot
-            for(Map.Entry<MachineType, LinkedList<Machine>> entry1: huidigDepot.getMachines().entrySet()){
-                for (int i = 0; i < entry1.getValue().size(); i++) {
-                    huidigeCluster.getBeschikbaar().putIfAbsent(entry1.getKey(), 0);
-                    huidigeCluster.getBeschikbaar().replace(entry1.getKey(), huidigeCluster.getBeschikbaar().get(entry1.getKey())+1);
-                }
-            }
 
-            // machine types beschikbaar op locaties en af te leveren op locatie
-            for (Job job : huidigeCluster.getClusterJobs()) {
-                for (Machine toCollectItem : job.getToCollectItems()) {
-                    huidigeCluster.getBeschikbaar().putIfAbsent(toCollectItem.getType(), 0);
-                    huidigeCluster.getBeschikbaar().replace(toCollectItem.getType(), huidigeCluster.getBeschikbaar().get(toCollectItem.getType())+1);
-                }
-
-                for (MachineType toDropItem : job.getToDropItems()) {
-                    huidigeCluster.getAfTeLeveren().putIfAbsent(toDropItem, 0);
-                    huidigeCluster.getAfTeLeveren().replace(toDropItem, huidigeCluster.getAfTeLeveren().get(toDropItem)+1);
-                }
-
-            }
-
+            huidigeCluster.setupBeschikbaarAfTeLeveren(this);
             huidigeCluster.computeNeeded(this);
             huidigeCluster.printBehoeftesOverbodige();
+            huidigeCluster.fillNeeded(this, clusters);
+
         }
 
         for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
            entry.getValue().addEdgesToOtherClusters(clusters);
         }
 
-        for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
-            entry.getValue().fillNeeded(this, clusters);
+
+        while(!checkClusterReq(clusters)) {
+            Main.printGraph(this);
+            for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
+                entry.getValue().reset();
+                entry.getValue().setupBeschikbaarAfTeLeveren(this);
+                entry.getValue().computeNeeded(this);
+                entry.getValue().printBehoeftesOverbodige();
+                entry.getValue().fillNeeded(this, clusters);
+            }
         }
 
 
@@ -317,7 +303,21 @@ public class Problem {
     }
 
 
+    private boolean checkClusterReq(HashMap<Depot, Cluster> clusters){
+        int check= 0;
+        for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
+            if(entry.getValue().getNodigeMachineTypes().size()==0){
+                check++;
+            }
+        }
 
+        if(clusters.entrySet().size()==check){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
 
 
