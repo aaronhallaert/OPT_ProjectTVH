@@ -150,11 +150,17 @@ public class Visualisation extends Application {
             root.getChildren().addAll(lineMap.get(t));
             System.out.println(t);
             allTrucksShown = false;
+            for(Circle c: circleMap.values()){
+                c.toFront();
+            }
         }
         else{
             root.getChildren().removeAll(lineMap.get(t));
             root.getChildren().addAll(lineMap.values());
             allTrucksShown = true;
+            for(Circle c: circleMap.values()){
+                c.toFront();
+            }
         }
 
 
