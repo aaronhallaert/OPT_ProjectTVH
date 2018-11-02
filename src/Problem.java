@@ -218,6 +218,7 @@ public class Problem {
         int n_clusters =(int) Math.round((double) clients.size()/5);
         List<Cluster> clusters = Cluster.createClusters(n_clusters, clients, depots);
 
+
         //Sort the clusters based on remoteness
         clusters.sort((Cluster c1, Cluster c2)->c2.getRemoteness(depots)-c1.getRemoteness(depots));
 
@@ -233,7 +234,6 @@ public class Problem {
             cluster.solve();
         }
 
-        Visualisation.start(new Solution(trucks), clusters, depots);
         int totalDistance = 0;
         for(Truck t: trucks){
             int distance = t.getTotalDistance();
@@ -241,6 +241,15 @@ public class Problem {
             totalDistance += distance;
         }
         System.out.println("Total Distance: "+totalDistance);
+
+        for(Truck t: trucks){
+            if(t.getRoute().getFirst().getLocation() != t.getRoute().getLast().getLocation()){
+                System.out.println("error");
+            }
+        }
+
+        Visualisation.start(new Solution(trucks), clusters, depots);
+
 
         //Grafiek maken om toch enig idee te hebben waar we eigenlijk mee bezig zijn
 

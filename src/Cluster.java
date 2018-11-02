@@ -277,7 +277,7 @@ public class Cluster {
             for(Machine m: locationClientMap.get(collect).getToCollectItems()){
                 for(Edge e: collect.getSortedEdgeList()){
                     //We search the closest depot to drop the machine
-                    if(depots.contains(e.getTo())){
+                    if(locationDepotMap.containsKey(e.getTo())){
                         movesList.add(new Move(m, collect, e.getTo()));
                         break;
                     }
