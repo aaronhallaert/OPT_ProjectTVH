@@ -38,4 +38,8 @@ public class Machine {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return id + " ("+type.getName()+")";
+    }
 }

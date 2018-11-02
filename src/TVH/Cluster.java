@@ -248,7 +248,7 @@ public class Cluster {
                 //Search for each machineType needed, the closest member of the cluster that has this machineType
                 for(Edge e: drop.getSortedEdgeList()){
                     if(members.contains(e.getTo()) || expandedMembers.contains(e.getTo()) || depots.contains(e.getTo())) {
-                        //In case the location is a TVH.Entities.Client
+                        //In case the location is a Client
                         if (locationClientMap.containsKey(e.getTo())) {
                             Client j = locationClientMap.get(e.getTo());
                             if (j.collectItemsContains(mt)) {
@@ -335,7 +335,7 @@ public class Cluster {
                 }
                 else {
                     sortedTruckList.removeFirst();
-                    selected = backup;
+                    selected.rollBack(backup);
                 }
             }
             //If a truck was found to do the move, we go to the next move

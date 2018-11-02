@@ -110,4 +110,5 @@ public class Stop {
     public void setOnTruck(LinkedList<Machine> onTruck) {
         this.onTruck = onTruck;
     }
+
 }

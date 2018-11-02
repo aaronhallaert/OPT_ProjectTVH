@@ -196,6 +196,16 @@ public class Truck {
         distance += X.distanceTo(B);
         return distance;
     }
+    public void rollBack(Truck t){
+        this.truckId = t.truckId;
+        this.totalTime = t.totalTime;
+        this.totalDistance = t.totalDistance;
+        this.startLocation = t.startLocation;
+        this.endLocation = t.endLocation;
+        this.used = t.used;
+        this.route = t.route;
+        this.locationStopMap = t.locationStopMap;
+    }
 
     public int getTruckId() {
         return truckId;
@@ -251,5 +261,28 @@ public class Truck {
 
     public LinkedList<Stop> getRoute() {
         return route;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Truck: "+truckId+" ("+totalDistance +"km) ("+totalTime+" min)\n");
+        for(Stop s: route){
+            sb.append("\t" + "Location " + s.getLocation() + ", Fillrate: "+s.getFillRate()+"%\n");
+            sb.append("\t\t On truck:\n");
+            for(Machine m: s.getOnTruck()){
+                sb.append("\t\t\t "+m+"\n");
+            }
+            sb.append("\t\t Collect:\n");
+            for(Machine m: s.getCollectItems()){
+                sb.append("\t\t\t "+m+"\n");
+            }
+            sb.append("\t\t Drop:\n");
+            for(Machine m: s.getDropItems()){
+                sb.append("\t\t\t "+m+"\n");
+            }
+
+        }
+        return sb.toString();
     }
 }

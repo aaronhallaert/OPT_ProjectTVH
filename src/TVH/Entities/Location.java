@@ -96,4 +96,9 @@ public class Location {
         Location location = (Location) o;
         return locationID == location.locationID;
     }
+
+    @Override
+    public String toString() {
+        return locationID +": "+name;
+    }
 }

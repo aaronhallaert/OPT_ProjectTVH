@@ -105,7 +105,7 @@ public class Visualisation extends Application {
                     Location stop = t.getRoute().get(i + 1).getLocation();
                     Line line = new Line();
                     line.setStroke(color);
-                    line.setStrokeWidth(3);
+                    line.setStrokeWidth(4);
                     Circle circle1 = circleMap.get(start);
                     Circle circle2 = circleMap.get(stop);
                     line.startXProperty().bind(circle1.centerXProperty().add(circle1.translateXProperty()));
@@ -131,6 +131,7 @@ public class Visualisation extends Application {
         if(allTrucksShown){
             root.getChildren().removeAll(lineMap.values());
             root.getChildren().addAll(lineMap.get(t));
+            System.out.println(t);
             allTrucksShown = false;
         }
         else{
