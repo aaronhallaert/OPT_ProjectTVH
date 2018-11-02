@@ -2,13 +2,11 @@ package SolutionEntities;
 
 import Algorithm.Problem;
 import Entities.Depot;
+import Entities.Edge;
 import Entities.Job;
 import Entities.MachineType;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * elke cluster heeft een depot, dus cluster is depot gelinkt met lijst van jobs
@@ -20,10 +18,10 @@ public class Cluster {
     private Set<Job> clusterJobs;
     private HashMap<MachineType, Integer> beschikbaar;
     private HashMap<MachineType, Integer> afTeLeveren;
-    private HashMap<MachineType, Integer> nodigeMachineTypes=new HashMap<>();
-    private HashMap<MachineType, Integer> overbodigeMachineTypes=new HashMap<>();
-    private Set<MachineType> genoegMachineTypes=new HashSet<>();
-
+    private HashMap<MachineType, Integer> nodigeMachineTypes;
+    private HashMap<MachineType, Integer> overbodigeMachineTypes;
+    private Set<MachineType> genoegMachineTypes;
+    private LinkedList<Edge> sortedEdgesToOtherDepots;
 
     public Cluster(Depot depot, int id){
         this.id=id;
@@ -34,6 +32,7 @@ public class Cluster {
         nodigeMachineTypes=new HashMap<>();
         overbodigeMachineTypes=new HashMap<>();
         genoegMachineTypes=new HashSet<>();
+        sortedEdgesToOtherDepots=new LinkedList<>();
     }
 
 
@@ -66,14 +65,16 @@ public class Cluster {
      * zoekt bij andere clusters nodige machinetypes
      * @param clusters alle andere clusters
      */
-    public void fillNeeded(HashMap<Depot, Cluster> clusters){
+    public void fillNeeded(Problem problem, HashMap<Depot, Cluster> clusters){
         //overlopen van nodige machine types
         for(Map.Entry<MachineType, Integer> nodigeMachineType: nodigeMachineTypes.entrySet()){
 
             //overlopen van alles clusters op zoek naar nodige machine type
-            for(Map.Entry<Depot, Cluster> cluster: clusters.entrySet()){
-                if(cluster.getValue().getOverbodigeMachineTypes().containsKey(nodigeMachineType.getKey())){
-                    System.out.println("gevonden voor cluster "+id+" => cluster "+cluster.getValue().getId()+" heeft een machinetype "+nodigeMachineType.getKey()+" over" );
+            // dit doen we via edges om zo eerst bij de dichtste clusters te zoeken en dan pas bij verdere
+            for (Edge edge : sortedEdgesToOtherDepots) {
+                if(clusters.get(problem.depots.get(edge.getTo())).getOverbodigeMachineTypes().containsKey(nodigeMachineType.getKey())){
+                    System.out.println("gevonden voor cluster "+id+" => cluster "+clusters.get(problem.depots.get(edge.getTo())).getId()+" heeft een machinetype "+nodigeMachineType.getKey()+" over" );
+                    // ga nu op zoek naar een node die niet ver ligt van huidige cluster depot in de cluster
                 }
             }
 
@@ -101,6 +102,14 @@ public class Cluster {
                 genoegMachineTypes.add(machineType);
             }
         }
+    }
+
+    public LinkedList<Edge> getSortedEdgesToOtherDepots() {
+        return sortedEdgesToOtherDepots;
+    }
+
+    public void setSortedEdgesToOtherDepots(LinkedList<Edge> sortedEdgesToOtherDepots) {
+        this.sortedEdgesToOtherDepots = sortedEdgesToOtherDepots;
     }
 
     public int getId() {
@@ -165,5 +174,19 @@ public class Cluster {
 
     public void setAfTeLeveren(HashMap<MachineType, Integer> afTeLeveren) {
         this.afTeLeveren = afTeLeveren;
+    }
+
+    public void addEdgesToOtherClusters(HashMap<Depot, Cluster> clusters) {
+        for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
+            if(entry.getValue().getId()!=this.getId()){
+
+                // vraag de edge op van het huidige depot naar het depot van de andere cluster en sorteer
+                sortedEdgesToOtherDepots.add(depot.getLocation().getEdgeMap().get(entry.getKey().getLocation()));
+                sortedEdgesToOtherDepots.sort(Comparator.comparing(Edge::getDistance));
+
+
+
+            }
+        }
     }
 }

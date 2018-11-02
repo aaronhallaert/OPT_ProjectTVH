@@ -26,9 +26,8 @@ public class GraphBuilder extends ApplicationFrame{
         // PLOTTEN VAN CLUSTERS
         ArrayList<XYSeries> clusterPoints= new ArrayList<>();
 
-        int i= 1;
         for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
-            final XYSeries locationPoints = new XYSeries("cluster "+i);
+            final XYSeries locationPoints = new XYSeries("cluster "+entry.getValue().getId());
             for (Job job : entry.getValue().getClusterJobs()) {
                 double lat= job.getLocation().getLatitude();
                 double lng= job.getLocation().getLongitude();
@@ -36,7 +35,6 @@ public class GraphBuilder extends ApplicationFrame{
             }
             clusterPoints.add(locationPoints);
 
-            i++;
         }
 
 

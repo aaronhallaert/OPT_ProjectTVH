@@ -215,15 +215,7 @@ public class Problem {
     public Solution createInitialSolution(){
 
 
-
-
-
-
-
         HashMap<Depot, Cluster> clusters= setupClusters();
-
-
-
 
         return null;
 
@@ -311,9 +303,12 @@ public class Problem {
             huidigeCluster.printBehoeftesOverbodige();
         }
 
+        for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
+           entry.getValue().addEdgesToOtherClusters(clusters);
+        }
 
         for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
-            entry.getValue().fillNeeded(clusters);
+            entry.getValue().fillNeeded(this, clusters);
         }
 
 
