@@ -9,16 +9,20 @@ import com.google.common.collect.HashMultimap;
 import javafx.application.Application;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.List;
 
 /**
  * Disclaimer: Heel snel geschreven, code is slecht
@@ -35,6 +39,7 @@ public class Visualisation extends Application {
     public static double maxLat = Double.MIN_VALUE;
     public static HashMap<Location, Circle> circleMap = new HashMap<>();
     public static HashMultimap<Truck, Line> lineMap = HashMultimap.create();
+    public static ArrayList<Label> labels = new ArrayList<>();
     public static boolean allTrucksShown = true;
     public static final int HEIGHT = 900;
     public static final int WIDTH = 1700;
@@ -94,25 +99,35 @@ public class Visualisation extends Application {
         for(Cluster c: clusters){
             Color color = colors.pop();
             for(Location l: c.getMembers()){
+                Label label = new Label(l.getLocationID()+"");
+                label.setFont(Font.font(null, FontWeight.BOLD, 15));
+                label.setTranslateX(translateLong(l.getLongitude()));
+                label.setTranslateY(translateLat(l.getLatitude())+10);
+                labels.add(label);
                 Circle circle =  new Circle(6, color);
                 circle.setStroke(Color.BLACK);
                 circle.setStrokeWidth(1);
                 circle.setTranslateX(translateLong(l.getLongitude()));
                 circle.setTranslateY(translateLat(l.getLatitude()));
                 circleMap.put(l, circle);
-                root.getChildren().add(circle);
+                root.getChildren().addAll(circle, label);
             }
 
         }
         Color depotColor = colors.pop();
         for(Depot d: depots){
+            Label label = new Label(d.getLocation().getLocationID()+"");
+            label.setFont(Font.font(null, FontWeight.BOLD, 15));
+            label.setTranslateX(translateLong(d.getLocation().getLongitude()));
+            label.setTranslateY(translateLat(d.getLocation().getLatitude())+10);
+            labels.add(label);
             Circle circle = new Circle(8, depotColor);
             circle.setStrokeWidth(3);
             circle.setStroke(Color.BLACK);
             circle.setTranslateX(translateLong(d.getLocation().getLongitude()));
             circle.setTranslateY(translateLat(d.getLocation().getLatitude()));
             circleMap.put(d.getLocation(), circle);
-            root.getChildren().add(circle);
+            root.getChildren().addAll(circle, label);
         }
         for(Truck t: solution.getTrucks()){
             if(t.getRoute().size() > 2) {
@@ -159,6 +174,9 @@ public class Visualisation extends Application {
             for(Circle c: circleMap.values()){
                 c.toFront();
             }
+            for(Label l: labels){
+                l.toFront();
+            }
         }
         else{
             root.getChildren().removeAll(lineMap.get(t));
@@ -166,6 +184,9 @@ public class Visualisation extends Application {
             allTrucksShown = true;
             for(Circle c: circleMap.values()){
                 c.toFront();
+            }
+            for(Label l: labels){
+                l.toFront();
             }
         }
 
