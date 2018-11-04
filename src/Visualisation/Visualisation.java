@@ -56,7 +56,7 @@ public class Visualisation extends Application {
             }
         }
         //Kleuren lezen uit file
-        File inputFile = new File("./src/TVH/Visualisation\\colors.txt");
+        File inputFile = new File("./src/Visualisation\\colors.txt");
 
         try{
             Scanner sc = new Scanner(inputFile).useLocale(Locale.US);

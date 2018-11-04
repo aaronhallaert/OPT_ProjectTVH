@@ -42,6 +42,14 @@ public class Location {
         return locationID == location.locationID;
     }
 
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "locationID=" + locationID +
+                '}';
+    }
+
     public int timeTo(Location l){
         return edgeMap.get(l).getTime();
     }

@@ -34,6 +34,12 @@ public class Machine {
         return type;
     }
 
+
+    @Override
+    public String toString() {
+        return "Machine{ type=" + type + '}';
+    }
+
     public void setType(MachineType type) {
         this.type = type;
     }

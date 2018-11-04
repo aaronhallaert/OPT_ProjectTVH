@@ -196,14 +196,14 @@ public class Problem {
             for (int to = 0; to < distanceMatrixSize; to++) {
                 int time = timeMatrix[from][to];
                 int distance = distanceMatrix[from][to];
-                if(!(time == 0 && distance == 0)){
-                    Location fromLoc = locations.get(from);
-                    Location toLoc = locations.get(to);
-                    Edge edge = new Edge(fromLoc, toLoc, time, distance);
-                    edges.add(edge);
-                    //We voegen ook nog een verwijzing naar de edge toe aan de "from location" (handig zoeken);
-                    fromLoc.addEdge(edge);
-                }
+
+                Location fromLoc = locations.get(from);
+                Location toLoc = locations.get(to);
+                Edge edge = new Edge(fromLoc, toLoc, time, distance);
+                edges.add(edge);
+                //We voegen ook nog een verwijzing naar de edge toe aan de "from location" (handig zoeken);
+                fromLoc.addEdge(edge);
+
 
             }
         }
@@ -351,7 +351,7 @@ public class Problem {
 
 
         while(!checkClusterReq(clusters)) {
-            Main.printGraph(this);
+            //Main.printGraph(this);
             for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
                 entry.getValue().reset();
                 entry.getValue().setupBeschikbaarAfTeLeveren(this);
