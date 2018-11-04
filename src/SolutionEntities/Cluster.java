@@ -6,13 +6,14 @@ import Entities.*;
 import java.util.*;
 
 /**
- * elke cluster heeft een depot, dus cluster is depot gelinkt met lijst van jobs
+ * elke cluster heeft een mainDepot, dus cluster is mainDepot gelinkt met lijst van jobs
  */
 public class Cluster {
 
     private int id;
-    private Depot depot;
-    private Set<Job> clusterJobs;
+    private Depot mainDepot;
+
+    private Set<Client> clusterClients;
     private Set<Depot> clusterDepots;
     private HashMap<MachineType, Integer> beschikbaar;
     private HashMap<MachineType, Integer> afTeLeveren;
@@ -21,21 +22,24 @@ public class Cluster {
     private Set<MachineType> genoegMachineTypes;
     private LinkedList<Edge> sortedEdgesToOtherDepots;
 
-    public Cluster(Depot depot, int id){
+    public Cluster(Depot mainDepot, int id){
         this.id=id;
-        this.depot=depot;
-        clusterJobs=new HashSet<>();
+        this.mainDepot = mainDepot;
+        clusterClients =new HashSet<>();
         beschikbaar=new HashMap<>();
         afTeLeveren= new HashMap<>();
         nodigeMachineTypes=new HashMap<>();
         overbodigeMachineTypes=new HashMap<>();
         genoegMachineTypes=new HashSet<>();
         sortedEdgesToOtherDepots=new LinkedList<>();
+        clusterDepots= new HashSet<>();
+        clusterDepots.add(mainDepot);
     }
 
     public Set<Depot> getClusterDepots() {
         return clusterDepots;
     }
+
 
     public void setClusterDepots(Set<Depot> clusterDepots) {
         this.clusterDepots = clusterDepots;
@@ -79,37 +83,37 @@ public class Cluster {
             for (Edge edge : sortedEdgesToOtherDepots) {
                 if(clusters.get(problem.depots.get(edge.getTo())).getOverbodigeMachineTypes().containsKey(nodigeMachineType.getKey())){
                     System.out.println("gevonden voor cluster "+id+" => cluster "+clusters.get(problem.depots.get(edge.getTo())).getId()+" heeft een machinetype "+nodigeMachineType.getKey()+" over" );
-                    // ga nu op zoek naar een node die niet ver ligt van huidige cluster depot en die missende machinetype bezit
+                    // ga nu op zoek naar een node die niet ver ligt van huidige cluster mainDepot en die missende machinetype bezit
 
                     // zoek node die machinetype nodig heeft in huidige cluster
-                    Job behoevendeJob=null;
-                    for (Job clusterJob : this.getClusterJobs()) {
-                        if(clusterJob.getToDropItems().contains(nodigeMachineType.getKey())){
-                           behoevendeJob=clusterJob;
+                    Client behoevendeClient =null;
+                    for (Client clusterClient : this.getClusterClients()) {
+                        if(clusterClient.getToDropItems().contains(nodigeMachineType.getKey())){
+                           behoevendeClient = clusterClient;
                            break;
                         }
                     }
 
 
-                    Job gevendeJob=null;
+                    Client gevendeClient =null;
                     // doorzoek eerst alle nodes van andere cluster op zoek naar nodige machinetype => verplaats die node naar huidige cluster
-                    for (Job clusterJob : clusters.get(problem.depots.get(edge.getTo())).getClusterJobs()) {
-                        for (Machine toCollectItem : clusterJob.getToCollectItems()) {
+                    for (Client clusterClient : clusters.get(problem.depots.get(edge.getTo())).getClusterClients()) {
+                        for (Machine toCollectItem : clusterClient.getToCollectItems()) {
                             if(toCollectItem.getType().equals(nodigeMachineType.getKey())){
-                                gevendeJob=clusterJob;
+                                gevendeClient = clusterClient;
                                 break;
                             }
                         }
                     }
 
                     // als geen nodes gevonden, voeg behoevende node toe aan andere cluster
-                    if(gevendeJob==null){
-                        this.getClusterJobs().remove(behoevendeJob);
-                        clusters.get(problem.depots.get(edge.getTo())).getClusterJobs().add(behoevendeJob);
+                    if(gevendeClient ==null){
+                        this.getClusterClients().remove(behoevendeClient);
+                        clusters.get(problem.depots.get(edge.getTo())).getClusterClients().add(behoevendeClient);
                     }
                     else{
-                        this.getClusterJobs().add(gevendeJob);
-                        clusters.get(problem.depots.get(edge.getTo())).getClusterJobs().remove(gevendeJob);
+                        this.getClusterClients().add(gevendeClient);
+                        clusters.get(problem.depots.get(edge.getTo())).getClusterClients().remove(gevendeClient);
                     }
                 }
             }
@@ -181,19 +185,19 @@ public class Cluster {
     }
 
     public Depot getMainDepot() {
-        return depot;
+        return mainDepot;
     }
 
     public void setMainDepot(Depot depot) {
-        this.depot = depot;
+        this.mainDepot = depot;
     }
 
-    public Set<Job> getClusterJobs() {
-        return clusterJobs;
+    public Set<Client> getClusterClients() {
+        return clusterClients;
     }
 
-    public void setClusterJobs(Set<Job> clusterJobs) {
-        this.clusterJobs = clusterJobs;
+    public void setClusterClients(Set<Client> clusterClients) {
+        this.clusterClients = clusterClients;
     }
 
     public HashMap<MachineType, Integer> getBeschikbaar() {
@@ -216,8 +220,8 @@ public class Cluster {
         for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
             if(entry.getValue().getId()!=this.getId()){
 
-                // vraag de edge op van het huidige depot naar het depot van de andere cluster en sorteer
-                sortedEdgesToOtherDepots.add(depot.getLocation().getEdgeMap().get(entry.getKey().getLocation()));
+                // vraag de edge op van het huidige mainDepot naar het mainDepot van de andere cluster en sorteer
+                sortedEdgesToOtherDepots.add(mainDepot.getLocation().getEdgeMap().get(entry.getKey().getLocation()));
                 sortedEdgesToOtherDepots.sort(Comparator.comparing(Edge::getDistance));
 
 
@@ -240,8 +244,8 @@ public class Cluster {
             this.getBeschikbaar().put(machineType,0);
             this.getAfTeLeveren().put(machineType, 0);
         }
-        // machine types beschikbaar in depot
-        for(Map.Entry<MachineType, LinkedList<Machine>> entry1: depot.getMachines().entrySet()){
+        // machine types beschikbaar in mainDepot
+        for(Map.Entry<MachineType, LinkedList<Machine>> entry1: mainDepot.getMachines().entrySet()){
             for (int i = 0; i < entry1.getValue().size(); i++) {
                 this.getBeschikbaar().putIfAbsent(entry1.getKey(), 0);
                 this.getBeschikbaar().replace(entry1.getKey(), this.getBeschikbaar().get(entry1.getKey())+1);
@@ -249,13 +253,13 @@ public class Cluster {
         }
 
         // machine types beschikbaar op locaties en af te leveren op locatie
-        for (Job job : this.getClusterJobs()) {
-            for (Machine toCollectItem : job.getToCollectItems()) {
+        for (Client client : this.getClusterClients()) {
+            for (Machine toCollectItem : client.getToCollectItems()) {
                 this.getBeschikbaar().putIfAbsent(toCollectItem.getType(), 0);
                 this.getBeschikbaar().replace(toCollectItem.getType(), this.getBeschikbaar().get(toCollectItem.getType())+1);
             }
 
-            for (MachineType toDropItem : job.getToDropItems()) {
+            for (MachineType toDropItem : client.getToDropItems()) {
                 this.getAfTeLeveren().putIfAbsent(toDropItem, 0);
                 this.getAfTeLeveren().replace(toDropItem, this.getAfTeLeveren().get(toDropItem)+1);
             }

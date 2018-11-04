@@ -5,14 +5,14 @@ import java.util.LinkedList;
 
 public class Stop {
 
-    private Job locatie;
+    private Client locatie;
     private int fillRate; //na stop
     private ArrayList<Machine> collectItems;
     private ArrayList<Machine> dropItems;
     private LinkedList<Machine> onTruck;
 
 
-    public Stop(Job locatie, ArrayList<Machine> collectItems, ArrayList<Machine> dropItems, LinkedList<Machine> onTruck) {
+    public Stop(Client locatie, ArrayList<Machine> collectItems, ArrayList<Machine> dropItems, LinkedList<Machine> onTruck) {
         this.locatie = locatie;
         this.collectItems = collectItems;
         this.dropItems = dropItems;
@@ -21,7 +21,7 @@ public class Stop {
     }
 
     public Stop(Stop s){
-        this.locatie = new Job(s.locatie);
+        this.locatie = new Client(s.locatie);
         this.fillRate = s.fillRate;
         this.collectItems = new ArrayList<>(s.collectItems);
         this.dropItems = new ArrayList<>(s.dropItems);

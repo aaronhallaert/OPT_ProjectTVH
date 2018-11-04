@@ -2,14 +2,14 @@ package Entities;
 
 import java.util.*;
 
-public class Job {
+public class Client {
 
     private Location location;
     private LinkedList<Machine> toCollectItems;
     private LinkedList<MachineType> toDropItems;
     private boolean finished;
 
-    public Job(Location location) {
+    public Client(Location location) {
         this.location = location;
         this.toCollectItems = new LinkedList<>();
         this.toDropItems = new LinkedList<>();
@@ -17,7 +17,7 @@ public class Job {
     }
 
     //Copy constructor
-    public Job(Job n){
+    public Client(Client n){
         location = n.location;
         finished = n.finished;
         toCollectItems = new LinkedList<>(n.toCollectItems);

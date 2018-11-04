@@ -15,7 +15,7 @@ public class Problem {
 
     public ArrayList<Location> locations = new ArrayList<>();
     public HashMap<Location, Depot> depots = new HashMap<>();
-    public HashMap<Location,Job> jobs = new HashMap<>();
+    public HashMap<Location, Client> jobs = new HashMap<>();
     public HashMap<Machine, Location> machineLocations = new HashMap<>();
     public ArrayList<Truck> trucks = new ArrayList<>();
     public ArrayList<MachineType> machineTypes = new ArrayList<>();
@@ -135,9 +135,9 @@ public class Problem {
                 jobs.get(location).addToDropItems(machineType);
             }
             else{
-                Job job = new Job(location);
-                job.addToDropItems(machineType);
-                jobs.put(location, job);
+                Client client = new Client(location);
+                client.addToDropItems(machineType);
+                jobs.put(location, client);
             }
 
         }
@@ -157,9 +157,9 @@ public class Problem {
                 jobs.get(location).addToCollectItems(machine);
             }
             else{
-                Job job = new Job(location);
-                job.addToCollectItems(machine);
-                jobs.put(location, job);
+                Client client = new Client(location);
+                client.addToCollectItems(machine);
+                jobs.put(location, client);
             }
         }
 
@@ -216,14 +216,26 @@ public class Problem {
 
 
         HashMap<Depot, Cluster> clusters= setupClusters();
-        // depots zonder jobs, aan andere cluster geven
-        for (Map.Entry<Depot, Cluster> cluster : clusters.entrySet()) {
-            if(cluster.getValue().getClusterJobs().size()==0){
+
+        Iterator it = clusters.entrySet().iterator();
+        while (it.hasNext())
+        {
+            Map.Entry<Depot, Cluster> item = (Map.Entry<Depot, Cluster>) it.next();
+            if(item.getValue().getClusterClients().size()==0) {
                 // voeg mainDepot toe aan andere dichtsbijzijnde cluster
-                clusters.get(depots.get(cluster.getValue().getSortedEdgesToOtherDepots().get(0).getTo())).getClusterDepots().add(cluster.getKey());
-                // verwijder cluster uit depot (aangezien deze is samengesmolten)
-                clusters.remove(cluster.getKey());
+                clusters.get(depots.get(item.getValue().getSortedEdgesToOtherDepots().get(0).getTo())).getClusterDepots().add(item.getKey());
+                // verwijder cluster (aangezien deze is samengesmolten met andere)
+                it.remove();
             }
+        }
+
+
+        Iterator it2 = clusters.entrySet().iterator();
+        while (it2.hasNext())
+        {
+            // voeg alle clusters toe aan de cluster
+            Map.Entry<Depot, Cluster> item = (Map.Entry<Depot, Cluster>) it2.next();
+
         }
 
 
@@ -244,9 +256,9 @@ public class Problem {
     private HashMap<Depot, Cluster> setupClusters(){
 
         // DICHTSTE DEPOT VOOR ELKE JOB BEREKENEN
-        HashMap<Job, Depot> nearestDepot=new HashMap<>();
-        // itereren over alle jobs <Location, Job>
-        for (Map.Entry<Location, Job> entry : jobs.entrySet()) {
+        HashMap<Client, Depot> nearestDepot=new HashMap<>();
+        // itereren over alle jobs <Location, Client>
+        for (Map.Entry<Location, Client> entry : jobs.entrySet()) {
             // voor elke job gesorteerde lijst van edges eruit halen en eerste depot = dichtste depot voor die job
             for (Edge edge : entry.getValue().getLocation().getSortedEdgeList()) {
                 // edgeTo is een depot
@@ -264,14 +276,14 @@ public class Problem {
 
 
         // itereren over alle nearestDepot
-        for (Map.Entry<Job, Depot> entry : nearestDepot.entrySet()) {
+        for (Map.Entry<Client, Depot> entry : nearestDepot.entrySet()) {
 
             if(clusters.get(entry.getValue())==null){
                 clusters.put(entry.getValue(), new Cluster(entry.getValue(), clusterCount));
                 System.out.println("clustercount " + clusterCount);
                 clusterCount++;
             }
-            clusters.get(entry.getValue()).getClusterJobs().add(entry.getKey());
+            clusters.get(entry.getValue()).getClusterClients().add(entry.getKey());
         }
 
 

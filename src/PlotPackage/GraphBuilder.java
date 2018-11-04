@@ -2,7 +2,7 @@ package PlotPackage;
 
 
 import Entities.Depot;
-import Entities.Job;
+import Entities.Client;
 import Entities.Location;
 import SolutionEntities.Cluster;
 import org.jfree.chart.ChartFactory;
@@ -28,9 +28,9 @@ public class GraphBuilder extends ApplicationFrame{
 
         for (Map.Entry<Depot, Cluster> entry : clusters.entrySet()) {
             final XYSeries locationPoints = new XYSeries("cluster "+entry.getValue().getId());
-            for (Job job : entry.getValue().getClusterJobs()) {
-                double lat= job.getLocation().getLatitude();
-                double lng= job.getLocation().getLongitude();
+            for (Client client : entry.getValue().getClusterClients()) {
+                double lat= client.getLocation().getLatitude();
+                double lng= client.getLocation().getLongitude();
                 locationPoints.add(lng, lat);
             }
             clusterPoints.add(locationPoints);
