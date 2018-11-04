@@ -1,4 +1,4 @@
-package PlotPackage;
+package Visualisation;
 
 
 import Entities.Depot;

@@ -1,6 +1,6 @@
 package Algorithm;
 
-import PlotPackage.GraphBuilder;
+import Visualisation.GraphBuilder;
 import org.jfree.ui.RefineryUtilities;
 
 import java.io.File;
@@ -15,7 +15,8 @@ public class Main {
 
         try {
             Problem problem = new Problem(inputFile);
-            problem.createInitialSolution();
+            Solution solution= problem.createInitialSolution();
+           // Visualisation.run(solution, problem.jernClusters, problem.jernDepots);
             printGraph(problem);
 
         } catch (FileNotFoundException e) {

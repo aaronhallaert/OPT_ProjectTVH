@@ -2,6 +2,7 @@ package Algorithm;
 
 import Entities.*;
 import SolutionEntities.Cluster;
+import SolutionEntities.JernCluster;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,9 +10,9 @@ import java.util.*;
 
 public class Problem {
 
-    public String info;
-    public int TRUCK_CAPACITY;
-    public int TRUCK_WORKING_TIME;
+    public static String info;
+    public static int TRUCK_CAPACITY;
+    public static int TRUCK_WORKING_TIME;
 
     public ArrayList<Location> locations = new ArrayList<>();
     public HashMap<Location, Depot> depots = new HashMap<>();
@@ -23,6 +24,8 @@ public class Problem {
     public ArrayList<Edge> edges = new ArrayList<>();
 
 
+    public ArrayList<JernCluster> jernClusters;
+    public ArrayList<Depot> jernDepots;
 
     //computed
     public HashMap<Depot, Cluster> clusters;
@@ -230,17 +233,55 @@ public class Problem {
         }
 
 
+        jernClusters=new ArrayList<>();
+
+        // converteer naar JernCluster
         Iterator it2 = clusters.entrySet().iterator();
         while (it2.hasNext())
         {
-            // voeg alle clusters toe aan de cluster
             Map.Entry<Depot, Cluster> item = (Map.Entry<Depot, Cluster>) it2.next();
+            jernClusters.add(new JernCluster(item.getValue()));
 
         }
 
 
 
-        return null;
+        for(JernCluster cluster: jernClusters){
+            cluster.solve(trucks);
+        }
+
+        int totalDistance = 0;
+        int totalTime = 0;
+        for(Truck t: trucks){
+            int time = t.getTotalTime();
+            int distance = t.getTotalDistance();
+            System.out.println("Truck "+t.getTruckId()+":\t"+time+"min\t"+distance+"km");
+            totalDistance += distance;
+            totalTime += time;
+        }
+        System.out.println("Total: \t\t"+totalTime+"min\t"+totalDistance+"km");
+
+        for(Truck t: trucks){
+            if(t.getRoute().getFirst().getLocation() != t.getRoute().getLast().getLocation()){
+                //System.out.println("error");
+            }
+        }
+
+        jernDepots=new ArrayList<>();
+        Iterator it3 = depots.entrySet().iterator();
+        while (it3.hasNext())
+        {
+            Map.Entry<Location, Depot> item = (Map.Entry<Location, Depot>) it3.next();
+            jernDepots.add(item.getValue());
+
+        }
+
+
+
+        return new Solution(trucks);
+
+
+
 
     }
 

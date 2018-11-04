@@ -9,7 +9,7 @@ public class Location {
     private double latitude;
     private double longitude;
     private String name;
-    private HashMap<Location , Edge> edgeMap;
+    private HashMap<Location, Edge> edgeMap;
     private LinkedList<Edge> sortedEdgeList;
 
     public Location(int locationID,String name ,double latitude, double longitude) {
@@ -30,7 +30,8 @@ public class Location {
     }
 
     public int distanceTo(Location l){
-        return edgeMap.get(l).getDistance();
+        Edge edge= edgeMap.get(l);
+        return edge.getDistance();
     }
 
     @Override
@@ -39,6 +40,10 @@ public class Location {
         if (!(o instanceof Location)) return false;
         Location location = (Location) o;
         return locationID == location.locationID;
+    }
+
+    public int timeTo(Location l){
+        return edgeMap.get(l).getTime();
     }
 
     public int getLocationID() {

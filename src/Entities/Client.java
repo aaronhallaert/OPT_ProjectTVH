@@ -40,7 +40,27 @@ public class Client {
     }
 
 
+    public void removeFromCollectItems(Machine machine){
+        toCollectItems.remove(machine);
+    }
 
+    public boolean collectItemsContains(MachineType mt){
+        for(Machine m: toCollectItems){
+            if(m.getType() == mt){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Machine getMachineToCollect(MachineType mt){
+        for(Machine m: toCollectItems){
+            if(m.getType() == mt){
+                return m;
+            }
+        }
+        return null;
+    }
 
 
     public LinkedList<Machine> getToCollectItems() {
