@@ -29,7 +29,6 @@ public class JernCluster {
         }
         for (Depot clusterDepot : c.getClusterDepots()) {
             allLocations.add(clusterDepot.getLocation());
-            members.add(clusterDepot.getLocation());
             depots.add(clusterDepot.getLocation());
             locationDepotMap.put(clusterDepot.getLocation(), clusterDepot);
         }
