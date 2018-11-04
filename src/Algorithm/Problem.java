@@ -216,6 +216,17 @@ public class Problem {
 
 
         HashMap<Depot, Cluster> clusters= setupClusters();
+        // depots zonder jobs, aan andere cluster geven
+        for (Map.Entry<Depot, Cluster> cluster : clusters.entrySet()) {
+            if(cluster.getValue().getClusterJobs().size()==0){
+                // voeg mainDepot toe aan andere dichtsbijzijnde cluster
+                clusters.get(depots.get(cluster.getValue().getSortedEdgesToOtherDepots().get(0).getTo())).getClusterDepots().add(cluster.getKey());
+                // verwijder cluster uit depot (aangezien deze is samengesmolten)
+                clusters.remove(cluster.getKey());
+            }
+        }
+
+
 
         return null;
 

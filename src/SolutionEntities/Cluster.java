@@ -13,6 +13,7 @@ public class Cluster {
     private int id;
     private Depot depot;
     private Set<Job> clusterJobs;
+    private Set<Depot> clusterDepots;
     private HashMap<MachineType, Integer> beschikbaar;
     private HashMap<MachineType, Integer> afTeLeveren;
     private HashMap<MachineType, Integer> nodigeMachineTypes;
@@ -32,6 +33,13 @@ public class Cluster {
         sortedEdgesToOtherDepots=new LinkedList<>();
     }
 
+    public Set<Depot> getClusterDepots() {
+        return clusterDepots;
+    }
+
+    public void setClusterDepots(Set<Depot> clusterDepots) {
+        this.clusterDepots = clusterDepots;
+    }
 
     /**
      * print de behoeftes, overbodige en genoeg machine types
@@ -172,11 +180,11 @@ public class Cluster {
         this.genoegMachineTypes = genoegMachineTypes;
     }
 
-    public Depot getDepot() {
+    public Depot getMainDepot() {
         return depot;
     }
 
-    public void setDepot(Depot depot) {
+    public void setMainDepot(Depot depot) {
         this.depot = depot;
     }
 
