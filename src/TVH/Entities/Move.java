@@ -60,7 +60,7 @@ public class Move {
     @Override
     public String toString() {
         return "Move{" +
-                "machine=" + machine.getId() +"(" + machine.getType().getId() +")" +
+                "machine=" + machine.getId() +"(" + machine.getType().getName() +")" +
                 ", from=" + from.getLocationID() +
                 ", to=" + to.getLocationID() +
                 '}';
