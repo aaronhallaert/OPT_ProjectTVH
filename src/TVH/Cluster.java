@@ -319,21 +319,20 @@ public class Cluster {
 
         //Next step is to assign moves to trucks;
 
+        //Sort moves
+        movesList.sort(Comparator.comparing(Move::getRemoteFactor).reversed());
 
-        //Make a list of the available trucks to handle the moves;
-        HashMultimap<Location, Truck> truckMap = HashMultimap.create();
-        for(Truck t: trucks){
-            //Check if truck is not yet being used by other cluster;
-            if(!t.isUsed()){
-                truckMap.put(t.getStartLocation(),t);
+        Set<Machine> machinesMoved = new HashSet<>();
+        for(Move m: movesList){
+            if(!machinesMoved.add(m.getMachine())){
+                System.out.println("howla");
             }
         }
+
         //Assign each move to a truck
         for(Move m: movesList){
-            Location from = m.getFrom();
 
-
-            //First we check if we have any trucks that are passing in either both origin and destination of the move
+            /*//First we check if we have any trucks that are passing in either both origin and destination of the move
             //or one of the two. We check these trucks first, because they are already passing at one of both locations.
             ArrayList<Truck> trucksPassingBoth = new ArrayList<>();
             ArrayList<Truck> trucksPassingOne = new ArrayList<>();
@@ -357,13 +356,18 @@ public class Cluster {
                         if(!sortedTruckList.contains(t)) sortedTruckList.add(t);
                     }
                 }
+            }*/
+            LinkedList<TruckPreference> sortedTruckList = new LinkedList<>();
+            for(Truck t: trucks){
+                sortedTruckList.add(new TruckPreference(t, m));
             }
+            sortedTruckList.sort(Comparator.comparing(TruckPreference::getPreference));
 
             //Go through the sortedTruckList until a truck is found that is able to handle the move without breaking any
             //constraints.
             boolean truckFound = false;
             while(!sortedTruckList.isEmpty()){
-                Truck selected = sortedTruckList.getFirst();
+                Truck selected = sortedTruckList.getFirst().getTruck();
                 //Make a deep copy backup to roll back the truck in case it can't handle the move;
                 Truck backup = new Truck(selected);
                 if(selected.doMove(m)){
@@ -379,13 +383,15 @@ public class Cluster {
                 }
             }
             //If a truck was found to do the move, we go to the next move
-            if(truckFound) continue;
+            if(sortedTruckList.isEmpty() && !truckFound) {
+                System.out.println(m);
+            }
 
 
             //If we reach this part of the code, it means that the move can't be executed by any available trucks.
             //🤔🤔🤔🤔🤔🤔
 
-            System.out.println("Wooooops");
+
 
         }
         //System.out.println("done");

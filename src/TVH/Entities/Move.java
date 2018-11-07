@@ -11,6 +11,7 @@ public class Move {
     private Machine machine;
     private Location from;
     private Location to;
+    private int remoteness;
 
     public Move(Machine machine, Location from, Location to) {
         this.machine = machine;
@@ -40,5 +41,28 @@ public class Move {
 
     public void setTo(Location to) {
         this.to = to;
+    }
+
+    public int getRemoteFactor(){
+        int toRemoteness = 0;
+        int fromRemoteness = 0;
+        for(Edge e: from.getEdgeMap().values()){
+            toRemoteness += e.getDistance();
+        }
+        for(Edge e: to.getEdgeMap().values()){
+            fromRemoteness += e.getDistance();
+        }
+
+        remoteness = Math.max(toRemoteness, fromRemoteness);
+        return remoteness;
+    }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+                "machine=" + machine.getId() +"(" + machine.getType().getId() +")" +
+                ", from=" + from.getLocationID() +
+                ", to=" + to.getLocationID() +
+                '}';
     }
 }

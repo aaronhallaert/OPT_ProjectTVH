@@ -198,8 +198,8 @@ public class Problem {
 
     }
 
-    public Solution solve(){
-        Solution Init = createInitialSolution(1);
+    public Solution solve(int n_clusters){
+        Solution Init = createInitialSolution(n_clusters);
         /*
         * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
         * 1) Initial result:
@@ -219,7 +219,7 @@ public class Problem {
      * @return
      */
     public Solution createInitialSolution(int n_clusters){
-        //int n_clusters =(int) Math.round((double) clients.size()/5);
+        //n_clusters =(int) Math.round((double) clients.size()/5);
         clusters = Cluster.createClusters(n_clusters, clients, depots);
 
 

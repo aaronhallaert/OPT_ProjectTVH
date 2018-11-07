@@ -71,7 +71,23 @@ public class Truck {
             //In case the Truck doesn't yet pass by Move.from.
             Stop newStop = new Stop(from);
             //Add a new stop on the optimal location
-            int index = findBestIndexToInsert(newStop);
+            int highBound = 0;
+            int foundAt = -1;
+            for(Stop s: route){
+                if(s.getLocation() == to){
+                    foundAt = highBound;
+                }
+                highBound++;
+            }
+            if(foundAt == -1) highBound = route.size()-1;
+
+
+            int index = findBestIndexToInsert(newStop, 0, highBound);
+            if(index < 0){
+                System.out.println("stop");
+            }
+
+
             newStop.setOnTruck(route.get(index-1).getOnTruck());
             route.add(index, newStop);
             locationStopMap.put(from, newStop);
@@ -80,7 +96,22 @@ public class Truck {
             //In case the Truck doesn't yet pass by Move.to.
             Stop newStop = new Stop(to);
             //Add a new stop on the optimal location
-            int index = findBestIndexToInsert(newStop);
+            int lowBound = 0;
+            boolean found = false;
+            for(Stop s: route){
+                if(s.getLocation() == to){
+                    found = true;
+                    break;
+                }
+                lowBound++;
+            }
+            if(!found) lowBound = 0;
+
+
+            int index = findBestIndexToInsert(newStop, lowBound, route.size()-1);
+            if(index < 0){
+                System.out.println("stop");
+            }
             newStop.setOnTruck(route.get(index-1).getOnTruck());
             route.add(index, newStop);
             locationStopMap.put(to, newStop);
@@ -95,11 +126,17 @@ public class Truck {
         if(endLocation == to) dropStop = route.getLast();
         else dropStop = locationStopMap.get(to);
 
+        if(route.indexOf(collectStop) > route.indexOf(dropStop)){
+            //Dit kan enkel het geval zijn als de nodes er al inzaten voor een andere move
+            return false;
+        };
 
         //Add the machine to the right stops, and check the fillrate constraint;
         collectStop.addCollectItem(machine);
         dropStop.addDropItem(machine);
-        if(!recalculateOnTruck()) return false;
+        if(!recalculateOnTruck()) {
+            return false;
+        }
         /*int collectIndex = route.indexOf(collectStop);
         int dropIndex = route.indexOf(dropStop);
         for(int i = collectIndex; i < dropIndex; i++){
@@ -108,7 +145,9 @@ public class Truck {
             }
         }*/
         //Total time is recalculated and checked;
-        if(!recalculateTime()) return false;
+        if(!recalculateTime()) {
+            return false;
+        }
 
         //If this part of the code is reached, it means that the truck can handle the new move without breaking any constraints;
         used = true;
@@ -133,7 +172,7 @@ public class Truck {
         for(Stop s: route){
             totalTime += s.getTimeSpend();
         }
-        return totalTime < Problem.TRUCK_WORKING_TIME;
+        return totalTime <= Problem.TRUCK_WORKING_TIME;
     }
     public boolean recalculateOnTruck(){
         LinkedList<Machine> onTruck = new LinkedList<>();
@@ -154,11 +193,11 @@ public class Truck {
      * @param toInsert new Stop
      * @return index of where the new Stop should be inserted in the route.
      */
-    public int findBestIndexToInsert(Stop toInsert){
+    public int findBestIndexToInsert(Stop toInsert, int lowBound, int highBound){
         int minAddedDistance = Integer.MAX_VALUE;
         int index = -1;
         Location X = toInsert.getLocation();
-        for (int i = 0; i < route.size()-1; i++) {
+        for (int i = lowBound; i < highBound; i++) {
             Location A = route.get(i).getLocation();
             Location B = route.get(i+1).getLocation();
             int oldDistance = A.distanceTo(B);

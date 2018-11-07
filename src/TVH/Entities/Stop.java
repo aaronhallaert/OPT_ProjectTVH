@@ -64,7 +64,7 @@ public class Stop {
         for(Machine m: onTruck){
             fillRate += m.getType().getVolume();
         }
-        return fillRate < 100;
+        return fillRate <= 100;
     }
     public int getTimeSpend(){
         //TODO:Efficienter maken
