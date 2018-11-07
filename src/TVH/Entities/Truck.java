@@ -71,18 +71,9 @@ public class Truck {
             //In case the Truck doesn't yet pass by Move.from.
             Stop newStop = new Stop(from);
             //Add a new stop on the optimal location
-            int highBound = 0;
-            int foundAt = -1;
-            for(Stop s: route){
-                if(s.getLocation() == to){
-                    foundAt = highBound;
-                }
-                highBound++;
-            }
-            if(foundAt == -1) foundAt = route.size()-1;
 
 
-            int index = findBestIndexToInsert(newStop, 0, foundAt);
+            int index = findBestIndexToInsert(newStop, 0, findHighBound(to));
             if(index < 0){
                 System.out.println("stop");
             }
@@ -96,19 +87,8 @@ public class Truck {
             //In case the Truck doesn't yet pass by Move.to.
             Stop newStop = new Stop(to);
             //Add a new stop on the optimal location
-            int lowBound = 0;
-            int foundAt = -1;
-            for(Stop s: route){
-                if(s.getLocation() == from){
-                    foundAt = lowBound;
-                    break;
-                }
-                lowBound++;
-            }
-            if(foundAt == -1) foundAt = 0;
 
-
-            int index = findBestIndexToInsert(newStop, foundAt, route.size()-1);
+            int index = findBestIndexToInsert(newStop, findLowBound(from), route.size()-1);
             if(index < 0){
                 System.out.println("stop");
             }
@@ -209,6 +189,35 @@ public class Truck {
         }
         return index;
     }
+
+    private int findLowBound(Location l){
+        int i = 0;
+        int lowBound = -1;
+        for(Stop s: route){
+            if(s.getLocation() == l){
+                lowBound = i;
+                break;
+            }
+            i++;
+        }
+        if(lowBound == -1) lowBound = 0;
+
+        return lowBound;
+
+    }
+    private int findHighBound(Location l){
+        int i = 0;
+        int highBound = -1;
+        for(Stop s: route){
+            if(s.getLocation() == l){
+                highBound = i;
+            }
+            i++;
+        }
+        if(highBound == -1) highBound = route.size()-1;
+        return highBound;
+    }
+
 
     /**
      * This method is used to rollback the Truck to a previous state.
