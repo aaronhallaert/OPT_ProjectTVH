@@ -322,44 +322,61 @@ public class Truck {
     }
     public void optimiseRoute(Problem problem){
 
-
+        // sla originele route op (deze wordt upgedate indien er iets beters gevonden wordt)
         LinkedList<Stop> origineleRoute= new LinkedList<>(route);
+        // sla originele distance op (deze wordt upgedate indien er iets beters gevonden wordt)
         int originalTotaldistance= getTotalDistance();
 
+        // vraag eerste en laatste node op
         Stop firstStop = route.getFirst();
         Stop lastStop = route.getLast();
 
-        LinkedList<Stop> alleStops = new LinkedList<>();
-        for (Map.Entry<Location, Stop> stopEntry : locationStopMap.entrySet()) {
-            alleStops.add(stopEntry.getValue());
-        }
 
-        alleStops.remove(firstStop);
-        alleStops.remove(lastStop);
+
+
 
         for (int i = 0; i < 1000; i++) {
+            // haal alle stops uit locationStopMap
+            LinkedList<Stop> alleStops = new LinkedList<>();
+            alleStops.addAll(locationStopMap.values());
+
+
+            // haal eerste en laatste stop uit voorlopig route, aangezien deze niet geshuffled mogen worden
+            alleStops.remove(firstStop);
+            alleStops.remove(lastStop);
+
+
+
             // verwissel random 2 punten
+            int randomIndex1 = (int) getRandomDoubleBetweenRange(0, alleStops.size()-1);
+           // System.out.println("randomIndex1 "+randomIndex1);
+            int randomIndex2 = (int) getRandomDoubleBetweenRange(0, alleStops.size()-1);
+            //System.out.println("randomIndex2 "+randomIndex2);
+            if (randomIndex1 != randomIndex2) {
+                Collections.swap(alleStops, randomIndex1, randomIndex2);
+            }
 
-
-            Collections.shuffle(alleStops);
-
-
-            // voeg eerste en laatste stop toe
+            // voeg eerste en laatste stop terug toe
             alleStops.addFirst(firstStop);
             alleStops.addLast(lastStop);
 
 
-            // controleer routeke
+            // controleer routeke of ie beter is
             if (routeControleBasedOnStops(alleStops, problem)) {
+                // voorlopige route instellen als route van truck (om te kunnen recalculaten)
                 route = alleStops;
+                recalculateOnTruck();
+                recalculateTime();
+
+
                 if (!recalculateOnTruck() || !recalculateTime()) {
-                    System.out.println("verwerp deze nieuwe route");
+                    //System.out.println("verwerp deze nieuwe route");
                     route = origineleRoute;
                     recalculateOnTruck();
                     recalculateTime();
                 } else {
 
-                    int currentTotalDistance= this.getTotalDistance();
+                    int currentTotalDistance= getTotalDistance();
                     if (originalTotaldistance > currentTotalDistance) {
                         origineleRoute = route;
                         originalTotaldistance = getTotalDistance();
@@ -368,14 +385,13 @@ public class Truck {
                 }
             }
 
-            route = origineleRoute;
-            recalculateOnTruck();
-            recalculateTime();
-
 
             alleStops.removeFirst();
             alleStops.removeLast();
         }
+        route = origineleRoute;
+        recalculateOnTruck();
+        recalculateTime();
 
     }
 
