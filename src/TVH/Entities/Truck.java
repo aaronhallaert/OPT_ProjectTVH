@@ -154,6 +154,9 @@ public class Truck {
         }
         return totalTime <= Problem.TRUCK_WORKING_TIME;
     }
+
+
+
     public boolean recalculateOnTruck(){
         LinkedList<Machine> onTruck = new LinkedList<>();
         for(Stop s: route){
@@ -265,6 +268,7 @@ public class Truck {
     }
 
 
+
     public boolean routeControleBasedOnStops(LinkedList<Stop> route, Problem problem){
         HashMap<MachineType, Integer> availableMap= new HashMap<>();
         for (MachineType machineType : problem.machineTypes) {
@@ -308,55 +312,70 @@ public class Truck {
 
         return true;
     }
+
+    public static double getRandomDoubleBetweenRange(double min, double max){
+
+        double x = (Math.random()*((max-min)+1))+min;
+
+        return x;
+
+    }
     public void optimiseRoute(Problem problem){
 
-        Stop firstStop= route.getFirst();
-        Stop lastStop=route.getLast();
+
+        LinkedList<Stop> origineleRoute= new LinkedList<>(route);
+        int originalTotaldistance= getTotalDistance();
+
+        Stop firstStop = route.getFirst();
+        Stop lastStop = route.getLast();
 
         LinkedList<Stop> alleStops = new LinkedList<>();
-        for(Map.Entry<Location, Stop> stopEntry: locationStopMap.entrySet()) {
+        for (Map.Entry<Location, Stop> stopEntry : locationStopMap.entrySet()) {
             alleStops.add(stopEntry.getValue());
         }
 
         alleStops.remove(firstStop);
         alleStops.remove(lastStop);
 
-        LinkedList<Stop> totalRouteStops= new LinkedList<>();
+        for (int i = 0; i < 1000; i++) {
+            // verwissel random 2 punten
 
-        HashMap<MachineType, Set<Stop>> collectStops= new HashMap<>();
-        HashMap<MachineType, Set<Stop>> dropStops= new HashMap<>();
 
-        for (MachineType machineType : problem.machineTypes) {
-            for(Map.Entry<Location, Stop> stopEntry: locationStopMap.entrySet()){
-                for (Machine collectItem : stopEntry.getValue().getCollectItems()) {
-                    if(collectItem.getType().equals(machineType)){
-                        collectStops.putIfAbsent(machineType, new HashSet<>());
-                        collectStops.get(machineType).add(stopEntry.getValue());
-                    }
-                }
-                for (Machine dropItem : stopEntry.getValue().getDropItems()) {
-                    if(dropItem.getType().equals(machineType)){
-                        dropStops.putIfAbsent(machineType, new HashSet<>());
-                        dropStops.get(machineType).add(stopEntry.getValue());
+            Collections.shuffle(alleStops);
+
+
+            // voeg eerste en laatste stop toe
+            alleStops.addFirst(firstStop);
+            alleStops.addLast(lastStop);
+
+
+            // controleer routeke
+            if (routeControleBasedOnStops(alleStops, problem)) {
+                route = alleStops;
+                if (!recalculateOnTruck() || !recalculateTime()) {
+                    System.out.println("verwerp deze nieuwe route");
+                    route = origineleRoute;
+                    recalculateOnTruck();
+                    recalculateTime();
+                } else {
+
+                    int currentTotalDistance= this.getTotalDistance();
+                    if (originalTotaldistance > currentTotalDistance) {
+                        origineleRoute = route;
+                        originalTotaldistance = getTotalDistance();
+
                     }
                 }
             }
+
+            route = origineleRoute;
+            recalculateOnTruck();
+            recalculateTime();
+
+
+            alleStops.removeFirst();
+            alleStops.removeLast();
         }
-
-        if(!routeControleBasedOnStops(route, problem)) System.out.println("deze route is schijt"); ;
-
-
-        /*
-        route= totalRouteStops;
-        for (Stop stop : route) {
-            System.out.println(stop.getLocation().getLocationID());
-        }
-        if(recalculateTime() || recalculateOnTruck()){
-            System.out.println("misse wi");
-        }*/
-
-
-
 
     }
 

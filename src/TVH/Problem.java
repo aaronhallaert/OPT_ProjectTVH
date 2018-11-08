@@ -210,9 +210,11 @@ public class Problem {
         * 2) Optimisation phase
         *
         * */
-        for (Truck truck : Init.getTrucks()) {
-            if(!truck.routeControleBasedOnStops(truck.getRoute(), this)) System.out.println("deze route is schijt");;
-        }
+        /*for (Truck truck : Init.getTrucks()) {
+            if(truck.getRoute().size()>2) {
+                truck.optimiseRoute(this);
+            }
+        }*/
         return Init;
     }
 
@@ -239,6 +241,14 @@ public class Problem {
         for(Cluster cluster: clusters){
             cluster.solve(trucks);
         }
+
+
+        for (Truck truck : trucks) {
+            if (truck.getRoute().size() > 2) {
+                truck.optimiseRoute(this);
+            }
+        }
+
 
         int totalDistance = 0;
         int totalTime = 0;
