@@ -283,6 +283,10 @@ public class Truck {
                 neededMapStop.replace(machine.getType(), neededMapStop.get(machine.getType())+1);
             }
 
+            // oppikken van machines (dus available aanvullen)
+            for (Machine machine : machinesCollect) {
+                availableMap.replace(machine.getType(), availableMap.get(machine.getType())+1);
+            }
 
             for (Map.Entry<MachineType, Integer> machineTypeNeeded : neededMapStop.entrySet()) {
                 MachineType nodigeMachinetype= machineTypeNeeded.getKey();
@@ -297,10 +301,7 @@ public class Truck {
             }
 
 
-            // als niet gestopt, voeg collect items toe aan available
-            for (Machine machine : machinesCollect) {
-                availableMap.replace(machine.getType(), availableMap.get(machine.getType())+1);
-            }
+
 
         }
 
