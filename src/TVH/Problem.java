@@ -311,37 +311,35 @@ public class Problem {
         Collections.sort(jobs, new JobRemotenessComparator());
 
         //Assign each move to a truck
-        for(Job m: jobs){
-            if(m instanceof DropJob){
-                DropJob dropm = (DropJob) m;
-                LinkedList<Truck> sortedTruckList = new LinkedList<>();
-                sortedTruckList.addAll(trucks);
-                //Sort truck list based on it's route proximity to the move
-                sortedTruckList.sort(Comparator.comparing(t->t.getDistanceToLocation(dropm.getTo())));
+        for(Job j: jobs){
+            LinkedList<Truck> sortedTruckList = new LinkedList<>();
+            sortedTruckList.addAll(trucks);
+            //Sort truck list based on it's route proximity to the location of the Job
+            sortedTruckList.sort(Comparator.comparing(t->t.getDistanceToLocation(j.getJobLocation())));
 
-                //Go through the sortedTruckList until a truck is found that is able to handle the move without breaking any
-                //constraints.
-                boolean truckFound = false;
-                while(!sortedTruckList.isEmpty()){
-                    Truck selected = sortedTruckList.getFirst();
-                    //Make a deep copy backup to roll back the truck in case it can't handle the move;
-                    Truck backup = new Truck(selected);
-                    if(selected.doDropMove(dropm)){
-                        //Truck was able to handle the move without breaking any constraints;
-                        truckFound = true;
-                        break;
-                    }
-                    else {
-                        //Truck was not able to handle the move without breaking any constraints;
-                        sortedTruckList.removeFirst();
-                        //Truck needs to be rolled back to previous state;
-                        selected.rollBack(backup);
-                    }
+            //Go through the sortedTruckList until a truck is found that is able to handle the move without breaking any
+            //constraints.
+            boolean truckFound = false;
+            while(!sortedTruckList.isEmpty()){
+                Truck selected = sortedTruckList.getFirst();
+                //Make a deep copy backup to roll back the truck in case it can't handle the move;
+                Truck backup = new Truck(selected);
+                if(selected.doJob(j)){
+                    //Truck was able to handle the move without breaking any constraints;
+                    truckFound = true;
+                    break;
                 }
-                //If a truck was found to do the move, we go to the next move
-                if(sortedTruckList.isEmpty() && !truckFound) {
-                    System.out.println(m);
+                else {
+                    //Truck was not able to handle the move without breaking any constraints;
+                    sortedTruckList.removeFirst();
+                    //Truck needs to be rolled back to previous state;
+                    selected.rollBack(backup);
                 }
+            }
+            //If a truck was found to do the move, we go to the next move
+            if(sortedTruckList.isEmpty() && !truckFound) {
+                System.out.println(j);
+            }
 
 
                 //If we reach this part of the code, it means that the move can't be executed by any available trucks.

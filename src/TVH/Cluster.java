@@ -369,7 +369,7 @@ public class Cluster {
                 Truck selected = sortedTruckList.getFirst().getTruck();
                 //Make a deep copy backup to roll back the truck in case it can't handle the move;
                 Truck backup = new Truck(selected);
-                if(selected.doDropMove(m)){
+                if(selected.doJob(m)){
                     //Truck was able to handle the move without breaking any constraints;
                     truckFound = true;
                     break;

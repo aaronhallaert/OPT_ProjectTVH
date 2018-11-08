@@ -1,6 +1,8 @@
 package TVH.Entities;
 
+import TVH.Entities.Job.CollectJob;
 import TVH.Entities.Job.DropJob;
+import TVH.Entities.Job.Job;
 import TVH.Problem;
 
 import java.util.*;
@@ -55,69 +57,67 @@ public class Truck {
 
     /**
      * This method let's a truck handle a move. It also checks if no constraints are broken by handling the new move.
-     * @param m Job that needs to be handled by the truck.
+     * @param j Job that needs to be handled by the truck.
      * @return true if the truck breaks no constraints while handling the new move. False if it does break a constraint;
      */
-    public boolean doDropMove(DropJob m){
-        List<Location> collects = m.getFrom();
-        Location to = m.getDrop();
-        Machine machine = m.getMachine();
+    public boolean doJob(Job j){
+        if(j instanceof DropJob){
+            DropJob dj = (DropJob) j;
+            //First step is to choose a certain Location to pickup the the machine;
+            for(Location l : dj.getFrom()){
 
-        /*
-            First step: Check if the truck already passes the origin and/or destination of the truck.
-            If so no new stops are needed.
-         */
-
-        if(!(locationStopMap.containsKey(from) || from==startLocation)) {
-            //In case the Truck doesn't yet pass by Job.from.
-            Stop newStop = new Stop(from);
-            //Add a new stop on the optimal location
-
-
-            int index = findBestIndexToInsert(newStop, 0, findHighBound(to));
-            if(index < 0){
-                System.out.println("stop");
             }
 
+            if(!(locationStopMap.containsKey(from) || from==startLocation)) {
+                //In case the Truck doesn't yet pass by Job.from.
+                Stop newStop = new Stop(from);
+                //Add a new stop on the optimal location
 
-            newStop.setOnTruck(route.get(index-1).getOnTruck());
-            route.add(index, newStop);
-            locationStopMap.put(from, newStop);
-        }
-        if(!(locationStopMap.containsKey(to) || to==endLocation)){
-            //In case the Truck doesn't yet pass by Job.to.
-            Stop newStop = new Stop(to);
-            //Add a new stop on the optimal location
 
-            int index = findBestIndexToInsert(newStop, findLowBound(from), route.size()-1);
-            if(index < 0){
-                System.out.println("stop");
+                int index = findBestIndexToInsert(newStop, 0, findHighBound(to));
+                if(index < 0){
+                    System.out.println("stop");
+                }
+
+
+                newStop.setOnTruck(route.get(index-1).getOnTruck());
+                route.add(index, newStop);
+                locationStopMap.put(from, newStop);
             }
-            newStop.setOnTruck(route.get(index-1).getOnTruck());
-            route.add(index, newStop);
-            locationStopMap.put(to, newStop);
-        }
+            if(!(locationStopMap.containsKey(to) || to==endLocation)){
+                //In case the Truck doesn't yet pass by Job.to.
+                Stop newStop = new Stop(to);
+                //Add a new stop on the optimal location
 
-        //Search the collect en drop stops;
-        Stop collectStop;
-        Stop dropStop;
-        if(startLocation == from) collectStop = route.getFirst();
-        else collectStop = locationStopMap.get(from);
+                int index = findBestIndexToInsert(newStop, findLowBound(from), route.size()-1);
+                if(index < 0){
+                    System.out.println("stop");
+                }
+                newStop.setOnTruck(route.get(index-1).getOnTruck());
+                route.add(index, newStop);
+                locationStopMap.put(to, newStop);
+            }
 
-        if(endLocation == to) dropStop = route.getLast();
-        else dropStop = locationStopMap.get(to);
+            //Search the collect en drop stops;
+            Stop collectStop;
+            Stop dropStop;
+            if(startLocation == from) collectStop = route.getFirst();
+            else collectStop = locationStopMap.get(from);
 
-        if(route.indexOf(collectStop) > route.indexOf(dropStop)){
-            //Dit kan enkel het geval zijn als de nodes er al inzaten van een andere move
-            return false;
-        };
+            if(endLocation == to) dropStop = route.getLast();
+            else dropStop = locationStopMap.get(to);
 
-        //Add the machine to the right stops, and check the fillrate constraint;
-        collectStop.addCollectItem(machine);
-        dropStop.addDropItem(machine);
-        if(!recalculateOnTruck()) {
-            return false;
-        }
+            if(route.indexOf(collectStop) > route.indexOf(dropStop)){
+                //Dit kan enkel het geval zijn als de nodes er al inzaten van een andere move
+                return false;
+            };
+
+            //Add the machine to the right stops, and check the fillrate constraint;
+            collectStop.addCollectItem(machine);
+            dropStop.addDropItem(machine);
+            if(!recalculateOnTruck()) {
+                return false;
+            }
         /*int collectIndex = route.indexOf(collectStop);
         int dropIndex = route.indexOf(dropStop);
         for(int i = collectIndex; i < dropIndex; i++){
@@ -125,14 +125,28 @@ public class Truck {
                 return false;
             }
         }*/
-        //Total time is recalculated and checked;
-        if(!recalculateTime()) {
-            return false;
-        }
+            //Total time is recalculated and checked;
+            if(!recalculateTime()) {
+                return false;
+            }
 
-        //If this part of the code is reached, it means that the truck can handle the new move without breaking any constraints;
-        used = true;
-        return true;
+            //If this part of the code is reached, it means that the truck can handle the new move without breaking any constraints;
+            used = true;
+            return true;
+        }
+        if(j instanceof CollectJob){
+
+        }
+        List<Location> collects = j.getFrom();
+        Location to = j.getDrop();
+        Machine machine = j.getMachine();
+
+        /*
+            First step: Check if the truck already passes the origin and/or destination of the truck.
+            If so no new stops are needed.
+         */
+
+
     }
     public boolean doesTruckPass(Location l){
         for(Stop s: route){

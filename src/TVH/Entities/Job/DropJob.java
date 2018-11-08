@@ -17,6 +17,10 @@ public class DropJob implements Job {
         this.mt = mt;
     }
 
+    public Location getJobLocation(){
+        return to;
+    }
+
     public Location getTo() {
         return to;
     }

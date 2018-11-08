@@ -17,6 +17,10 @@ public class CollectJob implements Job {
         this.m = m;
     }
 
+    public Location getJobLocation(){
+        return from;
+    }
+
     public Location getFrom() {
         return from;
     }
