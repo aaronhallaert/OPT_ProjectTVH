@@ -1,6 +1,10 @@
 package TVH;
 
 import TVH.Entities.*;
+import TVH.Entities.Job.CollectJob;
+import TVH.Entities.Job.JobRemotenessComparator;
+import TVH.Entities.Job.DropJob;
+import TVH.Entities.Job.Job;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,13 +18,15 @@ public class Problem {
 
     public ArrayList<Location> locations = new ArrayList<>();
     public ArrayList<Depot> depots = new ArrayList<>();
-    public HashMap<Location, Client> clients = new HashMap<>();
+    public HashMap<Location, Client> clientMap = new HashMap<>();
+    public HashMap<Location, Depot> depotsMap = new HashMap<>();
     public HashMap<Machine, Location> machineLocations = new HashMap<>();
     public ArrayList<Truck> trucks = new ArrayList<>();
     public ArrayList<MachineType> machineTypes = new ArrayList<>();
     public ArrayList<Machine> machines = new ArrayList<>();
     public ArrayList<Edge> edges = new ArrayList<>();
     public List<Cluster> clusters = new ArrayList<>();
+    public List<Job> jobs = new ArrayList<>();
 
     public Problem(File inputFile) throws FileNotFoundException {
 
@@ -52,7 +58,9 @@ public class Problem {
         for (int i = 0; i < aantalDepots; i++) {
             int depotId=sc.nextInt();
             int locationId= sc.nextInt();
-            depots.add(new Depot(locations.get(locationId)));
+            Depot depot = new Depot(locations.get(locationId));
+            depots.add(depot);
+            depotsMap.put(locations.get(locationId), depot);
         }
 
         //TRUCKS
@@ -121,13 +129,13 @@ public class Problem {
             int dropId=sc.nextInt();
             MachineType machineType=machineTypes.get(sc.nextInt());
             Location location = locations.get(sc.nextInt());
-            if(clients.containsKey(location)){
-                clients.get(location).addToDropItems(machineType);
+            if(clientMap.containsKey(location)){
+                clientMap.get(location).addToDropItems(machineType);
             }
             else{
                 Client client = new Client(location);
                 client.addToDropItems(machineType);
-                clients.put(location, client);
+                clientMap.put(location, client);
             }
 
         }
@@ -143,13 +151,13 @@ public class Problem {
             int collectId=sc.nextInt();
             Machine machine=machines.get(sc.nextInt());
             Location location = machineLocations.get(machine);
-            if(clients.containsKey(location)){
-                clients.get(location).addToCollectItems(machine);
+            if(clientMap.containsKey(location)){
+                clientMap.get(location).addToCollectItems(machine);
             }
             else{
                 Client client = new Client(location);
                 client.addToCollectItems(machine);
-                clients.put(location, client);
+                clientMap.put(location, client);
             }
         }
 
@@ -178,7 +186,7 @@ public class Problem {
             }
         }
 
-        //Edges aanmaken met time en distance info, en koppelen aan clients
+        //Edges aanmaken met time en distance info, en koppelen aan clientMap
         for (int from = 0; from < distanceMatrixSize; from++) {
             for (int to = 0; to < distanceMatrixSize; to++) {
                 int time = timeMatrix[from][to];
@@ -199,7 +207,7 @@ public class Problem {
     }
 
     public Solution solve(int n_clusters){
-        Solution Init = createInitialSolution(n_clusters);
+        Solution Init = createInitialSolutionDeprecated(n_clusters);
         /*
         * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
         * 1) Initial result:
@@ -218,9 +226,9 @@ public class Problem {
      * This will use clusters to decide initial routes of trucks.
      * @return
      */
-    public Solution createInitialSolution(int n_clusters){
-        //n_clusters =(int) Math.round((double) clients.size()/5);
-        clusters = Cluster.createClusters(n_clusters, clients, depots);
+    public Solution createInitialSolutionDeprecated(int n_clusters){
+        //n_clusters =(int) Math.round((double) clientMap.size()/5);
+        clusters = Cluster.createClusters(n_clusters, clientMap, depots);
 
 
         //Sort the clusters based on remoteness
@@ -256,6 +264,96 @@ public class Problem {
         }
 
         return new Solution(trucks);
+    }
+
+    public Solution createInitialSolution(){
+        for(Client client: clientMap.values()){
+            Location loc = client.getLocation();
+            for(MachineType mt: client.getToDropItems()){
+                //Search for each machineType needed what the closest location in this cluster is that has this machineType.
+                //There are 2 possibilities: Depot contains machine of type, Client contains a machine of this type that needs to be collected
+                List<Location> from = new ArrayList<>();
+                for(Edge e: loc.getSortedEdgeList()){
+                    //In case the location is a Client
+                    if (clientMap.containsKey(e.getTo())) {
+                        Client c = clientMap.get(e.getTo());
+                        if (c.collectItemsContains(mt)) {
+                            Machine m = c.getMachineToCollect(mt);
+                            //Add the move to the list and delete machine from items that need to be collected.
+                            from.add(c.getLocation());
+                        }
+                    }
+                    //In case the location is a depot
+                    if (depotsMap.containsKey(e.getTo())) {
+                        Depot d = depotsMap.get(e.getTo());
+                        if (d.hasMachine(mt)) {
+                            Machine m = d.getMachineFromDepot(mt);
+                            //Add the move to the list and delete machine from the depot.
+                            from.add(d.getLocation());
+                            //A location is found, break the for loop to go the next machine;
+                        }
+                    }
+                }
+                jobs.add(new DropJob(loc, from, mt);
+
+            }
+            for(Machine m: client.getToCollectItems()){
+                List<Location> to = new ArrayList<>();
+                for(Depot d: depots){
+                    to.add(d.getLocation());
+                }
+                jobs.add(new CollectJob(loc, to, m));
+            }
+        }
+
+        //Next step is to assign jobs to trucks;
+
+        Collections.sort(jobs, new JobRemotenessComparator());
+
+        //Assign each move to a truck
+        for(Job m: jobs){
+            if(m instanceof DropJob){
+                DropJob dropm = (DropJob) m;
+                LinkedList<Truck> sortedTruckList = new LinkedList<>();
+                sortedTruckList.addAll(trucks);
+                //Sort truck list based on it's route proximity to the move
+                sortedTruckList.sort(Comparator.comparing(t->t.getDistanceToLocation(dropm.getTo())));
+
+                //Go through the sortedTruckList until a truck is found that is able to handle the move without breaking any
+                //constraints.
+                boolean truckFound = false;
+                while(!sortedTruckList.isEmpty()){
+                    Truck selected = sortedTruckList.getFirst();
+                    //Make a deep copy backup to roll back the truck in case it can't handle the move;
+                    Truck backup = new Truck(selected);
+                    if(selected.doDropMove(dropm)){
+                        //Truck was able to handle the move without breaking any constraints;
+                        truckFound = true;
+                        break;
+                    }
+                    else {
+                        //Truck was not able to handle the move without breaking any constraints;
+                        sortedTruckList.removeFirst();
+                        //Truck needs to be rolled back to previous state;
+                        selected.rollBack(backup);
+                    }
+                }
+                //If a truck was found to do the move, we go to the next move
+                if(sortedTruckList.isEmpty() && !truckFound) {
+                    System.out.println(m);
+                }
+
+
+                //If we reach this part of the code, it means that the move can't be executed by any available trucks.
+                //🤔🤔🤔🤔🤔🤔
+            }
+
+
+
+
+        }
+        //System.out.println("done");
+
     }
 
 }

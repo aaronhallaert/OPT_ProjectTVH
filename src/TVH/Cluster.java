@@ -1,7 +1,6 @@
 package TVH;
 
 import TVH.Entities.*;
-import com.google.common.collect.HashMultimap;
 
 import java.util.*;
 
@@ -44,15 +43,15 @@ public class Cluster {
     }
 
     /**
-     * This method creates nClusters amount of clusters based on a list of clients and depots.
+     * This method creates nClusters amount of clusters based on a list of clientMap and depots.
      * @param nClusters amount of clusters needed
-     * @param clients list of clients
+     * @param clients list of clientMap
      * @param depotList list of depots
      * @return the newly created clusters;
      */
     public static List<Cluster> createClusters(int nClusters, HashMap<Location, Client> clients, List<Depot> depotList){
 
-        //Copying the clients and depots
+        //Copying the clientMap and depots
         for(Client j: clients.values()){
             allLocations.add(j.getLocation());
         }
@@ -195,7 +194,7 @@ public class Cluster {
      * This method expands a cluster until it is self sufficient (it doesn't need any machines from the outside).
      */
     public void expand(){
-        //Deep copy the clients and depots into hashmaps so certain machines can deleted from clients/depots temporarily.
+        //Deep copy the clientMap and depots into hashmaps so certain machines can deleted from clientMap/depots temporarily.
         HashMap<Location, Client> locationClientMapCopy = new HashMap<>();
         HashMap<Location, Depot> locationDepotMapCopy = new HashMap<>();
 
@@ -255,7 +254,7 @@ public class Cluster {
     public void solve(List<Truck> trucks){
 
         /*
-         * First step of the solving the cluster is determining which machine goes where. This is saved in a "Move" object.
+         * First step of the solving the cluster is determining which machine goes where. This is saved in a "Job" object.
          * Since every cluster is self sufficient we only need to move machines to and from other members of the cluster.
          *
          * Second step is to determine which Truck can do which move.
@@ -304,7 +303,7 @@ public class Cluster {
 
             }
         }
-        //After all the drop moves are made, the collect moves are made.
+        //After all the drop jobs are made, the collect jobs are made.
         for(Location collect: membersList){
             for(Machine m: locationClientMap.get(collect).getToCollectItems()){
                 for(Edge e: collect.getSortedEdgeList()){
@@ -317,9 +316,9 @@ public class Cluster {
             }
         }
 
-        //Next step is to assign moves to trucks;
+        //Next step is to assign jobs to trucks;
 
-        //Sort moves
+        //Sort jobs
         movesList.sort(Comparator.comparing(Move::getRemoteFactor).reversed());
 
         Set<Machine> machinesMoved = new HashSet<>();
@@ -370,7 +369,7 @@ public class Cluster {
                 Truck selected = sortedTruckList.getFirst().getTruck();
                 //Make a deep copy backup to roll back the truck in case it can't handle the move;
                 Truck backup = new Truck(selected);
-                if(selected.doMove(m)){
+                if(selected.doDropMove(m)){
                     //Truck was able to handle the move without breaking any constraints;
                     truckFound = true;
                     break;

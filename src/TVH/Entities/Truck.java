@@ -1,5 +1,6 @@
 package TVH.Entities;
 
+import TVH.Entities.Job.DropJob;
 import TVH.Problem;
 
 import java.util.*;
@@ -54,12 +55,12 @@ public class Truck {
 
     /**
      * This method let's a truck handle a move. It also checks if no constraints are broken by handling the new move.
-     * @param m Move that needs to be handled by the truck.
+     * @param m Job that needs to be handled by the truck.
      * @return true if the truck breaks no constraints while handling the new move. False if it does break a constraint;
      */
-    public boolean doMove(Move m){
-        Location from = m.getFrom();
-        Location to = m.getTo();
+    public boolean doDropMove(DropJob m){
+        List<Location> collects = m.getFrom();
+        Location to = m.getDrop();
         Machine machine = m.getMachine();
 
         /*
@@ -68,7 +69,7 @@ public class Truck {
          */
 
         if(!(locationStopMap.containsKey(from) || from==startLocation)) {
-            //In case the Truck doesn't yet pass by Move.from.
+            //In case the Truck doesn't yet pass by Job.from.
             Stop newStop = new Stop(from);
             //Add a new stop on the optimal location
 
@@ -84,7 +85,7 @@ public class Truck {
             locationStopMap.put(from, newStop);
         }
         if(!(locationStopMap.containsKey(to) || to==endLocation)){
-            //In case the Truck doesn't yet pass by Move.to.
+            //In case the Truck doesn't yet pass by Job.to.
             Stop newStop = new Stop(to);
             //Add a new stop on the optimal location
 
@@ -107,7 +108,7 @@ public class Truck {
         else dropStop = locationStopMap.get(to);
 
         if(route.indexOf(collectStop) > route.indexOf(dropStop)){
-            //Dit kan enkel het geval zijn als de nodes er al inzaten voor een andere move
+            //Dit kan enkel het geval zijn als de nodes er al inzaten van een andere move
             return false;
         };
 
@@ -165,6 +166,17 @@ public class Truck {
             }
         }
         return true;
+    }
+
+    public int getDistanceToLocation(Location l){
+        int minDistance = Integer.MAX_VALUE;
+        for(Stop s: route){
+            Location stopLoc = s.getLocation();
+            if(l.distanceTo(stopLoc) < minDistance){
+                minDistance = l.distanceTo(stopLoc);
+            }
+        }
+        return minDistance;
     }
 
     /**
