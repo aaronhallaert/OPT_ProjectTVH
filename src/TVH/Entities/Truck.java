@@ -167,6 +167,8 @@ public class Truck {
         return true;
     }
 
+
+
     /**
      * This method determines where a new stop should be inserted in the route.
      * It searches the place where inserting the new Stop adds the least amount of extra distance.
@@ -261,6 +263,102 @@ public class Truck {
         }
         return totalDistance;
     }
+
+
+    public boolean routeControleBasedOnStops(LinkedList<Stop> route, Problem problem){
+        HashMap<MachineType, Integer> availableMap= new HashMap<>();
+        for (MachineType machineType : problem.machineTypes) {
+            availableMap.put(machineType, 0);
+        }
+
+        // CONTROLE
+        for (Stop stop : route) {
+            ArrayList<Machine> machinesCollect = stop.getCollectItems();
+            ArrayList<Machine> machinesDrop = stop.getDropItems();
+
+            // controlleer of er genoeg aanwezig is om te droppen
+            HashMap<MachineType, Integer> neededMapStop= new HashMap<>();
+            for (Machine machine : machinesDrop) {
+                neededMapStop.putIfAbsent(machine.getType(), 0);
+                neededMapStop.replace(machine.getType(), neededMapStop.get(machine.getType())+1);
+            }
+
+
+            for (Map.Entry<MachineType, Integer> machineTypeNeeded : neededMapStop.entrySet()) {
+                MachineType nodigeMachinetype= machineTypeNeeded.getKey();
+                int aantalAvailable= availableMap.get(machineTypeNeeded.getKey());
+                int aantalNodig= machineTypeNeeded.getValue();
+                if(aantalNodig>aantalAvailable){
+                    return false;
+                }
+                else{
+                    availableMap.replace(machineTypeNeeded.getKey(),(availableMap.get(machineTypeNeeded.getKey())-machineTypeNeeded.getValue()));
+                }
+            }
+
+
+            // als niet gestopt, voeg collect items toe aan available
+            for (Machine machine : machinesCollect) {
+                availableMap.replace(machine.getType(), availableMap.get(machine.getType())+1);
+            }
+
+        }
+
+
+        return true;
+    }
+    public void optimiseRoute(Problem problem){
+
+        Stop firstStop= route.getFirst();
+        Stop lastStop=route.getLast();
+
+        LinkedList<Stop> alleStops = new LinkedList<>();
+        for(Map.Entry<Location, Stop> stopEntry: locationStopMap.entrySet()) {
+            alleStops.add(stopEntry.getValue());
+        }
+
+        alleStops.remove(firstStop);
+        alleStops.remove(lastStop);
+
+        LinkedList<Stop> totalRouteStops= new LinkedList<>();
+
+        HashMap<MachineType, Set<Stop>> collectStops= new HashMap<>();
+        HashMap<MachineType, Set<Stop>> dropStops= new HashMap<>();
+
+        for (MachineType machineType : problem.machineTypes) {
+            for(Map.Entry<Location, Stop> stopEntry: locationStopMap.entrySet()){
+                for (Machine collectItem : stopEntry.getValue().getCollectItems()) {
+                    if(collectItem.getType().equals(machineType)){
+                        collectStops.putIfAbsent(machineType, new HashSet<>());
+                        collectStops.get(machineType).add(stopEntry.getValue());
+                    }
+                }
+                for (Machine dropItem : stopEntry.getValue().getDropItems()) {
+                    if(dropItem.getType().equals(machineType)){
+                        dropStops.putIfAbsent(machineType, new HashSet<>());
+                        dropStops.get(machineType).add(stopEntry.getValue());
+                    }
+                }
+            }
+        }
+
+        if(!routeControleBasedOnStops(route, problem)) System.out.println("deze route is schijt"); ;
+
+
+        /*
+        route= totalRouteStops;
+        for (Stop stop : route) {
+            System.out.println(stop.getLocation().getLocationID());
+        }
+        if(recalculateTime() || recalculateOnTruck()){
+            System.out.println("misse wi");
+        }*/
+
+
+
+
+    }
+
 
     public void setTotalDistance(int totalDistance) {
         this.totalDistance = totalDistance;

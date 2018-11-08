@@ -210,7 +210,9 @@ public class Problem {
         * 2) Optimisation phase
         *
         * */
-
+        for (Truck truck : Init.getTrucks()) {
+            if(!truck.routeControleBasedOnStops(truck.getRoute(), this)) System.out.println("deze route is schijt");;
+        }
         return Init;
     }
 
