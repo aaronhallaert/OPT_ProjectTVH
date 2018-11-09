@@ -1,5 +1,7 @@
 package TVH.Entities;
 
+import TVH.Entities.Node.Location;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 

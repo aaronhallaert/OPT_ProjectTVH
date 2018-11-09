@@ -5,6 +5,7 @@ import TVH.Entities.Job.CollectJob;
 import TVH.Entities.Job.JobRemotenessComparator;
 import TVH.Entities.Job.DropJob;
 import TVH.Entities.Job.Job;
+import TVH.Entities.Node.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,12 +13,13 @@ import java.util.*;
 
 public class Problem {
 
-    public static String info;
-    public static int TRUCK_CAPACITY;
-    public static int TRUCK_WORKING_TIME;
-
+    private static Problem instance = null;
+    public String info;
+    public int TRUCK_CAPACITY;
+    public int TRUCK_WORKING_TIME;
     public ArrayList<Location> locations = new ArrayList<>();
     public ArrayList<Depot> depots = new ArrayList<>();
+    public HashMap<Location, Node> nodesMap = new HashMap<>();
     public HashMap<Location, Client> clientMap = new HashMap<>();
     public HashMap<Location, Depot> depotsMap = new HashMap<>();
     public HashMap<Machine, Location> machineLocations = new HashMap<>();
@@ -25,10 +27,16 @@ public class Problem {
     public ArrayList<MachineType> machineTypes = new ArrayList<>();
     public ArrayList<Machine> machines = new ArrayList<>();
     public ArrayList<Edge> edges = new ArrayList<>();
-    public List<Cluster> clusters = new ArrayList<>();
     public List<Job> jobs = new ArrayList<>();
+    public static Problem getInstance(){
+        return instance;
+    }
+    public static Problem newInstance(File inputFile) throws FileNotFoundException{
+        instance = new Problem(inputFile);
+        return instance;
+    }
 
-    public Problem(File inputFile) throws FileNotFoundException {
+    private Problem(File inputFile) throws FileNotFoundException {
 
         Scanner sc = new Scanner(inputFile).useLocale(Locale.US);;
 
@@ -61,6 +69,7 @@ public class Problem {
             Depot depot = new Depot(locations.get(locationId));
             depots.add(depot);
             depotsMap.put(locations.get(locationId), depot);
+            nodesMap.put(locations.get(locationId), depot);
         }
 
         //TRUCKS
@@ -110,7 +119,7 @@ public class Problem {
             //Indien een machine in een depot staat moet deze worden toegevoegd aan het depot;
             for(Depot d: depots){
                 if(d.getLocation() == location){
-                    d.addMachine(machine);
+                    d.putMachine(machine);
                 }
             }
             //toevoegen in algemene lijst
@@ -130,12 +139,14 @@ public class Problem {
             MachineType machineType=machineTypes.get(sc.nextInt());
             Location location = locations.get(sc.nextInt());
             if(clientMap.containsKey(location)){
-                clientMap.get(location).addToDropItems(machineType);
+                clientMap.get(location).addToDrop(machineType);
             }
             else{
                 Client client = new Client(location);
-                client.addToDropItems(machineType);
+                client.addToDrop(machineType);
                 clientMap.put(location, client);
+                nodesMap.put(location, client);
+
             }
 
         }
@@ -152,12 +163,13 @@ public class Problem {
             Machine machine=machines.get(sc.nextInt());
             Location location = machineLocations.get(machine);
             if(clientMap.containsKey(location)){
-                clientMap.get(location).addToCollectItems(machine);
+                clientMap.get(location).addToCollect(machine);
             }
             else{
                 Client client = new Client(location);
-                client.addToCollectItems(machine);
+                client.addToCollect(machine);
                 clientMap.put(location, client);
+                nodesMap.put(location, client);
             }
         }
 
@@ -207,7 +219,8 @@ public class Problem {
     }
 
     public Solution solve(int n_clusters){
-        Solution Init = createInitialSolutionDeprecated(n_clusters);
+        createJobs();
+        Solution Init = createInitialSolution();
         /*
         * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
         * 1) Initial result:
@@ -226,59 +239,19 @@ public class Problem {
      * This will use clusters to decide initial routes of trucks.
      * @return
      */
-    public Solution createInitialSolutionDeprecated(int n_clusters){
-        //n_clusters =(int) Math.round((double) clientMap.size()/5);
-        clusters = Cluster.createClusters(n_clusters, clientMap, depots);
 
-
-        //Sort the clusters based on remoteness
-        clusters.sort((Cluster c1, Cluster c2)->c2.getRemoteness(depots)-c1.getRemoteness(depots));
-
-        //Calculate the machines that are still needed inside the cluster, and expand the cluster until it is self-sufficient;
-        for(Cluster cluster : clusters){
-            cluster.calculateMachinesNeeded();
-            cluster.expand();
-            //System.out.println(cluster);
-            //System.out.println();
-        }
-
-        for(Cluster cluster: clusters){
-            cluster.solve(trucks);
-        }
-
-        int totalDistance = 0;
-        int totalTime = 0;
-        for(Truck t: trucks){
-            int time = t.getTotalTime();
-            int distance = t.getTotalDistance();
-            System.out.println("Truck "+t.getTruckId()+":\t"+time+"min\t"+distance+"km");
-            totalDistance += distance;
-            totalTime += time;
-        }
-        System.out.println("Total: \t\t"+totalTime+"min\t"+totalDistance+"km");
-
-        for(Truck t: trucks){
-            if(t.getRoute().getFirst().getLocation() != t.getRoute().getLast().getLocation()){
-                //System.out.println("error");
-            }
-        }
-
-        return new Solution(trucks);
-    }
-
-    public Solution createInitialSolution(){
+    public void createJobs(){
         for(Client client: clientMap.values()){
             Location loc = client.getLocation();
-            for(MachineType mt: client.getToDropItems()){
+            for(MachineType mt: client.getToDrop()){
                 //Search for each machineType needed what the closest location in this cluster is that has this machineType.
                 //There are 2 possibilities: Depot contains machine of type, Client contains a machine of this type that needs to be collected
                 List<Location> from = new ArrayList<>();
                 for(Edge e: loc.getSortedEdgeList()){
-                    //In case the location is a Client
+                    /*//In case the location is a Client
                     if (clientMap.containsKey(e.getTo())) {
                         Client c = clientMap.get(e.getTo());
-                        if (c.collectItemsContains(mt)) {
-                            Machine m = c.getMachineToCollect(mt);
+                        if (c.needsCollect(mt)) {
                             //Add the move to the list and delete machine from items that need to be collected.
                             from.add(c.getLocation());
                         }
@@ -286,36 +259,49 @@ public class Problem {
                     //In case the location is a depot
                     if (depotsMap.containsKey(e.getTo())) {
                         Depot d = depotsMap.get(e.getTo());
-                        if (d.hasMachine(mt)) {
-                            Machine m = d.getMachineFromDepot(mt);
-                            //Add the move to the list and delete machine from the depot.
+                        if (d.hasMachineAvailableOfType(mt)) {
+                            //Add the depot to the list of possibilities.
                             from.add(d.getLocation());
-                            //A location is found, break the for loop to go the next machine;
                         }
+                    }*/
+                    Node node = nodesMap.get(e.getTo());
+                    if(node.hasMachineAvailableOfType(mt)){
+                        from.add(node.getLocation());
                     }
                 }
-                jobs.add(new DropJob(loc, from, mt);
+                jobs.add(new DropJob(loc, from, mt));
 
             }
-            for(Machine m: client.getToCollectItems()){
+            for(Machine m: client.getToCollect()){
                 List<Location> to = new ArrayList<>();
-                for(Depot d: depots){
-                    to.add(d.getLocation());
+                for(Edge e: loc.getSortedEdgeList()){
+                    Node node = nodesMap.get(e.getTo());
+                    if(node.canPutMachine(m)){
+                        to.add(node.getLocation());
+                    }
                 }
                 jobs.add(new CollectJob(loc, to, m));
             }
         }
+        Collections.sort(jobs, new JobRemotenessComparator());
+    }
+
+
+    public Solution createInitialSolution(){
+
 
         //Next step is to assign jobs to trucks;
 
-        Collections.sort(jobs, new JobRemotenessComparator());
 
         //Assign each move to a truck
         for(Job j: jobs){
+            if(j.getFixedLocation().getLocationID() == 266){
+                System.out.println("wacht eke");
+            }
             LinkedList<Truck> sortedTruckList = new LinkedList<>();
             sortedTruckList.addAll(trucks);
             //Sort truck list based on it's route proximity to the location of the Job
-            sortedTruckList.sort(Comparator.comparing(t->t.getDistanceToLocation(j.getJobLocation())));
+            sortedTruckList.sort(Comparator.comparing(t->t.getDistanceToLocation(j.getFixedLocation())));
 
             //Go through the sortedTruckList until a truck is found that is able to handle the move without breaking any
             //constraints.
@@ -344,14 +330,10 @@ public class Problem {
 
                 //If we reach this part of the code, it means that the move can't be executed by any available trucks.
                 //🤔🤔🤔🤔🤔🤔
-            }
-
-
-
 
         }
         //System.out.println("done");
-
+        return new Solution(trucks);
     }
 
 }

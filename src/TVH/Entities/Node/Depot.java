@@ -1,14 +1,16 @@
-package TVH.Entities;
+package TVH.Entities.Node;
 
+import TVH.Entities.Machine;
+import TVH.Entities.MachineType;
 import com.google.common.collect.HashMultimap;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Depot {
+public class Depot implements Node{
 
     private Location location;
-    private HashMultimap<MachineType,Machine> machines;
+    private HashMultimap<MachineType, Machine> machines;
 
     public Depot(Location location) {
         this.location = location;
@@ -24,27 +26,27 @@ public class Depot {
         }
     }
 
-    public void addMachine(Machine m){
+    public void putMachine(Machine m){
         machines.put(m.getType(), m);
     }
-    public void removeMachine(Machine m){
+
+    public void takeMachine(Machine m){
         machines.get(m.getType()).remove(m);
     }
-    public void removeMachine(MachineType mt){
+
+    public Machine takeMachine(MachineType mt){
         for(Machine m: machines.get(mt)){
             machines.get(mt).remove(m);
-            return;
-        }
-    }
-
-    public Machine getMachineFromDepot(MachineType mt){
-        for(Machine m: machines.get(mt)){
             return m;
         }
         return null;
     }
+    public boolean canPutMachine(Machine m){
+        return true;
+    }
 
-    public boolean hasMachine(MachineType mt){
+
+    public boolean hasMachineAvailableOfType(MachineType mt){
         return machines.containsKey(mt);
     }
 
@@ -56,7 +58,10 @@ public class Depot {
         this.location = location;
     }
 
-    public HashMultimap<MachineType, Machine> getMachines() {
+    public HashMultimap<MachineType, Machine> getTypeMachineMap() {
         return machines;
+    }
+    public List<Machine> getAvailableMachines(){
+        return new ArrayList<>(machines.values());
     }
 }

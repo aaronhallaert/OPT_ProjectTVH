@@ -3,7 +3,12 @@ package TVH.Entities;
 import TVH.Entities.Job.CollectJob;
 import TVH.Entities.Job.DropJob;
 import TVH.Entities.Job.Job;
+import TVH.Entities.Job.Move;
+import TVH.Entities.Node.Location;
+import TVH.Entities.Node.Node;
 import TVH.Problem;
+import com.google.common.collect.HashMultimap;
+import javafx.util.Pair;
 
 import java.util.*;
 
@@ -11,11 +16,13 @@ public class Truck {
 
     private int truckId;
     private LinkedList<Stop> route;
-    private HashMap<Location, Stop> locationStopMap;
+    private HashMultimap<Location, Stop> locationStopMap;
     private int totalTime; //van de rit
     private int totalDistance;
     private Location startLocation;
     private Location endLocation;
+    private ArrayList<Job> jobsHandled;
+    private HashMap<Job, Move> jobMoveMap;
     private boolean used;
 
     public Truck(int truckId, Location startLocation, Location endLocation){
@@ -31,7 +38,12 @@ public class Truck {
         route.add(startStop);
         route.add(endStop);
 
-        locationStopMap = new HashMap<>();
+        locationStopMap = HashMultimap.create();
+        locationStopMap.put(startLocation, startStop);
+        locationStopMap.put(endLocation, endStop);
+
+        jobsHandled = new ArrayList<>();
+        jobMoveMap = new HashMap<>();
     }
 
     //Copy constructor
@@ -49,7 +61,7 @@ public class Truck {
             route.add(new Stop(s));
         }
         //Create a new hashmap;
-        this.locationStopMap = new HashMap<>();
+        this.locationStopMap = HashMultimap.create();
         for(Stop s: this.route){
             locationStopMap.put(s.getLocation(), s);
         }
@@ -61,90 +73,124 @@ public class Truck {
      * @return true if the truck breaks no constraints while handling the new move. False if it does break a constraint;
      */
     public boolean doJob(Job j){
-        if(j instanceof DropJob){
+        HashMap<Location,Node> nodesMap = Problem.getInstance().nodesMap;
+        //First step is to decide which machine to move from where to where.
+        Location drop = null;
+        Location collect = null;
+        Machine machine = null;
+
+        if(j instanceof DropJob) {
             DropJob dj = (DropJob) j;
+            //TODO: checken als je job al niet vervuld is;
             //First step is to choose a certain Location to pickup the the machine;
-            for(Location l : dj.getFrom()){
-
-            }
-
-            if(!(locationStopMap.containsKey(from) || from==startLocation)) {
-                //In case the Truck doesn't yet pass by Job.from.
-                Stop newStop = new Stop(from);
-                //Add a new stop on the optimal location
-
-
-                int index = findBestIndexToInsert(newStop, 0, findHighBound(to));
-                if(index < 0){
-                    System.out.println("stop");
+            drop = dj.getDrop();
+            int distanceClosestFrom = Integer.MAX_VALUE;
+            for (Location l : dj.getCollect()) {
+                Node node = nodesMap.get(l);
+                if (node.hasMachineAvailableOfType(dj.getMachineType())) {
+                    int minDistanceToRoute = Integer.MAX_VALUE;
+                    for (Stop s : route) {
+                        if (s.getLocation().distanceTo(l) < minDistanceToRoute) {
+                            minDistanceToRoute = s.getLocation().distanceTo(l);
+                        }
+                    }
+                    if (minDistanceToRoute < distanceClosestFrom) {
+                        collect = l;
+                        distanceClosestFrom = minDistanceToRoute;
+                    }
                 }
-
-
-                newStop.setOnTruck(route.get(index-1).getOnTruck());
-                route.add(index, newStop);
-                locationStopMap.put(from, newStop);
             }
-            if(!(locationStopMap.containsKey(to) || to==endLocation)){
-                //In case the Truck doesn't yet pass by Job.to.
-                Stop newStop = new Stop(to);
-                //Add a new stop on the optimal location
-
-                int index = findBestIndexToInsert(newStop, findLowBound(from), route.size()-1);
-                if(index < 0){
-                    System.out.println("stop");
+            //Once we have the location, we define which specific machine
+            for(Machine m: nodesMap.get(collect).getAvailableMachines()){
+                if(m.getType() == dj.getMachineType()){
+                    machine = m;
+                    break;
                 }
-                newStop.setOnTruck(route.get(index-1).getOnTruck());
-                route.add(index, newStop);
-                locationStopMap.put(to, newStop);
             }
-
-            //Search the collect en drop stops;
-            Stop collectStop;
-            Stop dropStop;
-            if(startLocation == from) collectStop = route.getFirst();
-            else collectStop = locationStopMap.get(from);
-
-            if(endLocation == to) dropStop = route.getLast();
-            else dropStop = locationStopMap.get(to);
-
-            if(route.indexOf(collectStop) > route.indexOf(dropStop)){
-                //Dit kan enkel het geval zijn als de nodes er al inzaten van een andere move
-                return false;
-            };
-
-            //Add the machine to the right stops, and check the fillrate constraint;
-            collectStop.addCollectItem(machine);
-            dropStop.addDropItem(machine);
-            if(!recalculateOnTruck()) {
-                return false;
-            }
-        /*int collectIndex = route.indexOf(collectStop);
-        int dropIndex = route.indexOf(dropStop);
-        for(int i = collectIndex; i < dropIndex; i++){
-            if(!route.get(i).addToTruck(machine)){
-                return false;
-            }
-        }*/
-            //Total time is recalculated and checked;
-            if(!recalculateTime()) {
-                return false;
-            }
-
-            //If this part of the code is reached, it means that the truck can handle the new move without breaking any constraints;
-            used = true;
-            return true;
         }
-        if(j instanceof CollectJob){
+        else if(j instanceof CollectJob) {
+            CollectJob cj = (CollectJob) j;
+            //TODO: checken als de job al niet vervuld is;
+            collect = cj.getCollect();
 
+            int distanceClosestTo = Integer.MAX_VALUE;
+            for(Location l: cj.getDrop()) {
+                Node node = nodesMap.get(l);
+                if (node.canPutMachine(cj.getMachine())) {
+                    int minDistanceToRoute = Integer.MAX_VALUE;
+                    for (Stop s : route) {
+                        if (s.getLocation().distanceTo(l) < minDistanceToRoute) {
+                            minDistanceToRoute = s.getLocation().distanceTo(l);
+                        }
+                    }
+                    if (minDistanceToRoute < distanceClosestTo) {
+                        drop = l;
+                        distanceClosestTo = minDistanceToRoute;
+                    }
+                }
+            }
+            machine = cj.getMachine();
         }
-        List<Location> collects = j.getFrom();
-        Location to = j.getDrop();
-        Machine machine = j.getMachine();
+        jobsHandled.add(j);
+        jobMoveMap.put(j, new Move(machine, collect, drop));
 
-        /*
-            First step: Check if the truck already passes the origin and/or destination of the truck.
-            If so no new stops are needed.
-         */
+        if(!locationStopMap.containsKey(collect)) {
+            //In case the Truck doesn't yet pass by the collect location;
+            Stop newStop = new Stop(collect);
+            //Add a new stop on the optimal location
+
+
+            int index = findBestIndexToInsert(newStop, 0, findHighBound(drop));
+
+            newStop.setOnTruck(route.get(index-1).getOnTruck());
+            route.add(index, newStop);
+            locationStopMap.put(collect, newStop);
+        }
+        if(!locationStopMap.containsKey(drop)){
+            //In case the Truck doesn't yet pass by Job.to.
+            Stop newStop = new Stop(drop);
+            //Add a new stop on the optimal location
+
+            int index = findBestIndexToInsert(newStop, findLowBound(collect), route.size()-1);
+
+            newStop.setOnTruck(route.get(index-1).getOnTruck());
+            route.add(index, newStop);
+            locationStopMap.put(drop, newStop);
+        }
+
+        //Search the collect en drop stops;
+        List<Stop> collectAndDropStops = getBestCollectAndDropLocation(locationStopMap.get(collect), locationStopMap.get(drop));
+        Stop collectStop = collectAndDropStops.get(0);
+        Stop dropStop = collectAndDropStops.get(1);
+
+        if(collectStop == null || dropStop == null){
+            //Dit kan enkel het geval zijn als de nodes er al inzaten van een andere move
+            //en de dropstop voor de collect komt;
+            return false;
+        };
+
+        //Add the machine to the right stops, and check the fillrate constraint;
+        collectStop.addCollectItem(machine);
+        dropStop.addDropItem(machine);
+        if(!recalculateOnTruck()) {
+            return false;
+        }
+
+        //Total time is recalculated and checked;
+        if(!recalculateTime()) {
+            return false;
+        }
+
+        //If this part of the code is reached, it means that the truck can handle the new move without breaking any constraints;
+        used = true;
+
+        //De move registreren bij de clients/depots;
+        Node collectNode = nodesMap.get(collect);
+        Node dropNode = nodesMap.get(drop);
+        collectNode.takeMachine(machine);
+        dropNode.putMachine(machine);
+
+        return true;
 
 
     }
@@ -167,7 +213,7 @@ public class Truck {
         for(Stop s: route){
             totalTime += s.getTimeSpend();
         }
-        return totalTime <= Problem.TRUCK_WORKING_TIME;
+        return totalTime <= Problem.getInstance().TRUCK_WORKING_TIME;
     }
     public boolean recalculateOnTruck(){
         LinkedList<Machine> onTruck = new LinkedList<>();
@@ -244,6 +290,25 @@ public class Truck {
         return highBound;
     }
 
+    public List<Stop> getBestCollectAndDropLocation(Set<Stop> collects, Set<Stop> drops){
+        int minIndexDifference = Integer.MAX_VALUE;
+        Stop collect = null;
+        Stop drop = null;
+        for(Stop c: collects){
+            for(Stop d: drops){
+                int indexDifference = route.indexOf(d) - route.indexOf(c);
+                if(indexDifference > 0 && indexDifference < minIndexDifference){
+                    minIndexDifference = indexDifference;
+                    collect = c;
+                    drop = d;
+                }
+            }
+        }
+        List<Stop> collectAndDrop = new ArrayList<>();
+        collectAndDrop.add(collect);
+        collectAndDrop.add(drop);
+        return collectAndDrop;
+    }
 
     /**
      * This method is used to rollback the Truck to a previous state.

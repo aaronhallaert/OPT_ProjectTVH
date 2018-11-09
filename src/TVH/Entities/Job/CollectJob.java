@@ -1,32 +1,32 @@
 package TVH.Entities.Job;
 
-import TVH.Entities.Edge;
-import TVH.Entities.Location;
+import TVH.Entities.Node.Edge;
+import TVH.Entities.Node.Location;
 import TVH.Entities.Machine;
 
 import java.util.List;
 
 public class CollectJob implements Job {
-    private Location from;
+    private Location collect;
     private List<Location> drop;
-    private Machine m;
+    private Machine machine;
 
-    public CollectJob(Location from, List<Location> drop, Machine m) {
-        this.from = from;
+    public CollectJob(Location collect, List<Location> drop, Machine machine) {
+        this.collect = collect;
         this.drop = drop;
-        this.m = m;
+        this.machine = machine;
     }
 
-    public Location getJobLocation(){
-        return from;
+    public Location getFixedLocation(){
+        return collect;
     }
 
-    public Location getFrom() {
-        return from;
+    public Location getCollect() {
+        return collect;
     }
 
-    public void setFrom(Location from) {
-        this.from = from;
+    public void setCollect(Location collect) {
+        this.collect = collect;
     }
 
     public List<Location> getDrop() {
@@ -37,17 +37,17 @@ public class CollectJob implements Job {
         this.drop = drop;
     }
 
-    public Machine getM() {
-        return m;
+    public Machine getMachine() {
+        return machine;
     }
 
-    public void setM(Machine m) {
-        this.m = m;
+    public void setMachine(Machine machine) {
+        this.machine = machine;
     }
 
     public int getRemoteFactor(){
         int distanceToAllNodes = 0;
-        for(Edge e: from.getEdgeMap().values()){
+        for(Edge e: collect.getEdgeMap().values()){
             distanceToAllNodes += e.getDistance();
         }
         return distanceToAllNodes;

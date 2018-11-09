@@ -1,4 +1,4 @@
-package TVH.Entities;
+package TVH.Entities.Node;
 
 public class Edge {
     Location from;

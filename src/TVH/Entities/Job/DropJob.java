@@ -1,53 +1,53 @@
 package TVH.Entities.Job;
 
-import TVH.Entities.Edge;
-import TVH.Entities.Location;
+import TVH.Entities.Node.Edge;
+import TVH.Entities.Node.Location;
 import TVH.Entities.MachineType;
 
 import java.util.List;
 
 public class DropJob implements Job {
-    private Location to;
-    private List<Location> from;
-    private MachineType mt;
+    private Location drop;
+    private List<Location> collect;
+    private MachineType machineType;
 
-    public DropJob(Location to, List<Location> from, MachineType mt) {
-        this.to = to;
-        this.from = from;
-        this.mt = mt;
+    public DropJob(Location drop, List<Location> collect, MachineType mt) {
+        this.drop = drop;
+        this.collect = collect;
+        this.machineType = mt;
     }
 
-    public Location getJobLocation(){
-        return to;
+    public Location getFixedLocation(){
+        return drop;
     }
 
-    public Location getTo() {
-        return to;
+    public Location getDrop() {
+        return drop;
     }
 
-    public void setTo(Location to) {
-        this.to = to;
+    public void setDrop(Location drop) {
+        this.drop = drop;
     }
 
-    public List<Location> getFrom() {
-        return from;
+    public List<Location> getCollect() {
+        return collect;
     }
 
-    public void setFrom(List<Location> from) {
-        this.from = from;
+    public void setCollect(List<Location> collect) {
+        this.collect = collect;
     }
 
-    public MachineType getMt() {
-        return mt;
+    public MachineType getMachineType() {
+        return machineType;
     }
 
-    public void setMt(MachineType mt) {
-        this.mt = mt;
+    public void setMachineType(MachineType machineType) {
+        this.machineType = machineType;
     }
 
     public int getRemoteFactor(){
         int distanceToAllNodes = 0;
-        for(Edge e: to.getEdgeMap().values()){
+        for(Edge e: drop.getEdgeMap().values()){
             distanceToAllNodes += e.getDistance();
         }
         return distanceToAllNodes;
