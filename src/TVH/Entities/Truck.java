@@ -268,7 +268,16 @@ public class Truck {
     }
 
 
-
+    /**
+     * deze route controleert feasibility van volgorde van route aan de hand van stops
+     *
+     * per stop wordt gecontroleerd of de drop kan uitgevoerd worden aan de hand van een
+     * variërende "availableMap" die upgedate wordt bij het controleren van elke stop
+     *
+     * @param route route is lijst met alle stops in te controleren volgorde
+     * @param problem algemeen probleem nodig om te kunnen itereren over alle machinetypes
+     * @return false indien route niet feasible is, true indien volgorde wel feasible
+     */
     public boolean routeControleBasedOnStops(LinkedList<Stop> route, Problem problem){
         HashMap<MachineType, Integer> availableMap= new HashMap<>();
         for (MachineType machineType : problem.machineTypes) {
@@ -294,8 +303,10 @@ public class Truck {
 
             for (Map.Entry<MachineType, Integer> machineTypeNeeded : neededMapStop.entrySet()) {
                 MachineType nodigeMachinetype= machineTypeNeeded.getKey();
-                int aantalAvailable= availableMap.get(machineTypeNeeded.getKey());
+                int aantalAvailable= availableMap.get(nodigeMachinetype);
                 int aantalNodig= machineTypeNeeded.getValue();
+
+                // drop is niet feasible als er meer gedropt dient te worden dan er aanwezig is
                 if(aantalNodig>aantalAvailable){
                     return false;
                 }
@@ -304,11 +315,7 @@ public class Truck {
                 }
             }
 
-
-
-
         }
-
 
         return true;
     }
@@ -320,48 +327,74 @@ public class Truck {
         return x;
 
     }
+
+    /**
+     * deze methode swapt 2 items en doet dit een aantal keer afhankelijk van de grootte van de list
+     * @param alleStops
+     */
+    public void shuffleList(List<Stop> alleStops){
+        int aantalShuffles= alleStops.size()/2;
+        List<Integer> randomIndexes1= new ArrayList<>();
+        List<Integer> randomIndexes2= new ArrayList<>();
+        for (int i = 0; i < aantalShuffles; i++) {
+            randomIndexes1.add((int) getRandomDoubleBetweenRange(0, alleStops.size()-1));
+            randomIndexes2.add((int) getRandomDoubleBetweenRange(0, alleStops.size()-1));
+        }
+
+
+        for (int i = 0; i < aantalShuffles; i++) {
+            if (randomIndexes1.get(i) != randomIndexes2.get(i)) {
+                Collections.swap(alleStops, randomIndexes1.get(i), randomIndexes2.get(i));
+            }
+        }
+
+
+
+
+
+    }
+
+
+    /**
+     * deze methode probeert de oorspronkelijke route van een truck te optimaliseren (km verminderen)
+     * @param problem Probleem is nodig om alle machinetypes te bereiken
+     */
     public void optimiseRoute(Problem problem){
-
+        System.out.println("check truck " + truckId + " voor verbetering in route");
         // sla originele route op (deze wordt upgedate indien er iets beters gevonden wordt)
-        LinkedList<Stop> origineleRoute= new LinkedList<>(route);
+        LinkedList<Stop> besteRoute= new LinkedList<>(route);
         // sla originele distance op (deze wordt upgedate indien er iets beters gevonden wordt)
-        int originalTotaldistance= getTotalDistance();
+        int besteTotaldistance= getTotalDistance();
 
-        // vraag eerste en laatste node op
+
+
+        // vraag eerste en laatste node op, deze hebben we nodig om uit "alle stops" te halen
+        // aangezien we deze altijd in het begin en op het einde van de route willen
         Stop firstStop = route.getFirst();
         Stop lastStop = route.getLast();
 
 
 
-
-
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < locationStopMap.values().size()*50000; i++) {
             // haal alle stops uit locationStopMap
-            LinkedList<Stop> alleStops = new LinkedList<>();
-            alleStops.addAll(locationStopMap.values());
+            LinkedList<Stop> alleStops = new LinkedList<>(locationStopMap.values());
+
 
 
             // haal eerste en laatste stop uit voorlopig route, aangezien deze niet geshuffled mogen worden
             alleStops.remove(firstStop);
             alleStops.remove(lastStop);
 
-
-
-            // verwissel random 2 punten
-            int randomIndex1 = (int) getRandomDoubleBetweenRange(0, alleStops.size()-1);
-           // System.out.println("randomIndex1 "+randomIndex1);
-            int randomIndex2 = (int) getRandomDoubleBetweenRange(0, alleStops.size()-1);
-            //System.out.println("randomIndex2 "+randomIndex2);
-            if (randomIndex1 != randomIndex2) {
-                Collections.swap(alleStops, randomIndex1, randomIndex2);
-            }
+            // shuffle de stops
+            shuffleList(alleStops);
 
             // voeg eerste en laatste stop terug toe
             alleStops.addFirst(firstStop);
             alleStops.addLast(lastStop);
 
 
-            // controleer routeke of ie beter is
+
+            // controleer route of deze beter is
             if (routeControleBasedOnStops(alleStops, problem)) {
                 // voorlopige route instellen als route van truck (om te kunnen recalculaten)
                 route = alleStops;
@@ -371,25 +404,29 @@ public class Truck {
 
                 if (!recalculateOnTruck() || !recalculateTime()) {
                     //System.out.println("verwerp deze nieuwe route");
-                    route = origineleRoute;
+                    route = besteRoute;
                     recalculateOnTruck();
                     recalculateTime();
-                } else {
-
+                }
+                else {
                     int currentTotalDistance= getTotalDistance();
-                    if (originalTotaldistance > currentTotalDistance) {
-                        origineleRoute = route;
-                        originalTotaldistance = getTotalDistance();
+                    if (besteTotaldistance > currentTotalDistance) {
+                        int verbetering= besteTotaldistance- currentTotalDistance;
+                        System.out.println("gank verbetering van "+ verbetering +" km");
+                        besteRoute = route;
+                        besteTotaldistance = getTotalDistance();
 
                     }
                 }
             }
 
 
-            alleStops.removeFirst();
-            alleStops.removeLast();
+
+
+           // alleStops.removeFirst();
+           // alleStops.removeLast();
         }
-        route = origineleRoute;
+        route = besteRoute;
         recalculateOnTruck();
         recalculateTime();
 
