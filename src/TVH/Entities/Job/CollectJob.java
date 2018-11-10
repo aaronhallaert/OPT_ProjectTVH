@@ -62,4 +62,7 @@ public class CollectJob implements Job {
         }
         return distanceToAllNodes;
     }
+    public int getVolume(){
+        return machine.getType().getVolume();
+    }
 }

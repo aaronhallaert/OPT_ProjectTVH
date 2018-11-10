@@ -3,10 +3,12 @@ package TVH.Entities;
 public class Machine {
     private int id;
     private MachineType type;
+    private boolean moved;
 
     public Machine(int id, MachineType type) {
         this.id = id;
         this.type = type;
+        moved = false;
     }
 
     @Override
@@ -41,5 +43,13 @@ public class Machine {
     @Override
     public String toString() {
         return id + " ("+type.getName()+")";
+    }
+
+    public boolean isMoved() {
+        return moved;
+    }
+
+    public void setMoved(boolean moved) {
+        this.moved = moved;
     }
 }

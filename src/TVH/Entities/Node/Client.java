@@ -30,9 +30,12 @@ public class Client implements Node {
         machines = new LinkedList<>(n.machines);
     }
 
-    public void addToCollect(Machine machine){
-        toCollect.add(machine);
+    public void addToCollect(Machine machine) {
         machines.add(machine);
+        //Speciaal voor locatie 88 van probleem 4, waarbij je een machine moet komen collecten die ook gedropt moet worden >:(
+        //if (!toDrop.contains(machine.getType())) {
+        toCollect.add(machine);
+        //}
     }
 
     public void addToDrop(MachineType machineType){
@@ -43,7 +46,7 @@ public class Client implements Node {
         machines.remove(machine);
     }
     public Machine viewMachineOfType(MachineType mt){
-        for(Machine m: machines){
+        for(Machine m: getAvailableMachines()){
             if(m.getType() == mt){
                 return m;
             }
@@ -56,8 +59,8 @@ public class Client implements Node {
     }
 
     public boolean needsCollect(MachineType mt){
-        for(Machine m: toCollect){
-            if(machines.contains(m) && m.getType() == mt){
+        for(Machine m: getAvailableMachines()){
+            if(m.getType() == mt){
                 return true;
             }
         }
@@ -103,7 +106,7 @@ public class Client implements Node {
             if(mt == machineType) nMachinesNeeded++;
         }
         //We tellen hoeveel machines er al gedropt zijn van een bepaald type
-        for(Machine m: alreadyDropped){
+        for(Machine m: machines){
             if(m.getType() == machineType) nMachinesNeeded--;
         }
         //return true als we er nog minstens 1 nodig hebben

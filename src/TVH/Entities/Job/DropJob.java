@@ -68,4 +68,8 @@ public class DropJob implements Job {
         }
         return distanceToAllNodes;
     }
+
+    public int getVolume(){
+        return machineType.getVolume();
+    }
 }

@@ -71,6 +71,7 @@ public class Truck {
         }
         else{
             CollectJob cj = (CollectJob) j;
+
             Location collect = cj.getCollect();
             Machine machine = cj.getMachine();
             List<Location> possibleDrops = new LinkedList<>(cj.getDrop());
@@ -85,13 +86,15 @@ public class Truck {
         Move optimalMove = null;
         int minDistance = Integer.MAX_VALUE;
         for(Move candidate: moves){
+            LinkedList<Stop> previousOrder = new LinkedList<>(route.stops);
             if(route.addMove(candidate)){
                 int distance = route.calculateDistance();
                 if(distance < minDistance){
                     optimalMove = candidate;
                     minDistance = distance;
                 }
-                route.removeMove(candidate, true);
+                route.removeMove(candidate, false);
+                route.stops = previousOrder;
             }
         }
         if(optimalMove == null) return false;
@@ -105,11 +108,12 @@ public class Truck {
         return true;
     }
 
-    public void removeJob(Job j){
+    public void removeJob(Job j, boolean optimize){
+
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
         Move move = jobMoveMap.get(j);
 
-        route.removeMove(move, true);
+        route.removeMove(move, optimize);
         jobMoveMap.remove(j);
 
         Node collect = nodesMap.get(move.getCollect());
@@ -162,16 +166,20 @@ public class Truck {
         return route;
     }
 
-    /*@Override
+    public Location getEndLocation() {
+        return endLocation;
+    }
+
+    public HashMap<Job, Move> getJobMoveMap() {
+        return jobMoveMap;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Truck: "+truckId+" ("+totalDistance +"km) ("+totalTime+" min)\n");
-        for(Stop s: route){
-            sb.append("\t" + "Location " + s.getLocation() + ", Fillrate: "+s.getFillRate()+"%\n");
-            sb.append("\t\t On truck:\n");
-            for(Machine m: s.getOnTruck()){
-                sb.append("\t\t\t "+m+"\n");
-            }
+        sb.append("Truck: "+truckId+" ("+route.calculateDistance() +"km) ("+route.calculateTime()+" min) (f: "+route.isFeasible()+")\n");
+        /*for(Stop s: route.stops){
+            sb.append("\t" + "Location " + s.getLocation()+"%\n");
             sb.append("\t\t Collect:\n");
             for(Machine m: s.getCollect()){
                 sb.append("\t\t\t "+m+"\n");
@@ -181,7 +189,7 @@ public class Truck {
                 sb.append("\t\t\t "+m+"\n");
             }
 
-        }
+        }*/
         return sb.toString();
-    }*/
+    }
 }

@@ -1,11 +1,9 @@
 package TVH;
 
 import TVH.Entities.*;
-import TVH.Entities.Job.CollectJob;
-import TVH.Entities.Job.JobRemotenessComparator;
-import TVH.Entities.Job.DropJob;
-import TVH.Entities.Job.Job;
+import TVH.Entities.Job.*;
 import TVH.Entities.Node.*;
+import TVH.Entities.Truck.Stop;
 import TVH.Entities.Truck.Truck;
 
 import java.io.File;
@@ -287,7 +285,7 @@ public class Problem {
                 jobs.add(new CollectJob(loc, to, m));
             }
         }
-        Collections.sort(jobs, new JobRemotenessComparator());
+        Collections.sort(jobs, new JobVolumeComparator());
     }
 
 
@@ -298,15 +296,23 @@ public class Problem {
 
 
         //Assign each move to a truck
+        List<Job> HandledJobs = new ArrayList<>();
+        int i = 0;
         for (Job j : jobs) {
+            i++;
             if (j.notDone()) {
                 Truck optimalTruck = null;
                 int minAddedCost = Integer.MAX_VALUE;
                 for (Truck t : trucks) {
                     int cost = t.getRoute().calculateDistance();
+                    LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
                     if (t.addJob(j)) {
                         int addedCost = t.getRoute().calculateDistance() - cost;
-                        t.removeJob(j);
+                        //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
+                        //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
+                        t.removeJob(j, false);
+                        t.getRoute().setStops(previousOrder);
+
                         if (addedCost < minAddedCost) {
                             minAddedCost = addedCost;
                             optimalTruck = t;
@@ -314,14 +320,23 @@ public class Problem {
                     }
                 }
                 if (optimalTruck != null) {
-                    optimalTruck.addJob(j);
-                } else {
-                    System.out.println("stop");
+                    if(!optimalTruck.addJob(j)){
+                        System.out.println("ERROR");
+                    }
+                    else{
+                        HandledJobs.add(j);
+                    }
                 }
+                else{
+                    System.out.println("ERROR");
+                }
+            }
+            else{
+                HandledJobs.add(j);
             }
         }
         for (Truck t : trucks) {
-            System.out.println(t.getRoute().isFeasible());
+            System.out.println(t);
         }
         return new Solution(trucks);
     }

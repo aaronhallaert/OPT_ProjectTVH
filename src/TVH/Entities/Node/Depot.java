@@ -36,7 +36,7 @@ public class Depot implements Node{
 
     public Machine viewMachineOfType(MachineType mt){
         for(Machine m: machines.get(mt)){
-            return m;
+            if(!m.isMoved()) return m;
         }
         return null;
     }
@@ -46,7 +46,10 @@ public class Depot implements Node{
 
 
     public boolean hasMachineAvailableOfType(MachineType mt){
-        return machines.containsKey(mt);
+        for(Machine m: machines.get(mt)){
+            if(!m.isMoved()) return true;
+        }
+        return false;
     }
 
     public Location getLocation() {

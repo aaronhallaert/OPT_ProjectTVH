@@ -9,4 +9,6 @@ public interface Job {
     Location getFixedLocation();
 
     boolean notDone();
+
+    int getVolume();
 }
