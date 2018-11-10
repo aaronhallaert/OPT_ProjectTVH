@@ -51,7 +51,6 @@ public class Route {
         LinkedList<Stop> previousOrder = new LinkedList<>(stops);
         Stop collectStop = null;
         Stop dropStop = null;
-        m.getMachine().setMoved(true);
         if(locationStopMap.get(m.getCollect()).size() > 0){
             int index = Integer.MAX_VALUE;
             for(Stop s: locationStopMap.get(m.getCollect())){
@@ -93,7 +92,6 @@ public class Route {
         return true;
     }
     public void removeMove(Move m, boolean optimize){
-        m.getMachine().setMoved(false);
         boolean stopsRemoved = false;
         List<Stop> stopsAtDropLoc = new ArrayList<>(locationStopMap.get(m.getDrop()));
         List<Stop> stopsAtCollectLoc = new ArrayList<>(locationStopMap.get(m.getCollect()));

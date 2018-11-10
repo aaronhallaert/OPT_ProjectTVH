@@ -118,8 +118,8 @@ public class Truck {
 
         Node collect = nodesMap.get(move.getCollect());
         Node drop =  nodesMap.get(move.getDrop());
-        collect.putMachine(move.getMachine());
-        drop.takeMachine(move.getMachine());
+        collect.undoTakeMachine(move.getMachine());
+        drop.undoPutMachine(move.getMachine());
 
     }
 

@@ -5,16 +5,19 @@ import TVH.Entities.MachineType;
 import com.google.common.collect.HashMultimap;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Depot implements Node{
 
     private Location location;
     private HashMultimap<MachineType, Machine> machines;
+    private LinkedList<Machine> dropped;
 
     public Depot(Location location) {
         this.location = location;
         machines = HashMultimap.create();
+        dropped = new LinkedList<>();
     }
 
     //Copy constructor
@@ -24,19 +27,31 @@ public class Depot implements Node{
         for(Machine m: toCopy.machines.values()){
             machines.put(m.getType(), m);
         }
+        dropped = new LinkedList<>();
     }
-
-    public void putMachine(Machine m){
+    public void addMachine(Machine m){
         machines.put(m.getType(), m);
     }
 
+    public void putMachine(Machine m){
+        dropped.add(m);
+    }
+
+    public void undoPutMachine(Machine m){
+        dropped.remove(m);
+    }
+
     public void takeMachine(Machine m){
-        machines.get(m.getType()).remove(m);
+        machines.remove(m.getType(), m);
+    }
+
+    public void undoTakeMachine(Machine m){
+        machines.put(m.getType(), m);
     }
 
     public Machine viewMachineOfType(MachineType mt){
         for(Machine m: machines.get(mt)){
-            if(!m.isMoved()) return m;
+            return m;
         }
         return null;
     }
@@ -47,7 +62,7 @@ public class Depot implements Node{
 
     public boolean hasMachineAvailableOfType(MachineType mt){
         for(Machine m: machines.get(mt)){
-            if(!m.isMoved()) return true;
+            return true;
         }
         return false;
     }

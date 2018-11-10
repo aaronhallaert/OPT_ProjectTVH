@@ -121,7 +121,7 @@ public class Problem {
             //Indien een machine in een depot staat moet deze worden toegevoegd aan het depot;
             for (Depot d : depots) {
                 if (d.getLocation() == location) {
-                    d.putMachine(machine);
+                    d.addMachine(machine);
                 }
             }
             //toevoegen in algemene lijst
@@ -250,22 +250,6 @@ public class Problem {
                 //There are 2 possibilities: Depot contains machine of type, Client contains a machine of this type that needs to be collected
                 List<Location> from = new ArrayList<>();
                 for (Edge e : loc.getSortedEdgeList()) {
-                    /*//In case the location is a Client
-                    if (clientMap.containsKey(e.getTo())) {
-                        Client c = clientMap.get(e.getTo());
-                        if (c.needsCollect(mt)) {
-                            //Add the move to the list and delete machine from items that need to be collected.
-                            from.add(c.getLocation());
-                        }
-                    }
-                    //In case the location is a depot
-                    if (depotsMap.containsKey(e.getTo())) {
-                        Depot d = depotsMap.get(e.getTo());
-                        if (d.hasMachineAvailableOfType(mt)) {
-                            //Add the depot to the list of possibilities.
-                            from.add(d.getLocation());
-                        }
-                    }*/
                     Node node = nodesMap.get(e.getTo());
                     if (node.hasMachineAvailableOfType(mt)) {
                         from.add(node.getLocation());
@@ -338,8 +322,15 @@ public class Problem {
         for (Truck t : trucks) {
             System.out.println(t);
         }
+
+
         return new Solution(trucks);
     }
+
+    public Solution localSearch(){
+
+    }
+
 }
 
 
