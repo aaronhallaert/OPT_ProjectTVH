@@ -1,5 +1,6 @@
 package TVH.Entities.Job;
 
+import TVH.Entities.MachineType;
 import TVH.Entities.Node.Edge;
 import TVH.Entities.Node.Location;
 import TVH.Entities.Machine;
@@ -62,7 +63,7 @@ public class CollectJob implements Job {
         }
         return distanceToAllNodes;
     }
-    public int getVolume(){
-        return machine.getType().getVolume();
+    public MachineType getMachineType(){
+        return machine.getType();
     }
 }

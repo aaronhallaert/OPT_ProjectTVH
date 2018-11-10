@@ -3,8 +3,10 @@ package TVH;
 import TVH.Entities.*;
 import TVH.Entities.Job.*;
 import TVH.Entities.Node.*;
+import TVH.Entities.Truck.Route;
 import TVH.Entities.Truck.Stop;
 import TVH.Entities.Truck.Truck;
+import com.google.common.collect.HashMultimap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,6 +29,7 @@ public class Problem {
     public ArrayList<Machine> machines = new ArrayList<>();
     public ArrayList<Edge> edges = new ArrayList<>();
     public List<Job> jobs = new ArrayList<>();
+    public HashMultimap<MachineType, Job> jobTypeMap = HashMultimap.create();
 
     public static Problem getInstance() {
         return instance;
@@ -221,19 +224,14 @@ public class Problem {
 
     public Solution solve(int n_clusters) {
         createJobs();
-        Solution Init = createInitialSolution();
-        /*
-         * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
-         * 1) Initial result:
-         *   We make clusters which contain stops. These clusters have a net list of needed items ot provided items.
-         *   From this list we search for the nearest depot or the nearest stop from another cluster that contains the needed items.
-         *   This will be a fairly fixed result where local search cant get out, so we increase the number of clusters until no improvement is found.
-         *
-         * 2) Optimisation phase
-         *
-         * */
+        Solution init = createInitialSolution();
+        System.out.println(init.getTotalDistance());
+        for(Truck t: trucks){
+            t.optimizeTruck();
+        }
+        Solution best = new Solution(trucks);
 
-        return Init;
+        return best;
     }
 
     /**
@@ -270,6 +268,9 @@ public class Problem {
             }
         }
         Collections.sort(jobs, new JobVolumeComparator());
+        for(Job j: jobs){
+            jobTypeMap.put(j.getMachineType(), j);
+        }
     }
 
 
@@ -283,9 +284,13 @@ public class Problem {
         List<Job> HandledJobs = new ArrayList<>();
         int i = 0;
         for (Job j : jobs) {
+            System.out.println(i);
             i++;
+
             if (j.notDone()) {
                 Truck optimalTruck = null;
+                Route optimalRoute = null;
+                Move optimalMove = null;
                 int minAddedCost = Integer.MAX_VALUE;
                 for (Truck t : trucks) {
                     int cost = t.getRoute().calculateDistance();
@@ -294,42 +299,62 @@ public class Problem {
                         int addedCost = t.getRoute().calculateDistance() - cost;
                         //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
                         //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
-                        t.removeJob(j, false);
-                        t.getRoute().setStops(previousOrder);
-
                         if (addedCost < minAddedCost) {
                             minAddedCost = addedCost;
                             optimalTruck = t;
+                            optimalRoute = new Route(t.getRoute());
+                            optimalMove = t.getJobMoveMap().get(j);
                         }
+                        t.removeJob(j, false);
+                        t.getRoute().setStops(previousOrder);
                     }
                 }
                 if (optimalTruck != null) {
-                    if(!optimalTruck.addJob(j)){
-                        System.out.println("ERROR");
+                    //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
+                    if(j.getFixedLocation().getLocationID() == 22){
+                        System.out.println("stop");
                     }
-                    else{
-                        HandledJobs.add(j);
-                    }
+                    optimalTruck.addJob(j, optimalMove, optimalRoute);
+                    HandledJobs.add(j);
                 }
                 else{
-                    System.out.println("ERROR");
+                    System.out.println("ERROR: No truck found");
                 }
             }
             else{
                 HandledJobs.add(j);
             }
         }
-        for (Truck t : trucks) {
+        /*for (Truck t : trucks) {
             System.out.println(t);
-        }
+        }*/
 
 
         return new Solution(trucks);
     }
 
-    public Solution localSearch(){
+    /*public Solution localSearch(int duration, Solution init){
+        long endTime = System.currentTimeMillis() + duration;
+        Solution currentBest = init;
+        System.out.println(currentBest.getTotalDistance());
+        while(System.currentTimeMillis() < endTime){
+            for(Truck t: trucks){
+                ArrayList<Job> jobs = new ArrayList<>(t.getJobMoveMap().keySet());
+                if(!jobs.isEmpty()) {
+                    int index = (int) (Math.random() * jobs.size());
+                    t.removeJob(jobs.get(index), false);
+                    t.addJob(jobs.get(index));
+                }
+            }
+            Solution candidate = new Solution(trucks);
+            if(candidate.getTotalDistance() < currentBest.getTotalDistance()){
+                System.out.println(currentBest.getTotalDistance());
+                currentBest = candidate;
+            }
+        }
+        return currentBest;
 
-    }
+    }*/
 
 }
 

@@ -71,7 +71,6 @@ public class Truck {
         }
         else{
             CollectJob cj = (CollectJob) j;
-
             Location collect = cj.getCollect();
             Machine machine = cj.getMachine();
             List<Location> possibleDrops = new LinkedList<>(cj.getDrop());
@@ -120,6 +119,20 @@ public class Truck {
         Node drop =  nodesMap.get(move.getDrop());
         collect.undoTakeMachine(move.getMachine());
         drop.undoPutMachine(move.getMachine());
+
+    }
+
+    //Deze methode voegt een job toe aan een truck, met bijhoorde move en route direct er al bij
+    //We zijn zeker dat deze route feasible is
+    public void addJob(Job j, Move m, Route r){
+        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+
+        route = r;
+        jobMoveMap.put(j, m);
+        Node collect = nodesMap.get(m.getCollect());
+        Node drop =  nodesMap.get(m.getDrop());
+        collect.takeMachine(m.getMachine());
+        drop.putMachine(m.getMachine());
 
     }
 
@@ -174,11 +187,46 @@ public class Truck {
         return jobMoveMap;
     }
 
+    public void optimizeTruck(){
+        List<Job> jobs = new ArrayList<>(jobMoveMap.keySet());
+        boolean improvement = true;
+        int minDistance = route.calculateDistance();
+        while (improvement) {
+            improvement = false;
+            for(Job j: jobs){
+                Route backup = new Route(route);
+                Move oldMove = jobMoveMap.get(j);
+                removeJob(j, false);
+                if(addJob(j)){
+                    int currentDistance = route.calculateDistance();
+                    if(minDistance > currentDistance){
+                        System.out.println("improvement found");
+                        improvement = true;
+                        minDistance = currentDistance;
+                    }
+                    else{
+                        route = backup;
+                        jobMoveMap.put(j, oldMove);
+                    }
+                }
+                else{
+                    route = backup;
+                    jobMoveMap.put(j, oldMove);
+
+                }
+            }
+        }
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Truck: "+truckId+" ("+route.calculateDistance() +"km) ("+route.calculateTime()+" min) (f: "+route.isFeasible()+")\n");
-        /*for(Stop s: route.stops){
+        for(Stop s: route.stops){
             sb.append("\t" + "Location " + s.getLocation()+"%\n");
             sb.append("\t\t Collect:\n");
             for(Machine m: s.getCollect()){
@@ -189,7 +237,7 @@ public class Truck {
                 sb.append("\t\t\t "+m+"\n");
             }
 
-        }*/
+        }
         return sb.toString();
     }
 }

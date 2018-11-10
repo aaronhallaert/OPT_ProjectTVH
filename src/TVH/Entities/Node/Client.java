@@ -32,7 +32,7 @@ public class Client implements Node {
     public void addToCollect(Machine machine) {
         //dropped.add(machine);
         //Speciaal voor locatie 88 van probleem 4, waarbij je een machine moet komen collecten die ook gedropt moet worden >:(
-        //if (!toDrop.contains(machine.getType())) {
+        //if (!toDrop.contains(machine.getMachineType())) {
         toCollect.add(machine);
         //}
     }

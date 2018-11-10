@@ -1,5 +1,6 @@
 package TVH.Entities.Job;
 
+import TVH.Entities.MachineType;
 import TVH.Entities.Node.Location;
 
 public interface Job {
@@ -10,5 +11,5 @@ public interface Job {
 
     boolean notDone();
 
-    int getVolume();
+    MachineType getMachineType();
 }
