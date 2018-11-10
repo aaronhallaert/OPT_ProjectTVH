@@ -45,7 +45,7 @@ public class Truck {
         //Deep copy each stop in route
         this.route = new Route(t.getRoute());
 
-        //Create a new hashmap;
+        //Add al job move relations to new hashmap;
         jobMoveMap = new HashMap<>();
         for(Map.Entry<Job, Move> entry: t.jobMoveMap.entrySet()){
             jobMoveMap.put(entry.getKey(), entry.getValue());

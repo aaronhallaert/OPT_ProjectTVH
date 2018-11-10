@@ -29,6 +29,14 @@ public class Stop {
         this.collect = new LinkedList<>();
         this.drop = new LinkedList<>();
     }
+
+    public Stop(Stop s){
+        this.location = s.location;
+        this.collect = new LinkedList<>(s.collect);
+        this.drop = new LinkedList<>(s.drop);
+    }
+
+
     public boolean isEmpty(){
         if(collect.isEmpty() && drop.isEmpty()) return true;
         return false;
@@ -49,11 +57,6 @@ public class Stop {
         drop.remove(m);
     }
 
-    public Stop(Stop s){
-        this.location = s.location;
-        this.collect = new LinkedList<>(s.collect);
-        this.drop = new LinkedList<>(s.drop);
-    }
 
     public int getTimeSpend(){
         //TODO:Efficienter maken

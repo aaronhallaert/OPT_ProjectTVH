@@ -35,9 +35,9 @@ public class Route {
 
     //Copy constructor
     public Route(Route r){
-        this.first = first;
-        this.last = last;
-        this.truck = truck;
+        this.first = r.first;
+        this.last = r.last;
+        this.truck = r.truck;
         stops = new LinkedList<>();
         locationStopMap = HashMultimap.create();
         for(Stop s: r.stops){
@@ -47,7 +47,8 @@ public class Route {
         }
     }
     public boolean addMove(Move m){
-        LinkedList<Stop> backup = new LinkedList<>(stops);
+        //Backups nemen van stops en locationstopmap
+        LinkedList<Stop> previousOrder = new LinkedList<>(stops);
         Stop collectStop = null;
         Stop dropStop = null;
         if(locationStopMap.get(m.getCollect()).size() > 0){
@@ -84,7 +85,8 @@ public class Route {
         optimizeRoute();
         if(!isFeasible()){
             removeMove(m, false);
-            stops = backup;
+            stops = previousOrder;
+
             return false;
         }
         return true;
@@ -160,6 +162,9 @@ public class Route {
 
     public int calculateTime(){
         int totalTime = 0;
+        if(stops.isEmpty()){
+            System.out.println("stop");
+        }
         Stop prevStop = stops.get(0);
         //Time to drive to each stop
         for (int i = 1; i < stops.size(); i++) {
