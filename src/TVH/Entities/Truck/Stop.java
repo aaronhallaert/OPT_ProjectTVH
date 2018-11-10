@@ -1,8 +1,8 @@
-package TVH.Entities;
+package TVH.Entities.Truck;
 
+import TVH.Entities.Machine;
 import TVH.Entities.Node.Location;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -89,6 +89,10 @@ public class Stop {
 
     public void setDrop(LinkedList<Machine> drop) {
         this.drop = drop;
+    }
+
+    public String toString(){
+        return location.toString();
     }
 
 

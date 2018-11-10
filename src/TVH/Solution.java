@@ -1,8 +1,8 @@
 package TVH;
 
 import TVH.Entities.Machine;
-import TVH.Entities.Stop;
-import TVH.Entities.Truck;
+import TVH.Entities.Truck.Stop;
+import TVH.Entities.Truck.Truck;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class Solution {
         //Current state van trucks kopiëren;
         for(Truck t: trucks){
             this.trucks.add(new Truck(t));
-            totalkm+= t.getTotalDistance();
+            totalkm+= t.getRoute().calculateDistance();
         }
     }
 
@@ -33,7 +33,7 @@ public class Solution {
     public int getTotalUsedTrucks(){
         int i = 0;
         for(Truck t: trucks){
-            if(t.getTotalDistance() > 0) i++;
+            if(t.getRoute().calculateDistance() > 0) i++;
         }
         return i;
     }
@@ -45,11 +45,11 @@ public class Solution {
         writer.println("TRUCKS: "+String.valueOf(getTotalUsedTrucks()));
 
         for(Truck t: trucks){
-            if(t.getTotalDistance() > 0){
+            if(t.getRoute().calculateDistance() > 0){
                 writer.print(String.valueOf(t.getTruckId()) + " ");
-                writer.print(String.valueOf(t.getTotalDistance()) + " ");
-                writer.print(String.valueOf(t.getTotalTime()));
-                for(Stop s: t.getRoute()){
+                writer.print(String.valueOf(t.getRoute().calculateDistance()) + " ");
+                writer.print(String.valueOf(t.getRoute().calculateTime()));
+                for(Stop s: t.getRoute().getStops()){
                     writer.print(" ");
                     writer.print(s.getLocation().getLocationID());
                     for(Machine m: s.getCollect()){

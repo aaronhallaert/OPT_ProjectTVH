@@ -1,22 +1,24 @@
-package TVH.Entities;
+package TVH.Entities.Truck;
 
-import TVH.Entities.Job.Job;
 import TVH.Entities.Job.Move;
+import TVH.Entities.Machine;
 import TVH.Entities.Node.Location;
-import TVH.Entities.Node.Node;
 import TVH.Entities.Node.Swap;
 import TVH.Problem;
 import com.google.common.collect.HashMultimap;
 
+import java.sql.SQLOutput;
 import java.util.*;
 
 public class Route {
+    Truck truck;
     LinkedList<Stop> stops;
     HashMultimap<Location, Stop> locationStopMap;
     Stop first;
     Stop last;
 
-    public Route(Stop first, Stop last){
+    public Route(Stop first, Stop last, Truck truck){
+        this.truck = truck;
         this.first = first;
         this.last = last;
         stops = new LinkedList<>();
@@ -35,6 +37,7 @@ public class Route {
     public Route(Route r){
         this.first = first;
         this.last = last;
+        this.truck = truck;
         stops = new LinkedList<>();
         locationStopMap = HashMultimap.create();
         for(Stop s: r.stops){
@@ -44,11 +47,12 @@ public class Route {
         }
     }
     public boolean addMove(Move m){
+        LinkedList<Stop> backup = new LinkedList<>(stops);
         Stop collectStop = null;
         Stop dropStop = null;
-        if(locationStopMap.get(m.getDrop()).size() > 0){
+        if(locationStopMap.get(m.getCollect()).size() > 0){
             int index = Integer.MAX_VALUE;
-            for(Stop s: locationStopMap.get(m.getDrop())){
+            for(Stop s: locationStopMap.get(m.getCollect())){
                 if(stops.indexOf(s) < index){
                     index = stops.indexOf(s);
                     collectStop = s;
@@ -57,7 +61,8 @@ public class Route {
         }
         else {
             collectStop = new Stop(m.getCollect());
-            stops.add(collectStop);
+            stops.add(stops.size()-1,collectStop);
+            locationStopMap.put(m.getCollect(), collectStop);
         }
         if(locationStopMap.get(m.getDrop()).size() > 0){
             int index = -1;
@@ -70,34 +75,44 @@ public class Route {
         }
         else {
             dropStop = new Stop(m.getDrop());
-            stops.add(dropStop);
+            stops.add(stops.size()-1,dropStop);
+            locationStopMap.put(m.getDrop(), dropStop);
         }
 
         collectStop.addToCollect(m.getMachine());
         dropStop.addToDrop(m.getMachine());
         optimizeRoute();
         if(!isFeasible()){
-            collectStop.removeFromCollect(m.getMachine());
-            dropStop.removeFromDrop(m.getMachine());
+            removeMove(m, false);
+            stops = backup;
             return false;
         }
         return true;
     }
-    public void removeMove(Move m){
-        for(Stop s: locationStopMap.get(m.getDrop())){
+    public void removeMove(Move m, boolean optimize){
+        boolean stopsRemoved = false;
+        List<Stop> stopsAtDropLoc = new ArrayList<>(locationStopMap.get(m.getDrop()));
+        List<Stop> stopsAtCollectLoc = new ArrayList<>(locationStopMap.get(m.getCollect()));
+        for(Stop s: stopsAtDropLoc){
             s.removeFromDrop(m.getMachine());
-            if(s.isEmpty()){
+            if(s.isEmpty() && s != first && s != last){
                 stops.remove(s);
                 locationStopMap.remove(s.getLocation(), s);
-                optimizeRoute();
+                stopsRemoved = true;
             }
         }
-        for(Stop s: locationStopMap.get(m.getCollect())){
+        for(Stop s: stopsAtCollectLoc){
             s.removeFromCollect(m.getMachine());
-            if(s.isEmpty()){
+            if(s.isEmpty() && s != first && s != last){
                 stops.remove(s);
                 locationStopMap.remove(s.getLocation(), s);
-                optimizeRoute();
+                stopsRemoved = true;
+            }
+        }
+        if(stopsRemoved && optimize){
+            optimizeRoute();
+            if(!isFeasible()){
+                System.out.println("stop");
             }
         }
     }
@@ -210,4 +225,7 @@ public class Route {
         return totalDistance;
     }
 
+    public LinkedList<Stop> getStops() {
+        return stops;
+    }
 }

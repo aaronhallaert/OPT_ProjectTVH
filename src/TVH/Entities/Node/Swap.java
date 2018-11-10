@@ -1,7 +1,5 @@
 package TVH.Entities.Node;
 
-import TVH.Entities.Stop;
-
 import java.util.Objects;
 
 public class Swap {

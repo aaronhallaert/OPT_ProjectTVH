@@ -6,6 +6,7 @@ import TVH.Entities.Job.JobRemotenessComparator;
 import TVH.Entities.Job.DropJob;
 import TVH.Entities.Job.Job;
 import TVH.Entities.Node.*;
+import TVH.Entities.Truck.Truck;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -295,44 +296,26 @@ public class Problem {
 
         //Assign each move to a truck
         for(Job j: jobs){
-            if(j.getFixedLocation().getLocationID() == 266){
-                System.out.println("wacht eke");
-            }
-            LinkedList<Truck> sortedTruckList = new LinkedList<>();
-            sortedTruckList.addAll(trucks);
-            //Sort truck list based on it's route proximity to the location of the Job
-            sortedTruckList.sort(Comparator.comparing(t->t.getDistanceToLocation(j.getFixedLocation())));
-
-            //Go through the sortedTruckList until a truck is found that is able to handle the move without breaking any
-            //constraints.
-            boolean truckFound = false;
-            while(!sortedTruckList.isEmpty()){
-                Truck selected = sortedTruckList.getFirst();
-                //Make a deep copy backup to roll back the truck in case it can't handle the move;
-                Truck backup = new Truck(selected);
-                if(selected.doJob(j)){
-                    //Truck was able to handle the move without breaking any constraints;
-                    truckFound = true;
-                    break;
+            if(j.notDone()) {
+                Truck optimalTruck = null;
+                int minAddedCost = Integer.MAX_VALUE;
+                for (Truck t : trucks) {
+                    int cost = t.getRoute().calculateDistance();
+                    if(t.addJob(j)) {
+                        int addedCost = t.getRoute().calculateDistance() - cost;
+                        t.removeJob(j);
+                        if (addedCost < minAddedCost) {
+                            minAddedCost = addedCost;
+                            optimalTruck = t;
+                        }
+                    }
                 }
-                else {
-                    //Truck was not able to handle the move without breaking any constraints;
-                    sortedTruckList.removeFirst();
-                    //Truck needs to be rolled back to previous state;
-                    selected.rollBack(backup);
-                }
+                optimalTruck.addJob(j);
             }
-            //If a truck was found to do the move, we go to the next move
-            if(sortedTruckList.isEmpty() && !truckFound) {
-                System.out.println(j);
-            }
-
-
-                //If we reach this part of the code, it means that the move can't be executed by any available trucks.
-                //🤔🤔🤔🤔🤔🤔
-
         }
-        //System.out.println("done");
+        for(Truck t: trucks){
+            System.out.println(t.getRoute().isFeasible());
+        }
         return new Solution(trucks);
     }
 

@@ -1,9 +1,11 @@
-package TVH.Entities;
+package TVH.Entities.Truck;
 
 import TVH.Entities.Job.CollectJob;
 import TVH.Entities.Job.DropJob;
 import TVH.Entities.Job.Job;
 import TVH.Entities.Job.Move;
+import TVH.Entities.Machine;
+import TVH.Entities.MachineType;
 import TVH.Entities.Node.Location;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
@@ -14,12 +16,9 @@ public class Truck {
 
     private int truckId;
     private Route route;
-    private int totalTime; //van de rit
-    private int totalDistance;
     private Location startLocation;
     private Location endLocation;
     private HashMap<Job, Move> jobMoveMap;
-    private ArrayList<Move> moves;
     private boolean used;
 
     public Truck(int truckId, Location startLocation, Location endLocation){
@@ -31,7 +30,7 @@ public class Truck {
 
         Stop startStop = new Stop(startLocation);
         Stop endStop = new Stop(endLocation);
-        route = new Route(startStop, endStop);
+        route = new Route(startStop, endStop, this);
 
         jobMoveMap = new HashMap<>();
     }
@@ -39,8 +38,6 @@ public class Truck {
     //Copy constructor
     public Truck(Truck t) {
         this.truckId = t.truckId;
-        this.totalTime = t.totalTime;
-        this.totalDistance = t.totalDistance;
         this.startLocation = t.startLocation;
         this.endLocation = t.endLocation;
         this.used = t.used;
@@ -94,11 +91,13 @@ public class Truck {
                     optimalMove = candidate;
                     minDistance = distance;
                 }
-                route.removeMove(candidate);
+                route.removeMove(candidate, true);
             }
         }
         if(optimalMove == null) return false;
 
+        route.addMove(optimalMove);
+        jobMoveMap.put(j, optimalMove);
         Node collectNode = nodesMap.get(optimalMove.getCollect());
         Node dropNode =  nodesMap.get(optimalMove.getDrop());
         collectNode.takeMachine(optimalMove.getMachine());
@@ -109,7 +108,9 @@ public class Truck {
     public void removeJob(Job j){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
         Move move = jobMoveMap.get(j);
-        route.removeMove(move);
+
+        route.removeMove(move, true);
+        jobMoveMap.remove(j);
 
         Node collect = nodesMap.get(move.getCollect());
         Node drop =  nodesMap.get(move.getDrop());
@@ -118,24 +119,23 @@ public class Truck {
 
     }
 
+    public int getDistanceToLocation(Location l){
+        int minDistance = Integer.MAX_VALUE;
+        for(Stop s: route.stops){
+            Location stopLoc = s.getLocation();
+            if(l.distanceTo(stopLoc) < minDistance){
+                minDistance = l.distanceTo(stopLoc);
+            }
+        }
+        return minDistance;
+    }
+
     public int getTruckId() {
         return truckId;
     }
 
     public void setTruckId(int truckId) {
         this.truckId = truckId;
-    }
-
-    public int getTotalTime() {
-        return totalTime;
-    }
-
-    public void setTotalTime(int totalTime) {
-        this.totalTime = totalTime;
-    }
-
-    public void setTotalDistance(int totalDistance) {
-        this.totalDistance = totalDistance;
     }
 
     public Location getStartLocation() {
