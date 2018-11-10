@@ -42,10 +42,9 @@ public class Client implements Node {
     public void takeMachine(Machine machine){
         machines.remove(machine);
     }
-    public Machine takeMachine(MachineType mt){
+    public Machine viewMachineOfType(MachineType mt){
         for(Machine m: machines){
             if(m.getType() == mt){
-                machines.remove(m);
                 return m;
             }
         }
@@ -111,8 +110,8 @@ public class Client implements Node {
         return nMachinesNeeded > 0;
     }
 
-    public boolean canPutMachine(Machine m){
-        return needsDrop(m.getType());
+    public boolean canPutMachineType(MachineType mt){
+        return needsDrop(mt);
     }
 
 

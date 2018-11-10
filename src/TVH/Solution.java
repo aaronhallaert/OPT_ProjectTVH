@@ -52,11 +52,11 @@ public class Solution {
                 for(Stop s: t.getRoute()){
                     writer.print(" ");
                     writer.print(s.getLocation().getLocationID());
-                    for(Machine m: s.getCollectItems()){
+                    for(Machine m: s.getCollect()){
                         writer.print(':');
                         writer.print(m.getId());
                     }
-                    for(Machine m: s.getDropItems()){
+                    for(Machine m: s.getDrop()){
                         writer.print(':');
                         writer.print(m.getId());
                     }

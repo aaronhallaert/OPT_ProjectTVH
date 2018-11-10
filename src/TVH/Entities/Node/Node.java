@@ -9,9 +9,9 @@ public interface Node {
 
     public boolean hasMachineAvailableOfType(MachineType mt);
     public List<Machine> getAvailableMachines();
-    public boolean canPutMachine(Machine m);
+    public boolean canPutMachineType(MachineType mt);
     public void putMachine(Machine m);
     public void takeMachine(Machine m);
-    public Machine takeMachine(MachineType mt);
+    public Machine viewMachineOfType(MachineType mt);
     public Location getLocation();
 }

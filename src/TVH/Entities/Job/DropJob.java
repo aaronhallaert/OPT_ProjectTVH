@@ -3,7 +3,12 @@ package TVH.Entities.Job;
 import TVH.Entities.Node.Edge;
 import TVH.Entities.Node.Location;
 import TVH.Entities.MachineType;
+import TVH.Entities.Node.Node;
+import TVH.Problem;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class DropJob implements Job {
@@ -15,6 +20,17 @@ public class DropJob implements Job {
         this.drop = drop;
         this.collect = collect;
         this.machineType = mt;
+    }
+    public DropJob(DropJob dj){
+        this.drop = dj.drop;
+        this.collect = new ArrayList<>(dj.collect);
+        this.machineType = dj.machineType;
+    }
+
+    public boolean notDone(){
+        HashMap<Location,Node> nodesMap = Problem.getInstance().nodesMap;
+        Node dropNode = nodesMap.get(drop);
+        return dropNode.canPutMachineType(machineType);
     }
 
     public Location getFixedLocation(){

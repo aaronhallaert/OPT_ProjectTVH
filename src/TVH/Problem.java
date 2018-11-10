@@ -276,7 +276,7 @@ public class Problem {
                 List<Location> to = new ArrayList<>();
                 for(Edge e: loc.getSortedEdgeList()){
                     Node node = nodesMap.get(e.getTo());
-                    if(node.canPutMachine(m)){
+                    if(node.canPutMachineType(m.getType())){
                         to.add(node.getLocation());
                     }
                 }

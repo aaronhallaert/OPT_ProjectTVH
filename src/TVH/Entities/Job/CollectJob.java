@@ -3,7 +3,10 @@ package TVH.Entities.Job;
 import TVH.Entities.Node.Edge;
 import TVH.Entities.Node.Location;
 import TVH.Entities.Machine;
+import TVH.Entities.Node.Node;
+import TVH.Problem;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class CollectJob implements Job {
@@ -15,6 +18,13 @@ public class CollectJob implements Job {
         this.collect = collect;
         this.drop = drop;
         this.machine = machine;
+    }
+
+    public boolean notDone(){
+        HashMap<Location,Node> nodesMap = Problem.getInstance().nodesMap;
+        Node collectNode = nodesMap.get(collect);
+        return collectNode.getAvailableMachines().contains(machine);
+
     }
 
     public Location getFixedLocation(){

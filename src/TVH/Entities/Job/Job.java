@@ -7,4 +7,6 @@ public interface Job {
     int getRemoteFactor();
 
     Location getFixedLocation();
+
+    boolean notDone();
 }

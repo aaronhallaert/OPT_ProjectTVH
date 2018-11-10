@@ -13,4 +13,16 @@ public class Move {
         this.collect = collect;
         this.drop = drop;
     }
+
+    public Machine getMachine() {
+        return machine;
+    }
+
+    public Location getCollect() {
+        return collect;
+    }
+
+    public Location getDrop() {
+        return drop;
+    }
 }

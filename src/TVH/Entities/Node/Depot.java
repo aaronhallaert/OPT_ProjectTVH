@@ -34,14 +34,13 @@ public class Depot implements Node{
         machines.get(m.getType()).remove(m);
     }
 
-    public Machine takeMachine(MachineType mt){
+    public Machine viewMachineOfType(MachineType mt){
         for(Machine m: machines.get(mt)){
-            machines.get(mt).remove(m);
             return m;
         }
         return null;
     }
-    public boolean canPutMachine(Machine m){
+    public boolean canPutMachineType(MachineType mt){
         return true;
     }
 

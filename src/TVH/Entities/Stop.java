@@ -13,68 +13,55 @@ import java.util.LinkedList;
 public class Stop {
 
     private Location location;
-    private int fillRate; //na stop
-    private ArrayList<Machine> collectItems;
-    private ArrayList<Machine> dropItems;
-    private LinkedList<Machine> onTruck;
+    private LinkedList<Machine> collect;
+    private LinkedList<Machine> drop;
 
 
-    public Stop(Location location, ArrayList<Machine> collectItems, ArrayList<Machine> dropItems, LinkedList<Machine> onTruck) {
+    public Stop(Location location, LinkedList<Machine> collect, LinkedList<Machine> drop) {
         this.location = location;
-        this.collectItems = collectItems;
-        this.dropItems = dropItems;
-        this.onTruck = onTruck;
-        calculateFillRate();
+        this.collect = collect;
+        this.drop = drop;
     }
 
     //Make single collect stop
     public Stop(Location location){
         this.location = location;
-        this.collectItems = new ArrayList<>();
-        this.dropItems = new ArrayList<>();
-        this.onTruck = new LinkedList<>();
+        this.collect = new LinkedList<>();
+        this.drop = new LinkedList<>();
     }
-    public void addCollectItem(Machine m){
-        collectItems.add(m);
+    public boolean isEmpty(){
+        if(collect.isEmpty() && drop.isEmpty()) return true;
+        return false;
     }
 
-    public void addDropItem(Machine m){
-        dropItems.add(m);
+    public void addToCollect(Machine m){
+        collect.add(m);
+    }
+
+    public void addToDrop(Machine m){
+        drop.add(m);
+    }
+
+    public void removeFromCollect(Machine m){
+        collect.remove(m);
+    }
+    public void removeFromDrop(Machine m){
+        drop.remove(m);
     }
 
     public Stop(Stop s){
         this.location = s.location;
-        this.fillRate = s.fillRate;
-        this.collectItems = new ArrayList<>(s.collectItems);
-        this.dropItems = new ArrayList<>(s.dropItems);
-        this.onTruck = new LinkedList<>(s.onTruck);
+        this.collect = new LinkedList<>(s.collect);
+        this.drop = new LinkedList<>(s.drop);
     }
 
-    public void removeFromTruck(Machine machine){
-        onTruck.remove(machine);
-        calculateFillRate();
-    }
-
-    public boolean addToTruck(Machine machine){
-        onTruck.add(machine);
-        return calculateFillRate();
-    }
-
-    public boolean calculateFillRate(){
-        //TODO:Efficienter maken;
-        fillRate = 0;
-        for(Machine m: onTruck){
-            fillRate += m.getType().getVolume();
-        }
-        return fillRate <= 100;
-    }
     public int getTimeSpend(){
         //TODO:Efficienter maken
         int time = 0;
-        for(Machine m: collectItems){
+        for(Machine m: collect){
             time += m.getType().getServiceTime();
         }
-        for(Machine m: dropItems){
+        for(Machine m: drop){
             time += m.getType().getServiceTime();
         }
         return time;
@@ -88,36 +75,21 @@ public class Stop {
         this.location = location;
     }
 
-    public int getFillRate() {
-        return fillRate;
+    public LinkedList<Machine> getCollect() {
+        return collect;
     }
 
-    public void setFillRate(int fillRate) {
-        this.fillRate = fillRate;
+    public void setCollect(LinkedList<Machine> collect) {
+        this.collect = collect;
     }
 
-    public ArrayList<Machine> getCollectItems() {
-        return collectItems;
+    public LinkedList<Machine> getDrop() {
+        return drop;
     }
 
-    public void setCollectItems(ArrayList<Machine> collectItems) {
-        this.collectItems = collectItems;
+    public void setDrop(LinkedList<Machine> drop) {
+        this.drop = drop;
     }
 
-    public ArrayList<Machine> getDropItems() {
-        return dropItems;
-    }
-
-    public void setDropItems(ArrayList<Machine> dropItems) {
-        this.dropItems = dropItems;
-    }
-
-    public LinkedList<Machine> getOnTruck() {
-        return onTruck;
-    }
-
-    public void setOnTruck(LinkedList<Machine> onTruck) {
-        this.onTruck = onTruck;
-    }
 
 }
