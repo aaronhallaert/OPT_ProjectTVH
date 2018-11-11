@@ -11,7 +11,6 @@ import java.util.*;
 //Dynamische klasse
 public class Route {
     private LinkedList<Stop> stops;
-    private HashMultimap<Location, Stop> locationStopMap;
     private int totalDistance = 0;
     private int cost = 0;
     private int orderViolations = 0;
@@ -33,9 +32,6 @@ public class Route {
         stops = new LinkedList<>();
         stops.add(first);
         stops.add(last);
-        locationStopMap = HashMultimap.create();
-        locationStopMap.put(first.getLocation(), first);
-        locationStopMap.put(last.getLocation(), last);
     }
 
     public Route(LinkedList<Stop> stops) {
@@ -45,11 +41,8 @@ public class Route {
     //Copy constructor
     public Route(Route r){
         stops = new LinkedList<>();
-        locationStopMap = HashMultimap.create();
         for(Stop s: r.stops){
-            Stop newStop = new Stop(s);
-            stops.add(newStop);
-            locationStopMap.put(newStop.getLocation(), newStop);
+            stops.add(new Stop(s));
         }
     }
     public boolean addMove(Move m){
@@ -58,34 +51,25 @@ public class Route {
         Stop collectStop = null;
         Stop dropStop = null;
         //Collect stop opzoeken
-        if(locationStopMap.get(m.getCollect()).size() > 0){
-            int index = Integer.MAX_VALUE;
-            for(Stop s: locationStopMap.get(m.getCollect())){
-                if(stops.indexOf(s) < index){
-                    index = stops.indexOf(s);
-                    collectStop = s;
-                }
+        boolean collectNotFound = true;
+        for(Stop s: stops){
+            if(s.getLocation() == m.getCollect() && collectNotFound){
+                collectNotFound = false;
+                collectStop = s;
+            }
+            if(s.getLocation() == m.getDrop()){
+                dropStop = s;
             }
         }
         //Indien deze nog niet in de route zit, hem toevoegen.
-        else {
+        if(collectStop == null) {
             collectStop = new Stop(m.getCollect());
             stops.add(stops.size()-1,collectStop);
-            locationStopMap.put(m.getCollect(), collectStop);
         }
-        if(locationStopMap.get(m.getDrop()).size() > 0){
-            int index = -1;
-            for(Stop s: locationStopMap.get(m.getDrop())){
-                if(stops.indexOf(s) > index){
-                    index = stops.indexOf(s);
-                    dropStop = s;
-                }
-            }
-        }
-        else {
+
+        if(dropStop == null) {
             dropStop = new Stop(m.getDrop());
             stops.add(stops.size()-1,dropStop);
-            locationStopMap.put(m.getDrop(), dropStop);
         }
 
         collectStop.addToCollect(m.getMachine());
@@ -101,24 +85,30 @@ public class Route {
     }
     public void removeMove(Move m, boolean optimize){
         boolean stopsRemoved = false;
-        List<Stop> stopsAtDropLoc = new ArrayList<>(locationStopMap.get(m.getDrop()));
-        List<Stop> stopsAtCollectLoc = new ArrayList<>(locationStopMap.get(m.getCollect()));
-        for(Stop s: stopsAtDropLoc){
-            s.removeFromDrop(m.getMachine());
-            if(s.isEmpty() && s != stops.getFirst() && s != stops.getLast()){
-                stops.remove(s);
-                locationStopMap.remove(s.getLocation(), s);
-                stopsRemoved = true;
+        Stop collectStop = null;
+        Stop dropStop = null;
+
+        for(Stop s: stops){
+            if(s.getLocation() == m.getCollect()){
+                collectStop = s;
+                s.removeFromCollect(m.getMachine());
+
+            }
+            if(s.getLocation() == m.getDrop()){
+                dropStop = s;
+                s.removeFromDrop(m.getMachine());
+
             }
         }
-        for(Stop s: stopsAtCollectLoc){
-            s.removeFromCollect(m.getMachine());
-            if(s.isEmpty() && s != stops.getFirst() && s != stops.getLast()){
-                stops.remove(s);
-                locationStopMap.remove(s.getLocation(), s);
-                stopsRemoved = true;
-            }
+        if(collectStop.isEmpty() && collectStop != stops.getFirst() && collectStop != stops.getLast()){
+            stops.remove(collectStop);
+            stopsRemoved = true;
         }
+        if(dropStop.isEmpty() && dropStop != stops.getFirst() && dropStop != stops.getLast()){
+            stops.remove(dropStop);
+            stopsRemoved = true;
+        }
+
         if(stopsRemoved && optimize){
             optimizeRoute();
         }

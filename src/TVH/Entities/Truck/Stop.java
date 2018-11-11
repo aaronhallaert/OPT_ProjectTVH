@@ -117,7 +117,6 @@ public class Stop {
 
     @Override
     public int hashCode() {
-        return ID;
+        return Objects.hash(location, collect, drop, ID);
     }
-
 }
