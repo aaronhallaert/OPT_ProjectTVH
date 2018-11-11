@@ -193,12 +193,11 @@ public class Route {
             int distanceFactor = 1;
             int avgFillRateFactor = 0;
 
-            int totalCost = distanceFactor * getTotalDistance()
+            return distanceFactor * getTotalDistance()
                     + avgFillRateFactor * getFillrateAbove65()
                     + timeFactor * getTimeViolations()
                     + orderFactor * getOrderViolations()
                     + fillrateViolationFactor * getFillRateViolations();
-            return totalCost;
 
     }
 

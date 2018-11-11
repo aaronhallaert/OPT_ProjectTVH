@@ -228,7 +228,7 @@ public class Problem {
 //            t.optimizeTruck();
 //        }
         System.out.println(init);
-        Solution best = improve(600000);
+        Solution best = simulatedAnnealing(60000, 200);
         System.out.println(best);
         System.out.println("DEBUG:");
         System.out.println("Init: "+init.getTotalDistance());
@@ -334,10 +334,14 @@ public class Problem {
         }
     }
 
-    public Solution improve(int duration){
+    public Solution simulatedAnnealing(int duration, double temperature){
         //TODO: werkt voorlopig niet omdat de hashmap van locations in route blijkbaar hier niets delete...
         long endTime = System.currentTimeMillis()+duration;
         Solution best = new Solution();
+        Solution localOptimum = new Solution();
+        double currentTemp = temperature;
+        int counter = 0;
+        Random r = new Random();
         while(System.currentTimeMillis() < endTime) {
             for (MachineType mt : machineTypes) {
                 ArrayList<Job> jobsOfType = new ArrayList<>(jobTypeMap.get(mt));
@@ -377,24 +381,42 @@ public class Problem {
                             optimalTruck.addJob(j, optimalMove, optimalRoute);
                             jobTruckMap.put(j, optimalTruck);
                         } else {
-                            best.loadSolution();
-                            System.out.println("ERROR: Geen truck meer gevonden");
+                            //We vinden geen truck meer die deze job wil uitvoeren, we zullen moeten teruggaan naar de beste oplossing tot nu toe
+                            localOptimum.loadSolution();
                             break;
                         }
                     }
                 }
                 Solution candidate = new Solution();
-                if(candidate.getTotalDistance() < best.getTotalDistance()){
-                    best = new Solution();
-                    System.out.println(best.getTotalDistance());
+                if(candidate.getTotalDistance() < localOptimum.getTotalDistance()){
+                    localOptimum = new Solution();
+                    if(localOptimum.getTotalDistance() < best.getTotalDistance()){
+                        best = localOptimum;
+                    }
+                    System.out.println(localOptimum.getTotalDistance());
                     break;
                 }
                 else{
-                    best.loadSolution();
+                    double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance())/currentTemp);
+                    if(localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
+                    double random = r.nextDouble();
+                    if(random <= acceptRate){
+                        counter++;
+                        System.out.println("worse candidate accepted with "+acceptRate+" ("+currentTemp+")");
+                        localOptimum = candidate;
+                        System.out.println(localOptimum.getTotalDistance() + "\t"+acceptRate+"\t"+currentTemp);
+
+                    }
+                    localOptimum.loadSolution();
                 }
+                if(counter < 10){
+                    counter=0;
+                    currentTemp = 0.99 * currentTemp;
+                }
+
             }
         }
-        //best.loadSolution();
+        best.loadSolution();
         return best;
     }
 
