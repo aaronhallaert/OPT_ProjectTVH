@@ -1,13 +1,14 @@
 package TVH.Entities.Node;
 
-import TVH.Entities.Machine;
-import TVH.Entities.MachineType;
+import TVH.Entities.Machine.Machine;
+import TVH.Entities.Machine.MachineType;
 import com.google.common.collect.HashMultimap;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+//Dynamische klasse
 public class Depot implements Node{
 
     private Location location;
@@ -27,7 +28,7 @@ public class Depot implements Node{
         for(Machine m: toCopy.machines.values()){
             machines.put(m.getType(), m);
         }
-        dropped = new LinkedList<>();
+        dropped = new LinkedList<>(toCopy.dropped);
     }
     public void addMachine(Machine m){
         machines.put(m.getType(), m);

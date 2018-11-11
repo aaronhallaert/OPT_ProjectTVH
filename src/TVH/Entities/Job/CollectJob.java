@@ -1,15 +1,16 @@
 package TVH.Entities.Job;
 
-import TVH.Entities.MachineType;
+import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.Edge;
 import TVH.Entities.Node.Location;
-import TVH.Entities.Machine;
+import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
 
 import java.util.HashMap;
 import java.util.List;
 
+//Statische klasse
 public class CollectJob implements Job {
     private Location collect;
     private List<Location> drop;

@@ -1,29 +1,28 @@
 package TVH.Entities.Node;
 
-import TVH.Entities.Machine;
-import TVH.Entities.MachineType;
+import TVH.Entities.Machine.Machine;
+import TVH.Entities.Machine.MachineType;
 
 import java.util.*;
 
-public class Client implements Node {
+
+//Dynamische klasse
+public class Client implements Node{
 
     private Location location;
     private ArrayList<Machine> toCollect;
     private ArrayList<MachineType> toDrop;
-    private boolean finished;
 
     public Client(Location location) {
         this.location = location;
         this.toCollect = new ArrayList<>();
         this.toDrop = new ArrayList<>();
         //this.dropped = new LinkedList<>();
-        this.finished = false;
     }
 
     //Copy constructor
     public Client(Client n){
         location = n.location;
-        finished = n.finished;
         toCollect = new ArrayList<>(n.toCollect);
         toDrop = new ArrayList<>(n.toDrop);
         //dropped = new LinkedList<>(n.dropped);

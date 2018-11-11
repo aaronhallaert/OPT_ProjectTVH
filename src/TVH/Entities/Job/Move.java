@@ -1,8 +1,9 @@
 package TVH.Entities.Job;
 
-import TVH.Entities.Machine;
+import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
 
+//Statische klasse
 public class Move {
     Machine machine;
     Location collect;

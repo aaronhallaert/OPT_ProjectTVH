@@ -1,7 +1,7 @@
 package TVH.Entities.Node;
 
-import TVH.Entities.Machine;
-import TVH.Entities.MachineType;
+import TVH.Entities.Machine.Machine;
+import TVH.Entities.Machine.MachineType;
 
 import java.util.List;
 

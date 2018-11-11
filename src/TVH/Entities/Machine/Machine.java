@@ -1,5 +1,6 @@
-package TVH.Entities;
+package TVH.Entities.Machine;
 
+//Statische klasse
 public class Machine {
     private int id;
     private MachineType type;

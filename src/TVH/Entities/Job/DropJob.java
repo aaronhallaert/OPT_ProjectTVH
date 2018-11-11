@@ -2,15 +2,15 @@ package TVH.Entities.Job;
 
 import TVH.Entities.Node.Edge;
 import TVH.Entities.Node.Location;
-import TVH.Entities.MachineType;
+import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
+//Statische klasse
 public class DropJob implements Job {
     private Location drop;
     private List<Location> collect;

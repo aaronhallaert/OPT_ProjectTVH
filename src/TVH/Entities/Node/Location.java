@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+//Statische klasse
 public class Location {
     private int locationID;
     private double latitude;

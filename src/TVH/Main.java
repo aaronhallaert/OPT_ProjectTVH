@@ -18,7 +18,7 @@ public class Main {
 
         try{
             Problem problem = Problem.newInstance(inputFile);
-            Solution solution = problem.solve(1);
+            Solution solution = problem.solve();
             solution.writeToFile(OUTPUT_FILE);
             System.out.println("Calculation time: "+(System.currentTimeMillis()-startTIme)+"ms");
         } catch (IOException e) {

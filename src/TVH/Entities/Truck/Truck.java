@@ -4,14 +4,15 @@ import TVH.Entities.Job.CollectJob;
 import TVH.Entities.Job.DropJob;
 import TVH.Entities.Job.Job;
 import TVH.Entities.Job.Move;
-import TVH.Entities.Machine;
-import TVH.Entities.MachineType;
+import TVH.Entities.Machine.Machine;
+import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.Location;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
 
 import java.util.*;
 
+//Dynamische klasse
 public class Truck {
 
     private int truckId;
@@ -19,14 +20,11 @@ public class Truck {
     private Location startLocation;
     private Location endLocation;
     private HashMap<Job, Move> jobMoveMap;
-    private boolean used;
 
     public Truck(int truckId, Location startLocation, Location endLocation){
         this.truckId=truckId;
         this.startLocation= startLocation;
         this.endLocation=endLocation;
-
-        used = false;
 
         Stop startStop = new Stop(startLocation);
         Stop endStop = new Stop(endLocation);
@@ -40,12 +38,11 @@ public class Truck {
         this.truckId = t.truckId;
         this.startLocation = t.startLocation;
         this.endLocation = t.endLocation;
-        this.used = t.used;
 
-        //Deep copy each stop in route
-        this.route = new Route(t.getRoute());
+        //Deep copy the entire route
+        this.route = new Route(t.route);
 
-        //Add al job move relations to new hashmap;
+        //Add all job move relations to new hashmap;
         jobMoveMap = new HashMap<>();
         for(Map.Entry<Job, Move> entry: t.jobMoveMap.entrySet()){
             jobMoveMap.put(entry.getKey(), entry.getValue());
@@ -83,17 +80,16 @@ public class Truck {
             }
         }
         Move optimalMove = null;
-        int minDistance = Integer.MAX_VALUE;
+        int minCost = Integer.MAX_VALUE;
         for(Move candidate: moves){
-            LinkedList<Stop> previousOrder = new LinkedList<>(route.stops);
+            LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
             if(route.addMove(candidate)){
-                int distance = route.calculateDistance();
-                if(distance < minDistance){
+                if(route.getCost() < minCost){
                     optimalMove = candidate;
-                    minDistance = distance;
+                    minCost = route.getCost();
                 }
                 route.removeMove(candidate, false);
-                route.stops = previousOrder;
+                route.setStops(previousOrder);
             }
         }
         if(optimalMove == null) return false;
@@ -138,7 +134,7 @@ public class Truck {
 
     public int getDistanceToLocation(Location l){
         int minDistance = Integer.MAX_VALUE;
-        for(Stop s: route.stops){
+        for(Stop s: route.getStops()){
             Location stopLoc = s.getLocation();
             if(l.distanceTo(stopLoc) < minDistance){
                 minDistance = l.distanceTo(stopLoc);
@@ -167,14 +163,6 @@ public class Truck {
         this.endLocation = endLocation;
     }
 
-    public boolean isUsed() {
-        return used;
-    }
-
-    public void setUsed(boolean used) {
-        this.used = used;
-    }
-
     public Route getRoute() {
         return route;
     }
@@ -190,7 +178,7 @@ public class Truck {
     public void optimizeTruck(){
         List<Job> jobs = new ArrayList<>(jobMoveMap.keySet());
         boolean improvement = true;
-        int minDistance = route.calculateDistance();
+        int minCost = route.getCost();
         while (improvement) {
             improvement = false;
             for(Job j: jobs){
@@ -198,11 +186,11 @@ public class Truck {
                 Move oldMove = jobMoveMap.get(j);
                 removeJob(j, false);
                 if(addJob(j)){
-                    int currentDistance = route.calculateDistance();
-                    if(minDistance > currentDistance){
+                    int cost = route.getCost();
+                    if(minCost > cost){
                         System.out.println("improvement found");
                         improvement = true;
-                        minDistance = currentDistance;
+                        minCost = cost;
                     }
                     else{
                         route = backup;
@@ -225,8 +213,8 @@ public class Truck {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Truck: "+truckId+" ("+route.calculateDistance() +"km) ("+route.calculateTime()+" min) (f: "+route.isFeasible()+")\n");
-        for(Stop s: route.stops){
+        sb.append("Truck: "+truckId+" ("+route.getTotalDistance() +"km) ("+route.getTotalTime()+" min) (f: "+route.isFeasible()+") (avgfill: "+route.getFillrateAbove65()+")\n");
+        /*for(Stop s: route.stops){
             sb.append("\t" + "Location " + s.getLocation()+"%\n");
             sb.append("\t\t Collect:\n");
             for(Machine m: s.getCollect()){
@@ -237,7 +225,7 @@ public class Truck {
                 sb.append("\t\t\t "+m+"\n");
             }
 
-        }
+        }*/
         return sb.toString();
     }
 }

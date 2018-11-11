@@ -1,6 +1,6 @@
 package TVH.Entities.Truck;
 
-import TVH.Entities.Machine;
+import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
 
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import java.util.LinkedList;
  * Each truck has stops. These stops define it's route. Stop objects give information about the state of the truck when
  * it is ready to leave stop.
  */
-
+//Dynamische klasse
 public class Stop {
 
     private Location location;
@@ -30,6 +30,7 @@ public class Stop {
         this.drop = new LinkedList<>();
     }
 
+    //Copy constructor
     public Stop(Stop s){
         this.location = s.location;
         this.collect = new LinkedList<>(s.collect);
