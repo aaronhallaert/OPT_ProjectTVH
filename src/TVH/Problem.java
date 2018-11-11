@@ -227,7 +227,8 @@ public class Problem {
 //        for(Truck t: trucks){
 //            t.optimizeTruck();
 //        }
-        Solution best = improve(10000);
+        Solution best = improve(0);
+        System.out.println(best);
         System.out.println("DEBUG:");
         System.out.println("Init: "+init.getTotalDistance());
         System.out.println("Best: " + best.getTotalDistance());

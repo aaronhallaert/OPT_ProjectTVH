@@ -20,7 +20,13 @@ public class Route {
     private int fillrateAbove65 = 0;
     private int totalTime = 0;
 
-    private boolean routeChanged = true;
+    private int hash1 = 0;
+    private int hash2 = 0;
+    private int hash3 = 0;
+    private int hash4 = 0;
+    private int hash5 = 0;
+    private int hash6 = 0;
+    private int hash7 = 0;
 
 
     public Route(Stop first, Stop last, Truck truck){
@@ -33,7 +39,6 @@ public class Route {
     }
 
     public Route(LinkedList<Stop> stops) {
-        routeChanged = true;
         this.stops = stops;
     }
 
@@ -66,7 +71,6 @@ public class Route {
         else {
             collectStop = new Stop(m.getCollect());
             stops.add(stops.size()-1,collectStop);
-            routeChanged = true;
             locationStopMap.put(m.getCollect(), collectStop);
         }
         if(locationStopMap.get(m.getDrop()).size() > 0){
@@ -81,7 +85,6 @@ public class Route {
         else {
             dropStop = new Stop(m.getDrop());
             stops.add(stops.size()-1,dropStop);
-            routeChanged = true;
             locationStopMap.put(m.getDrop(), dropStop);
         }
 
@@ -91,15 +94,12 @@ public class Route {
         if(!isFeasible()){
             removeMove(m, false);
             stops = previousOrder;
-            routeChanged = false;
 
             return false;
         }
-        routeChanged = true;
         return true;
     }
     public void removeMove(Move m, boolean optimize){
-        routeChanged = true;
         boolean stopsRemoved = false;
         List<Stop> stopsAtDropLoc = new ArrayList<>(locationStopMap.get(m.getDrop()));
         List<Stop> stopsAtCollectLoc = new ArrayList<>(locationStopMap.get(m.getCollect()));
@@ -157,7 +157,6 @@ public class Route {
             }*/
         }
         stops = new LinkedList<>(overallBest.getStops());
-        routeChanged = true;
     }
     public static LinkedList<Stop> twoOptSwap(int i1, int i2, LinkedList<Stop> stopList){
         int beginCut = Math.min(i1, i2);
@@ -188,7 +187,7 @@ public class Route {
         if(getFillRateViolations() > 0) return false;
         return true;
     }
-    private void recalculateAll(){
+    /*private void recalculateAll(){
         totalDistance = calculateDistance();
         totalTime = calculateTime();
         fillrateAbove65 = calculateFillrateAbove65();
@@ -196,8 +195,7 @@ public class Route {
         orderViolations = calculateOrderViolations();
         fillRateViolations = calculateFillRateViolations();
         cost = calculateCost();
-        routeChanged = false;
-    }
+    }*/
     private int calculateCost(){
             int timeFactor = 100;
             int orderFactor = 1000;
@@ -205,11 +203,11 @@ public class Route {
             int distanceFactor = 1;
             int avgFillRateFactor = 0;
 
-            int totalCost = distanceFactor * totalDistance
-                    + avgFillRateFactor * fillrateAbove65
-                    + timeFactor * timeViolations
-                    + orderFactor * orderViolations
-                    + fillrateViolationFactor * fillRateViolations;
+            int totalCost = distanceFactor * getTotalDistance()
+                    + avgFillRateFactor * getFillrateAbove65()
+                    + timeFactor * getTimeViolations()
+                    + orderFactor * getOrderViolations()
+                    + fillrateViolationFactor * getFillRateViolations();
             return totalCost;
 
     }
@@ -270,15 +268,6 @@ public class Route {
         return fillrate;
     }
     private int calculateFillrateAbove65(){
-        /*List<Machine> onTruck = new LinkedList<>();
-        int fillRate = 0;
-        for(Stop s: stops){
-            onTruck.addAll(s.getCollect());
-            onTruck.removeAll(s.getDrop());
-            fillRate += calculateFillRate(onTruck);
-
-        }
-        return fillRate/stops.size();*/
         List<Machine> onTruck = new LinkedList<>();
         int timesOver65 = 0;
         for(Stop s: stops){
@@ -307,42 +296,69 @@ public class Route {
     }
 
     public void setStops(LinkedList<Stop> stops) {
-        routeChanged = true;
         this.stops = stops;
     }
 
     public int getTotalDistance() {
-        if(routeChanged) recalculateAll();
+        int hash = Objects.hash(stops);
+        if(hash != hash1){
+            totalDistance = calculateDistance();
+            hash1 = hash;
+        }
         return totalDistance;
     }
 
     public int getCost() {
-        if(routeChanged) recalculateAll();
+        int hash = Objects.hash(stops);
+        if(hash != hash2){
+            cost = calculateCost();
+            hash2 = hash;
+        }
         return cost;
     }
 
     public int getOrderViolations() {
-        if(routeChanged) recalculateAll();
+        int hash = Objects.hash(stops);
+        if(hash != hash3){
+            orderViolations = calculateOrderViolations();
+            hash3 = hash;
+        }
         return orderViolations;
     }
 
     public int getTimeViolations() {
-        if(routeChanged) recalculateAll();
+        int hash = Objects.hash(stops);
+        if(hash != hash4){
+            timeViolations = calculateTimeViolations();
+            hash4 = hash;
+        }
         return timeViolations;
     }
 
     public int getFillRateViolations() {
-        if(routeChanged) recalculateAll();
+        int hash = Objects.hash(stops);
+        if(hash != hash5){
+            fillRateViolations = calculateFillRateViolations();
+            hash5 = hash;
+        }
         return fillRateViolations;
     }
 
     public int getFillrateAbove65() {
-        if(routeChanged) recalculateAll();
+        int hash = Objects.hash(stops);
+        if(hash != hash6){
+            fillrateAbove65 = calculateFillrateAbove65();
+            hash6 = hash;
+        }
         return fillrateAbove65;
     }
 
     public int getTotalTime() {
-        if(routeChanged) recalculateAll();
+        int hash = Objects.hash(stops);
+        if(hash != hash7){
+            totalTime = calculateTime();
+            hash7 = hash;
+        }
         return totalTime;
     }
 }
