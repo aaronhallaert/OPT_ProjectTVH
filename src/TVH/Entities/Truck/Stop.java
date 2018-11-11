@@ -4,6 +4,7 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
 
 import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * Each truck has stops. These stops define it's route. Stop objects give information about the state of the truck when
@@ -15,12 +16,14 @@ public class Stop {
     private Location location;
     private LinkedList<Machine> collect;
     private LinkedList<Machine> drop;
+    private int ID;
 
 
     public Stop(Location location, LinkedList<Machine> collect, LinkedList<Machine> drop) {
         this.location = location;
         this.collect = collect;
         this.drop = drop;
+        ID = StopIDGenerator.getInstance().getID();
     }
 
     //Make single collect stop
@@ -28,6 +31,8 @@ public class Stop {
         this.location = location;
         this.collect = new LinkedList<>();
         this.drop = new LinkedList<>();
+        ID = StopIDGenerator.getInstance().getID();
+
     }
 
     //Copy constructor
@@ -35,6 +40,7 @@ public class Stop {
         this.location = s.location;
         this.collect = new LinkedList<>(s.collect);
         this.drop = new LinkedList<>(s.drop);
+        ID = StopIDGenerator.getInstance().getID();
     }
 
 
@@ -99,5 +105,19 @@ public class Stop {
         return location.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Stop)) return false;
+        Stop stop = (Stop) o;
+        return Objects.equals(location, stop.location) &&
+                Objects.equals(collect, stop.collect) &&
+                Objects.equals(drop, stop.drop);
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
+    }
 
 }

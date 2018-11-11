@@ -118,6 +118,7 @@ public class Solution {
 
     public String toString(){
         StringBuilder sb = new StringBuilder();
+        sb.append(totalDistance+"\n");
         for (Truck t : trucks) {
             sb.append(t);
         }

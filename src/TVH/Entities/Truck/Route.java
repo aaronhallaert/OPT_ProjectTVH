@@ -300,7 +300,7 @@ public class Route {
     }
 
     public int getTotalDistance() {
-        int hash = Objects.hash(stops);
+        int hash = Objects.hashCode(stops);
         if(hash != hash1){
             totalDistance = calculateDistance();
             hash1 = hash;
@@ -309,7 +309,7 @@ public class Route {
     }
 
     public int getCost() {
-        int hash = Objects.hash(stops);
+        int hash = Objects.hashCode(stops);
         if(hash != hash2){
             cost = calculateCost();
             hash2 = hash;
@@ -318,7 +318,7 @@ public class Route {
     }
 
     public int getOrderViolations() {
-        int hash = Objects.hash(stops);
+        int hash = Objects.hashCode(stops);
         if(hash != hash3){
             orderViolations = calculateOrderViolations();
             hash3 = hash;
@@ -327,7 +327,7 @@ public class Route {
     }
 
     public int getTimeViolations() {
-        int hash = Objects.hash(stops);
+        int hash = Objects.hashCode(stops);
         if(hash != hash4){
             timeViolations = calculateTimeViolations();
             hash4 = hash;
@@ -336,7 +336,7 @@ public class Route {
     }
 
     public int getFillRateViolations() {
-        int hash = Objects.hash(stops);
+        int hash = Objects.hashCode(stops);
         if(hash != hash5){
             fillRateViolations = calculateFillRateViolations();
             hash5 = hash;
@@ -345,7 +345,7 @@ public class Route {
     }
 
     public int getFillrateAbove65() {
-        int hash = Objects.hash(stops);
+        int hash = Objects.hashCode(stops);
         if(hash != hash6){
             fillrateAbove65 = calculateFillrateAbove65();
             hash6 = hash;
@@ -354,7 +354,7 @@ public class Route {
     }
 
     public int getTotalTime() {
-        int hash = Objects.hash(stops);
+        int hash = Objects.hashCode(stops);
         if(hash != hash7){
             totalTime = calculateTime();
             hash7 = hash;

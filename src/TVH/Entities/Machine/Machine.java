@@ -44,4 +44,6 @@ public class Machine {
         return id + " ("+type.getName()+")";
     }
 
+
+
 }

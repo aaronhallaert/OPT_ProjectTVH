@@ -227,7 +227,8 @@ public class Problem {
 //        for(Truck t: trucks){
 //            t.optimizeTruck();
 //        }
-        Solution best = improve(0);
+        System.out.println(init);
+        Solution best = improve(600000);
         System.out.println(best);
         System.out.println("DEBUG:");
         System.out.println("Init: "+init.getTotalDistance());
@@ -275,7 +276,7 @@ public class Problem {
                 jobs.add(new CollectJob(loc, to, m));
             }
         }
-        Collections.sort(jobs, new JobVolumeComparator());
+        Collections.sort(jobs, new JobRemotenessComparator());
         for(Job j: jobs){
             jobTypeMap.put(j.getMachineType(), j);
         }
@@ -334,6 +335,7 @@ public class Problem {
     }
 
     public Solution improve(int duration){
+        //TODO: werkt voorlopig niet omdat de hashmap van locations in route blijkbaar hier niets delete...
         long endTime = System.currentTimeMillis()+duration;
         Solution best = new Solution();
         while(System.currentTimeMillis() < endTime) {
