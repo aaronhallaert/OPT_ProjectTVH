@@ -79,9 +79,6 @@ public class Truck {
                 }
             }
         }
-        if(moves.isEmpty()){
-            System.out.println("stop");
-        }
         Move optimalMove = null;
         int minCost = Integer.MAX_VALUE;
         for(Move candidate: moves){
