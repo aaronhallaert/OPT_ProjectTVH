@@ -1,6 +1,11 @@
 package TVH;
 
-import TVH.Entities.*;
+import TVH.Entities.Job.*;
+import TVH.Entities.Machine.Machine;
+import TVH.Entities.Machine.MachineType;
+import TVH.Entities.Node.*;
+import TVH.Entities.Truck.*;
+import com.google.common.collect.HashMultimap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,27 +13,40 @@ import java.util.*;
 
 public class Problem {
 
-    public static String info;
-    public static int TRUCK_CAPACITY;
-    public static int TRUCK_WORKING_TIME;
+    private static Problem instance = null;
+    public String info;
+    public int TRUCK_CAPACITY;
+    public int TRUCK_WORKING_TIME;
+    public ArrayList<Location> locations = new ArrayList<>();                   //statisch object
+    public HashMap<Location, Node> nodesMap = new HashMap<>();                  //niet-statisch object
+    public HashMap<Location, Client> clientMap = new HashMap<>();               //niet-statisch object
+    public HashMap<Location, Depot> depotMap = new HashMap<>();                 //niet-statisch object
+    public HashMap<Machine, Location> machineLocations = new HashMap<>();       //statisch object
+    public ArrayList<Truck> trucks = new ArrayList<>();                         //niet statisch object
+    public ArrayList<MachineType> machineTypes = new ArrayList<>();             //statisch object
+    public ArrayList<Machine> machines = new ArrayList<>();                     //statisch object
+    public ArrayList<Edge> edges = new ArrayList<>();                           //statisch object
+    public List<Job> jobs = new ArrayList<>();                                  //statisch object
+    public HashMultimap<MachineType, Job> jobTypeMap = HashMultimap.create();   //statisch object
+    public HashMap<Job, Truck> jobTruckMap = new HashMap<>();                   //niet-statisch object
 
-    public ArrayList<Location> locations = new ArrayList<>();
-    public ArrayList<Depot> depots = new ArrayList<>();
-    public HashMap<Location, Client> clients = new HashMap<>();
-    public HashMap<Machine, Location> machineLocations = new HashMap<>();
-    public ArrayList<Truck> trucks = new ArrayList<>();
-    public ArrayList<MachineType> machineTypes = new ArrayList<>();
-    public ArrayList<Machine> machines = new ArrayList<>();
-    public ArrayList<Edge> edges = new ArrayList<>();
-    public List<Cluster> clusters = new ArrayList<>();
+    public static Problem getInstance() {
+        return instance;
+    }
 
-    public Problem(File inputFile) throws FileNotFoundException {
+    public static Problem newInstance(File inputFile) throws FileNotFoundException {
+        instance = new Problem(inputFile);
+        return instance;
+    }
 
-        Scanner sc = new Scanner(inputFile).useLocale(Locale.US);;
+    private Problem(File inputFile) throws FileNotFoundException {
+
+        Scanner sc = new Scanner(inputFile).useLocale(Locale.US);
+        ;
 
         info = sc.nextLine().split(": ")[1];
-        TRUCK_CAPACITY= Integer.parseInt(sc.nextLine().split(": ")[1]);
-        TRUCK_WORKING_TIME=Integer.parseInt(sc.nextLine().split(": ")[1]);
+        TRUCK_CAPACITY = Integer.parseInt(sc.nextLine().split(": ")[1]);
+        TRUCK_WORKING_TIME = Integer.parseInt(sc.nextLine().split(": ")[1]);
 
         sc.nextLine(); //weggooilijn
 
@@ -37,22 +55,24 @@ public class Problem {
         int aantalLocations = Integer.parseInt(sc.nextLine().split(" ")[1]);
 
         for (int i = 0; i < aantalLocations; i++) {
-            int locationId =sc.nextInt();
+            int locationId = sc.nextInt();
             double latitude = sc.nextDouble();
             double longitude = sc.nextDouble();
             String name = sc.next();
-            locations.add(new Location(locationId, name, latitude,longitude));
+            locations.add(new Location(locationId, name, latitude, longitude));
         }
 
 
         //DEPOTS
         sc.nextLine();
         sc.nextLine();
-        int aantalDepots= Integer.parseInt(sc.nextLine().split(" ")[1]);
+        int aantalDepots = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalDepots; i++) {
-            int depotId=sc.nextInt();
-            int locationId= sc.nextInt();
-            depots.add(new Depot(locations.get(locationId)));
+            int depotId = sc.nextInt();
+            int locationId = sc.nextInt();
+            Depot depot = new Depot(locations.get(locationId));
+            depotMap.put(locations.get(locationId), depot);
+            nodesMap.put(locations.get(locationId), depot);
         }
 
         //TRUCKS
@@ -61,11 +81,11 @@ public class Problem {
          */
         sc.nextLine();
         sc.nextLine();
-        int aantalTrucks= Integer.parseInt(sc.nextLine().split(" ")[1]);
+        int aantalTrucks = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalTrucks; i++) {
-            int truckId=sc.nextInt();
+            int truckId = sc.nextInt();
             Location startLocation = locations.get(sc.nextInt());
-            Location endLocation= locations.get(sc.nextInt());
+            Location endLocation = locations.get(sc.nextInt());
 
             trucks.add(new Truck(truckId, startLocation, endLocation));
         }
@@ -77,12 +97,12 @@ public class Problem {
          */
         sc.nextLine();
         sc.nextLine();
-        int aantalMachineTypes= Integer.parseInt(sc.nextLine().split(" ")[1]);
+        int aantalMachineTypes = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalMachineTypes; i++) {
-            int machineTypeId=sc.nextInt();
-            int machineTypeVolume=sc.nextInt();
+            int machineTypeId = sc.nextInt();
+            int machineTypeVolume = sc.nextInt();
             int serviceTime = sc.nextInt();
-            String machineTypeName= sc.next();
+            String machineTypeName = sc.next();
             machineTypes.add(new MachineType(machineTypeId, machineTypeName, machineTypeVolume, serviceTime));
         }
 
@@ -92,16 +112,16 @@ public class Problem {
          */
         sc.nextLine();
         sc.nextLine();
-        int aantalMachines= Integer.parseInt(sc.nextLine().split(" ")[1]);
+        int aantalMachines = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalMachines; i++) {
-            int machineId=sc.nextInt();
-            MachineType machineType=machineTypes.get(sc.nextInt());
+            int machineId = sc.nextInt();
+            MachineType machineType = machineTypes.get(sc.nextInt());
             Location location = locations.get(sc.nextInt());
             Machine machine = new Machine(machineId, machineType);
 
             //Indien een machine in een depot staat moet deze worden toegevoegd aan het depot;
-            for(Depot d: depots){
-                if(d.getLocation() == location){
+            for (Depot d : depotMap.values()) {
+                if (d.getLocation() == location) {
                     d.addMachine(machine);
                 }
             }
@@ -116,18 +136,19 @@ public class Problem {
          */
         sc.nextLine();
         sc.nextLine();
-        int aantalDrops=Integer.parseInt(sc.nextLine().split(" ")[1]);
+        int aantalDrops = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalDrops; i++) {
-            int dropId=sc.nextInt();
-            MachineType machineType=machineTypes.get(sc.nextInt());
+            int dropId = sc.nextInt();
+            MachineType machineType = machineTypes.get(sc.nextInt());
             Location location = locations.get(sc.nextInt());
-            if(clients.containsKey(location)){
-                clients.get(location).addToDropItems(machineType);
-            }
-            else{
+            if (clientMap.containsKey(location)) {
+                clientMap.get(location).addToDrop(machineType);
+            } else {
                 Client client = new Client(location);
-                client.addToDropItems(machineType);
-                clients.put(location, client);
+                client.addToDrop(machineType);
+                clientMap.put(location, client);
+                nodesMap.put(location, client);
+
             }
 
         }
@@ -138,18 +159,18 @@ public class Problem {
          */
         sc.nextLine();
         sc.nextLine();
-        int aantalCollects=Integer.parseInt(sc.nextLine().split(" ")[1]);
+        int aantalCollects = Integer.parseInt(sc.nextLine().split(" ")[1]);
         for (int i = 0; i < aantalCollects; i++) {
-            int collectId=sc.nextInt();
-            Machine machine=machines.get(sc.nextInt());
+            int collectId = sc.nextInt();
+            Machine machine = machines.get(sc.nextInt());
             Location location = machineLocations.get(machine);
-            if(clients.containsKey(location)){
-                clients.get(location).addToCollectItems(machine);
-            }
-            else{
+            if (clientMap.containsKey(location)) {
+                clientMap.get(location).addToCollect(machine);
+            } else {
                 Client client = new Client(location);
-                client.addToCollectItems(machine);
-                clients.put(location, client);
+                client.addToCollect(machine);
+                clientMap.put(location, client);
+                nodesMap.put(location, client);
             }
         }
 
@@ -170,26 +191,27 @@ public class Problem {
         sc.nextLine();
         sc.nextLine();
         int distanceMatrixSize = Integer.parseInt(sc.nextLine().split(" ")[1]);
-        int [][] distanceMatrix = new int[distanceMatrixSize][distanceMatrixSize];
+        int[][] distanceMatrix = new int[distanceMatrixSize][distanceMatrixSize];
 
         for (int from = 0; from < distanceMatrixSize; from++) {
             for (int to = 0; to < distanceMatrixSize; to++) {
-                distanceMatrix[from][to] = sc.nextInt();;
+                distanceMatrix[from][to] = sc.nextInt();
+                ;
             }
         }
 
-        //Edges aanmaken met time en distance info, en koppelen aan clients
+        //Edges aanmaken met time en distance info, en koppelen aan clientMap
         for (int from = 0; from < distanceMatrixSize; from++) {
             for (int to = 0; to < distanceMatrixSize; to++) {
                 int time = timeMatrix[from][to];
                 int distance = distanceMatrix[from][to];
                 //if(!(time == 0 && distance == 0)){
-                    Location fromLoc = locations.get(from);
-                    Location toLoc = locations.get(to);
-                    Edge edge = new Edge(fromLoc, toLoc, time, distance);
-                    edges.add(edge);
-                    //We voegen ook nog een verwijzing naar de edge toe aan de "from location" (handig zoeken);
-                    fromLoc.addEdge(edge);
+                Location fromLoc = locations.get(from);
+                Location toLoc = locations.get(to);
+                Edge edge = new Edge(fromLoc, toLoc, time, distance);
+                edges.add(edge);
+                //We voegen ook nog een verwijzing naar de edge toe aan de "from location" (handig zoeken);
+                fromLoc.addEdge(edge);
                 //}
 
             }
@@ -198,76 +220,208 @@ public class Problem {
 
     }
 
-    public Solution solve(int n_clusters){
-        Solution Init = createInitialSolution(n_clusters);
-        /*
-        * The algorithm consists of two parts. Creating the initial solution and improving that solution with local search.
-        * 1) Initial result:
-        *   We make clusters which contain stops. These clusters have a net list of needed items ot provided items.
-        *   From this list we search for the nearest depot or the nearest stop from another cluster that contains the needed items.
-        *   This will be a fairly fixed result where local search cant get out, so we increase the number of clusters until no improvement is found.
-        *
-        * 2) Optimisation phase
-        *
-        * */
-        /*for (Truck truck : Init.getTrucks()) {
-            if(truck.getRoute().size()>2) {
-                truck.optimiseRoute(this);
-            }
-        }*/
-        return Init;
+    public Solution solve() {
+        createJobs();
+        createInitialSolution();
+        Solution init = new Solution();
+//        for(Truck t: trucks){
+//            t.optimizeTruck();
+//        }
+        System.out.println(init);
+        Solution best = improve(600000);
+        System.out.println(best);
+        System.out.println("DEBUG:");
+        System.out.println("Init: "+init.getTotalDistance());
+        System.out.println("Best: " + best.getTotalDistance());
+        init.recalculateDistance();
+        System.out.println("Init(re): "+init.getTotalDistance());
+        best.recalculateDistance();
+        System.out.println("Best(re): "+best.getTotalDistance());
+
+        Solution test = new Solution();
+        System.out.println("Current: "+test.getTotalDistance());
+        return best;
     }
 
     /**
      * This will use clusters to decide initial routes of trucks.
+     *
      * @return
      */
-    public Solution createInitialSolution(int n_clusters){
-        //n_clusters =(int) Math.round((double) clients.size()/5);
-        clusters = Cluster.createClusters(n_clusters, clients, depots);
 
+    public void createJobs() {
+        for (Client client : clientMap.values()) {
+            Location loc = client.getLocation();
+            for (MachineType mt : client.getToDrop()) {
+                //Search for each machineType needed what the closest location in this cluster is that has this machineType.
+                //There are 2 possibilities: Depot contains machine of type, Client contains a machine of this type that needs to be collected
+                List<Location> from = new ArrayList<>();
+                for (Edge e : loc.getSortedEdgeList()) {
+                    Node node = nodesMap.get(e.getTo());
+                    if (node.hasMachineAvailableOfType(mt)) {
+                        from.add(node.getLocation());
+                    }
+                }
+                jobs.add(new DropJob(loc, from, mt));
 
-        //Sort the clusters based on remoteness
-        clusters.sort((Cluster c1, Cluster c2)->c2.getRemoteness(depots)-c1.getRemoteness(depots));
-
-        //Calculate the machines that are still needed inside the cluster, and expand the cluster until it is self-sufficient;
-        for(Cluster cluster : clusters){
-            cluster.calculateMachinesNeeded();
-            cluster.expand();
-            //System.out.println(cluster);
-            //System.out.println();
-        }
-
-        for(Cluster cluster: clusters){
-            cluster.solve(trucks);
-        }
-
-
-        for (Truck truck : trucks) {
-            if (truck.getRoute().size() > 2) {
-                truck.optimiseRoute(this);
+            }
+            for (Machine m : client.getToCollect()) {
+                List<Location> to = new ArrayList<>();
+                for (Edge e : loc.getSortedEdgeList()) {
+                    Node node = nodesMap.get(e.getTo());
+                    if (node.canPutMachineType(m.getType())) {
+                        to.add(node.getLocation());
+                    }
+                }
+                jobs.add(new CollectJob(loc, to, m));
             }
         }
-
-
-        int totalDistance = 0;
-        int totalTime = 0;
-        for(Truck t: trucks){
-            int time = t.getTotalTime();
-            int distance = t.getTotalDistance();
-            System.out.println("Truck "+t.getTruckId()+":\t"+time+"min\t"+distance+"km");
-            totalDistance += distance;
-            totalTime += time;
+        Collections.sort(jobs, new JobRemotenessComparator());
+        for(Job j: jobs){
+            jobTypeMap.put(j.getMachineType(), j);
         }
-        System.out.println("Total: \t\t"+totalTime+"min\t"+totalDistance+"km");
-
-        for(Truck t: trucks){
-            if(t.getRoute().getFirst().getLocation() != t.getRoute().getLast().getLocation()){
-                //System.out.println("error");
-            }
-        }
-
-        return new Solution(trucks);
     }
 
+
+    public void createInitialSolution() {
+
+
+        //Next step is to assign jobs to trucks;
+
+
+        //Assign each move to a truck
+        List<Job> HandledJobs = new ArrayList<>();
+        int i = 0;
+        for (Job j : jobs) {
+            System.out.println(i);
+            i++;
+
+            if (j.notDone()) {
+                Truck optimalTruck = null;
+                Route optimalRoute = null;
+                Move optimalMove = null;
+                int minAddedCost = Integer.MAX_VALUE;
+                for (Truck t : trucks) {
+                    int cost = t.getRoute().getCost();
+                    LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
+                    if (t.addJob(j)) {
+                        int addedCost = t.getRoute().getCost() - cost;
+                        //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
+                        //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
+                        if (addedCost < minAddedCost) {
+                            minAddedCost = addedCost;
+                            optimalTruck = t;
+                            optimalRoute = new Route(t.getRoute());
+                            optimalMove = t.getJobMoveMap().get(j);
+                        }
+                        t.removeJob(j, false);
+                        t.getRoute().setStops(previousOrder);
+                    }
+                }
+                if (optimalTruck != null) {
+                    //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
+                    optimalTruck.addJob(j, optimalMove, optimalRoute);
+                    HandledJobs.add(j);
+                    jobTruckMap.put(j, optimalTruck);
+                }
+                else{
+                    System.out.println("ERROR: No truck found");
+                }
+            }
+            else{
+                HandledJobs.add(j);
+            }
+        }
+    }
+
+    public Solution improve(int duration){
+        //TODO: werkt voorlopig niet omdat de hashmap van locations in route blijkbaar hier niets delete...
+        long endTime = System.currentTimeMillis()+duration;
+        Solution best = new Solution();
+        while(System.currentTimeMillis() < endTime) {
+            for (MachineType mt : machineTypes) {
+                ArrayList<Job> jobsOfType = new ArrayList<>(jobTypeMap.get(mt));
+                Collections.shuffle(jobsOfType);
+                for (Job j : jobsOfType) {
+                    Truck t = jobTruckMap.get(j);
+                    if(t != null){ //Het kan zijn dat bepaalde jobs niet worden uitgevoerd door een truck omdat ze al gecompleet worden door een andere job
+                        t.removeJob(j, true);
+                        jobTruckMap.remove(j);
+                    }
+                }
+                for (Job j : jobsOfType) {
+                    if(j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
+                        Truck optimalTruck = null;
+                        Route optimalRoute = null;
+                        Move optimalMove = null;
+                        int minAddedCost = Integer.MAX_VALUE;
+                        for (Truck t : trucks) {
+                            int cost = t.getRoute().getCost();
+                            LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
+                            if (t.addJob(j)) {
+                                int addedCost = t.getRoute().getCost() - cost;
+                                //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
+                                //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
+                                if (addedCost < minAddedCost) {
+                                    minAddedCost = addedCost;
+                                    optimalTruck = t;
+                                    optimalRoute = new Route(t.getRoute());
+                                    optimalMove = t.getJobMoveMap().get(j);
+                                }
+                                t.removeJob(j, false);
+                                t.getRoute().setStops(previousOrder);
+                            }
+                        }
+                        if (optimalTruck != null) {
+                            //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
+                            optimalTruck.addJob(j, optimalMove, optimalRoute);
+                            jobTruckMap.put(j, optimalTruck);
+                        } else {
+                            best.loadSolution();
+                            System.out.println("ERROR: Geen truck meer gevonden");
+                            break;
+                        }
+                    }
+                }
+                Solution candidate = new Solution();
+                if(candidate.getTotalDistance() < best.getTotalDistance()){
+                    best = new Solution();
+                    System.out.println(best.getTotalDistance());
+                    break;
+                }
+                else{
+                    best.loadSolution();
+                }
+            }
+        }
+        //best.loadSolution();
+        return best;
+    }
+
+
+    /*public Solution localSearch(int duration, Solution init){
+        long endTime = System.currentTimeMillis() + duration;
+        Solution currentBest = init;
+        System.out.println(currentBest.getTotalDistance());
+        while(System.currentTimeMillis() < endTime){
+            for(Truck t: trucks){
+                ArrayList<Job> jobs = new ArrayList<>(t.getJobMoveMap().keySet());
+                if(!jobs.isEmpty()) {
+                    int index = (int) (Math.random() * jobs.size());
+                    t.removeJob(jobs.get(index), false);
+                    t.addJob(jobs.get(index));
+                }
+            }
+            Solution candidate = new Solution(trucks);
+            if(candidate.getTotalDistance() < currentBest.getTotalDistance()){
+                System.out.println(currentBest.getTotalDistance());
+                currentBest = candidate;
+            }
+        }
+        return currentBest;
+
+    }*/
+
 }
+
+

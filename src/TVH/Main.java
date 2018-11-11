@@ -1,7 +1,5 @@
 package TVH;
 
-import TVH.Visualisation.Visualisation;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -19,11 +17,10 @@ public class Main {
         long startTIme = System.currentTimeMillis();
 
         try{
-            Problem problem = new Problem(inputFile);
-            Solution solution = problem.solve(1);
+            Problem problem = Problem.newInstance(inputFile);
+            Solution solution = problem.solve();
             solution.writeToFile(OUTPUT_FILE);
             System.out.println("Calculation time: "+(System.currentTimeMillis()-startTIme)+"ms");
-            Visualisation.run(solution, problem.clusters, problem.depots);
         } catch (IOException e) {
             e.printStackTrace();
         }

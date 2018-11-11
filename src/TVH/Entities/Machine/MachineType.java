@@ -1,7 +1,8 @@
-package TVH.Entities;
+package TVH.Entities.Machine;
 
 import java.util.Objects;
 
+//Statische klasse
 public class MachineType {
     private int id;
     private String name;

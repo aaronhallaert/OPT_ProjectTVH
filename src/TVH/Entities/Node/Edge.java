@@ -1,5 +1,6 @@
-package TVH.Entities;
+package TVH.Entities.Node;
 
+//Statische klasse
 public class Edge {
     Location from;
     Location to;
