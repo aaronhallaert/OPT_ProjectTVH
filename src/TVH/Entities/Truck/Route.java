@@ -4,7 +4,6 @@ import TVH.Entities.Job.Move;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
 import TVH.Problem;
-import com.google.common.collect.HashMultimap;
 
 import java.util.*;
 
@@ -16,7 +15,7 @@ public class Route {
     private int orderViolations = 0;
     private int timeViolations = 0;
     private int fillRateViolations = 0;
-    private int fillrateAbove65 = 0;
+    private int avgStopsOnTruck = 0;
     private int totalTime = 0;
 
     private int hash1 = 0;
@@ -180,7 +179,7 @@ public class Route {
     /*private void recalculateAll(){
         totalDistance = calculateDistance();
         totalTime = calculateTime();
-        fillrateAbove65 = calculateFillrateAbove65();
+        avgStopsOnTruck = calculateAvgStopsOnTruck();
         timeViolations = calculateTimeViolations();
         orderViolations = calculateOrderViolations();
         fillRateViolations = calculateFillRateViolations();
@@ -191,10 +190,10 @@ public class Route {
             int orderFactor = 1000;
             int fillrateViolationFactor = 100;
             int distanceFactor = 1;
-            int avgFillRateFactor = 0;
+            int avgFillRateFactor = 10;
 
             return distanceFactor * getTotalDistance()
-                    + avgFillRateFactor * getFillrateAbove65()
+                    + avgFillRateFactor * getAvgStopsOnTruck()
                     + timeFactor * getTimeViolations()
                     + orderFactor * getOrderViolations()
                     + fillrateViolationFactor * getFillRateViolations();
@@ -256,18 +255,29 @@ public class Route {
         }
         return fillrate;
     }
-    private int calculateFillrateAbove65(){
+    private int calculateAvgStopsOnTruck(){
         List<Machine> onTruck = new LinkedList<>();
-        int timesOver65 = 0;
+        HashMap<Machine, Integer> nStopsOnTruck = new HashMap<>();
         for(Stop s: stops){
             onTruck.addAll(s.getCollect());
             onTruck.removeAll(s.getDrop());
-            if(calculateFillRate(onTruck) > 65){
-                timesOver65++;
-            };
+            for(Machine m: onTruck){
+                if(nStopsOnTruck.containsKey(m)){
+                    nStopsOnTruck.put(m, nStopsOnTruck.get(m)+1);
+                }
+                else{
+                    nStopsOnTruck.put(m, 1);
+                }
+            }
 
         }
-        return timesOver65;
+        if(nStopsOnTruck.size() == 0) return 0;
+
+        int avgStopsOnTruck = 0;
+        for(Integer i : nStopsOnTruck.values()){
+            avgStopsOnTruck += i;
+        }
+        return avgStopsOnTruck/nStopsOnTruck.size();
 
     }
     private int calculateDistance() {
@@ -333,13 +343,13 @@ public class Route {
         return fillRateViolations;
     }
 
-    public int getFillrateAbove65() {
+    public int getAvgStopsOnTruck() {
         int hash = Objects.hashCode(stops);
         if(hash != hash6){
-            fillrateAbove65 = calculateFillrateAbove65();
+            avgStopsOnTruck = calculateAvgStopsOnTruck();
             hash6 = hash;
         }
-        return fillrateAbove65;
+        return avgStopsOnTruck;
     }
 
     public int getTotalTime() {

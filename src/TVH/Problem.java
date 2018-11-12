@@ -228,7 +228,8 @@ public class Problem {
 //            t.optimizeTruck();
 //        }
         System.out.println(init);
-        Solution best = simulatedAnnealing(60000, 200);
+        //Solution best = simulatedAnnealing(600000, 100);
+        Solution best = testje(600000, 10);
         System.out.println(best);
         System.out.println("DEBUG:");
         System.out.println("Init: "+init.getTotalDistance());
@@ -335,22 +336,26 @@ public class Problem {
     }
 
     public Solution simulatedAnnealing(int duration, double temperature){
-        //TODO: werkt voorlopig niet omdat de hashmap van locations in route blijkbaar hier niets delete...
         long endTime = System.currentTimeMillis()+duration;
         Solution best = new Solution();
         Solution localOptimum = new Solution();
+        LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
         int counter = 0;
         Random r = new Random();
         while(System.currentTimeMillis() < endTime) {
             for (MachineType mt : machineTypes) {
                 ArrayList<Job> jobsOfType = new ArrayList<>(jobTypeMap.get(mt));
+                HashMap<Job, Integer> costPerJob;
                 Collections.shuffle(jobsOfType);
                 for (Job j : jobsOfType) {
                     Truck t = jobTruckMap.get(j);
                     if(t != null){ //Het kan zijn dat bepaalde jobs niet worden uitgevoerd door een truck omdat ze al gecompleet worden door een andere job
+                        int oldCost = t.getRoute().getCost();
                         t.removeJob(j, true);
                         jobTruckMap.remove(j);
+                        int newCost = t.getRoute().getCost();
+
                     }
                 }
                 for (Job j : jobsOfType) {
@@ -388,30 +393,41 @@ public class Problem {
                     }
                 }
                 Solution candidate = new Solution();
-                if(candidate.getTotalDistance() < localOptimum.getTotalDistance()){
-                    localOptimum = new Solution();
-                    if(localOptimum.getTotalDistance() < best.getTotalDistance()){
-                        best = localOptimum;
-                    }
-                    System.out.println(localOptimum.getTotalDistance());
-                    break;
-                }
-                else{
-                    double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance())/currentTemp);
-                    if(localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
-                    double random = r.nextDouble();
-                    if(random <= acceptRate){
+                if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
+                    //if(!tabu.contains(candidate.getHash())) {
                         counter++;
-                        System.out.println("worse candidate accepted with "+acceptRate+" ("+currentTemp+")");
-                        localOptimum = candidate;
-                        System.out.println(localOptimum.getTotalDistance() + "\t"+acceptRate+"\t"+currentTemp);
+                        localOptimum = new Solution();
+                        tabu.add(candidate.getHash());
+                        if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
+                            best = localOptimum;
+                        }
+                        System.out.println(localOptimum.getTotalDistance());
+                    /*}
+                    else{
+                        //System.out.println("skip");
+                    }*/
+                } else {
+                    if(localOptimum.getTotalDistance() + 30 < candidate.getTotalDistance()) {
+                        double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / currentTemp);
+                        if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
+                        double random = r.nextDouble();
+                        if (random <= acceptRate) {
+                            counter++;
+                            System.out.println("worse candidate accepted with " + acceptRate + " (" + currentTemp + ")");
+                            localOptimum = candidate;
+                            tabu.add(candidate.getHash());
+                            System.out.println(localOptimum.getTotalDistance() + "\t" + acceptRate + "\t" + currentTemp);
 
+                        }
+                    }
+                    else{
+                        //System.out.println("skip");
                     }
                     localOptimum.loadSolution();
                 }
-                if(counter < 10){
+                if(counter > 10){
                     counter=0;
-                    currentTemp = 0.99 * currentTemp;
+                    currentTemp = 0.95 * currentTemp;
                 }
 
             }
@@ -419,31 +435,138 @@ public class Problem {
         best.loadSolution();
         return best;
     }
-
-
-    /*public Solution localSearch(int duration, Solution init){
-        long endTime = System.currentTimeMillis() + duration;
-        Solution currentBest = init;
-        System.out.println(currentBest.getTotalDistance());
-        while(System.currentTimeMillis() < endTime){
-            for(Truck t: trucks){
-                ArrayList<Job> jobs = new ArrayList<>(t.getJobMoveMap().keySet());
-                if(!jobs.isEmpty()) {
-                    int index = (int) (Math.random() * jobs.size());
-                    t.removeJob(jobs.get(index), false);
-                    t.addJob(jobs.get(index));
+    public Solution testje(int duration, double temperature){
+        long endTime = System.currentTimeMillis()+duration;
+        Solution best = new Solution();
+        Solution localOptimum = new Solution();
+        //LinkedList<Integer> tabu = new LinkedList<>();
+        int counter = 0;
+        Random r = new Random();
+        while(System.currentTimeMillis() < endTime) {
+            Job randomJob = jobs.get(r.nextInt(jobs.size()));
+            Truck oldTruck = jobTruckMap.get(randomJob);
+            int oldDistance = localOptimum.getTotalDistance();
+            if(oldTruck != null){ //Het kan zijn dat bepaalde jobs niet worden uitgevoerd door een truck omdat ze al gecompleet worden door een andere job
+                oldTruck.removeJob(randomJob, true);
+                jobTruckMap.remove(randomJob);
+            }
+            //Zorgen dat een collectjob enkel drops losmaakt en omgekeerd
+            List<Job> jobsOfSameType = new ArrayList<>(jobTypeMap.get(randomJob.getMachineType()));
+            if(randomJob instanceof CollectJob){
+                for(Job j: jobTypeMap.get(randomJob.getMachineType())){
+                    if(j instanceof  CollectJob) jobsOfSameType.remove(j);
                 }
             }
-            Solution candidate = new Solution(trucks);
-            if(candidate.getTotalDistance() < currentBest.getTotalDistance()){
-                System.out.println(currentBest.getTotalDistance());
-                currentBest = candidate;
+            if(randomJob instanceof  DropJob){
+                for(Job j: jobTypeMap.get(randomJob.getMachineType())){
+                    if(j instanceof DropJob) jobsOfSameType.remove(j);
+                }
+            }
+            Set<Job> affectedJobs = new HashSet<>();
+            //Maken ook 5 jobs van hetzelfde type los, zodat er meer variatie mogelijk is
+            if(!jobsOfSameType.isEmpty()) {
+                for (int i = 0; i < 2; i++) {
+                    Job j = jobsOfSameType.get(r.nextInt(jobsOfSameType.size()));
+                    if (jobTruckMap.containsKey(j)) {
+                        jobTruckMap.get(j).removeJob(j, true);
+                        jobTruckMap.remove(j);
+                    }
+                    affectedJobs.add(j);
+                }
+            }
+            if(randomJob.notDone()){
+                boolean allJobsFullfilled = true;
+                allJobsFullfilled = assignJobToRandomTruck(randomJob, oldTruck);
+                for(Job j: jobs){
+                    if(j.notDone()){
+                        affectedJobs.add(j);
+                    }
+                }
+                for(Job j: affectedJobs){
+                    allJobsFullfilled = assignJobToBestTruck(j);
+                }
+                Solution candidate = new Solution();
+                if(allJobsFullfilled && candidate.getTotalDistance() < localOptimum.getTotalDistance()){
+                    counter++;
+                    localOptimum = candidate;
+                    if(localOptimum.getTotalDistance() < best.getTotalDistance()){
+                        best = localOptimum;
+                    }
+                    System.out.println(localOptimum.getTotalDistance());
+                }
+                else{
+                    if(allJobsFullfilled && candidate.getTotalDistance() > localOptimum.getTotalDistance()+30) {
+                        double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / temperature);
+                        if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
+                        double random = r.nextDouble();
+                        if (random <= acceptRate) {
+                            counter++;
+                            System.out.println("worse candidate accepted with " + acceptRate + " (" + temperature + ")");
+                            localOptimum = candidate;
+                            System.out.println(localOptimum.getTotalDistance() + "\t" + acceptRate + "\t" + temperature);
+
+                        }
+                    }
+                    localOptimum.loadSolution();
+                }
+            }
+            if(counter > 10){
+                counter=0;
+                temperature = 0.95 * temperature;
+            }
+
+        }
+        return localOptimum;
+    }
+    public boolean assignJobToRandomTruck(Job job, Truck oldTruck){
+        ArrayList<Truck> trucksToCheck = new ArrayList<>(trucks);
+        trucksToCheck.remove(oldTruck);
+        Random r = new Random();
+        while(true){
+            Truck randomTruck = trucksToCheck.get(r.nextInt(trucksToCheck.size()));
+            if(randomTruck.addJob(job)) {
+                jobTruckMap.put(job, randomTruck);
+                break;
+            }
+            else trucksToCheck.remove(randomTruck);
+            if(trucksToCheck.isEmpty()){
+                return false;
             }
         }
-        return currentBest;
+        return true;
+    }
 
-    }*/
-
+    public boolean assignJobToBestTruck(Job j){
+        Truck optimalTruck = null;
+        Route optimalRoute = null;
+        Move optimalMove = null;
+        int minAddedCost = Integer.MAX_VALUE;
+        for (Truck t : trucks) {
+            int cost = t.getRoute().getCost();
+            LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
+            if (t.addJob(j)) {
+                int addedCost = t.getRoute().getCost() - cost;
+                //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
+                //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
+                if (addedCost < minAddedCost) {
+                    minAddedCost = addedCost;
+                    optimalTruck = t;
+                    optimalRoute = new Route(t.getRoute());
+                    optimalMove = t.getJobMoveMap().get(j);
+                }
+                t.removeJob(j, false);
+                t.getRoute().setStops(previousOrder);
+            }
+        }
+        if (optimalTruck != null) {
+            //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
+            optimalTruck.addJob(j, optimalMove, optimalRoute);
+            jobTruckMap.put(j, optimalTruck);
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 

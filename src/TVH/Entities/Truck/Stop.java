@@ -16,14 +16,12 @@ public class Stop {
     private Location location;
     private LinkedList<Machine> collect;
     private LinkedList<Machine> drop;
-    private int ID;
 
 
     public Stop(Location location, LinkedList<Machine> collect, LinkedList<Machine> drop) {
         this.location = location;
         this.collect = collect;
         this.drop = drop;
-        ID = StopIDGenerator.getInstance().getID();
     }
 
     //Make single collect stop
@@ -31,7 +29,6 @@ public class Stop {
         this.location = location;
         this.collect = new LinkedList<>();
         this.drop = new LinkedList<>();
-        ID = StopIDGenerator.getInstance().getID();
 
     }
 
@@ -40,7 +37,6 @@ public class Stop {
         this.location = s.location;
         this.collect = new LinkedList<>(s.collect);
         this.drop = new LinkedList<>(s.drop);
-        ID = StopIDGenerator.getInstance().getID();
     }
 
 
@@ -117,6 +113,6 @@ public class Stop {
 
     @Override
     public int hashCode() {
-        return Objects.hash(location, collect, drop, ID);
+        return Objects.hash(location, collect, drop);
     }
 }

@@ -12,12 +12,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class Solution {
     private int totalDistance = 0;
-    private ArrayList<Truck> trucks = new ArrayList<>();;
+    private ArrayList<Truck> trucks = new ArrayList<>();
     private ArrayList<Client> clients = new ArrayList<>();
     private ArrayList<Depot> depots = new ArrayList<>();
+    private int hash = 0;
 
 
     public Solution() {
@@ -35,6 +37,11 @@ public class Solution {
         }
         for(Depot d: problem.depotMap.values()){
             depots.add(new Depot(d));
+        }
+
+        //Hash maken
+        for(Truck t: trucks){
+            hash += Objects.hash(t.getTruckId(),t.getRoute().getStops());
         }
     }
 
@@ -123,5 +130,9 @@ public class Solution {
             sb.append(t);
         }
         return sb.toString();
+    }
+
+    public int getHash() {
+        return hash;
     }
 }

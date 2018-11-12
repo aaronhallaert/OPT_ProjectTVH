@@ -213,7 +213,7 @@ public class Truck {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Truck: "+truckId+" ("+route.getTotalDistance() +"km) ("+route.getTotalTime()+" min) (f: "+route.isFeasible()+") (avgfill: "+route.getFillrateAbove65()+")\n");
+        sb.append("Truck: "+truckId+" ("+route.getTotalDistance() +"km) ("+route.getTotalTime()+" min) (f: "+route.isFeasible()+") (avgfill: "+route.getAvgStopsOnTruck()+")\n");
         /*for(Stop s: route.stops){
             sb.append("\t" + "Location " + s.getLocation()+"%\n");
             sb.append("\t\t Collect:\n");
