@@ -12,4 +12,5 @@ public interface Job {
     boolean notDone();
 
     MachineType getMachineType();
+
 }

@@ -229,7 +229,7 @@ public class Problem {
 //        }
         System.out.println(init);
         //Solution best = simulatedAnnealing(600000, 100);
-        Solution best = testje(600000, 10);
+        Solution best = testje(600000, 20);
         System.out.println(best);
         System.out.println("DEBUG:");
         System.out.println("Init: "+init.getTotalDistance());
@@ -291,46 +291,13 @@ public class Problem {
 
 
         //Assign each move to a truck
-        List<Job> HandledJobs = new ArrayList<>();
         int i = 0;
         for (Job j : jobs) {
             System.out.println(i);
             i++;
 
             if (j.notDone()) {
-                Truck optimalTruck = null;
-                Route optimalRoute = null;
-                Move optimalMove = null;
-                int minAddedCost = Integer.MAX_VALUE;
-                for (Truck t : trucks) {
-                    int cost = t.getRoute().getCost();
-                    LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
-                    if (t.addJob(j)) {
-                        int addedCost = t.getRoute().getCost() - cost;
-                        //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
-                        //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
-                        if (addedCost < minAddedCost) {
-                            minAddedCost = addedCost;
-                            optimalTruck = t;
-                            optimalRoute = new Route(t.getRoute());
-                            optimalMove = t.getJobMoveMap().get(j);
-                        }
-                        t.removeJob(j, false);
-                        t.getRoute().setStops(previousOrder);
-                    }
-                }
-                if (optimalTruck != null) {
-                    //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
-                    optimalTruck.addJob(j, optimalMove, optimalRoute);
-                    HandledJobs.add(j);
-                    jobTruckMap.put(j, optimalTruck);
-                }
-                else{
-                    System.out.println("ERROR: No truck found");
-                }
-            }
-            else{
-                HandledJobs.add(j);
+                if(!assignJobToBestTruck(j)) System.out.println("error");
             }
         }
     }
@@ -462,11 +429,14 @@ public class Problem {
                     if(j instanceof DropJob) jobsOfSameType.remove(j);
                 }
             }
+            Collections.sort(jobsOfSameType, new JobLocationComparator(randomJob.getFixedLocation()));
+
             Set<Job> affectedJobs = new HashSet<>();
-            //Maken ook 5 jobs van hetzelfde type los, zodat er meer variatie mogelijk is
+            //Maken ook 5 jobs van hetzelfde type los, zodat er meer variatie mogelijk is;
             if(!jobsOfSameType.isEmpty()) {
-                for (int i = 0; i < 2; i++) {
-                    Job j = jobsOfSameType.get(r.nextInt(jobsOfSameType.size()));
+                for (int i = 0; i < Math.min(jobsOfSameType.size(), 5); i++) {
+                    Job j = jobsOfSameType.get(i);
+                    //System.out.println(j.getFixedLocation().distanceTo(randomJob.getFixedLocation()));
                     if (jobTruckMap.containsKey(j)) {
                         jobTruckMap.get(j).removeJob(j, true);
                         jobTruckMap.remove(j);
@@ -483,14 +453,14 @@ public class Problem {
                     }
                 }
                 for(Job j: affectedJobs){
-                    allJobsFullfilled = assignJobToBestTruck(j);
+                    allJobsFullfilled = assignJobToRandomTruck(j,null);
                 }
                 Solution candidate = new Solution();
                 if(allJobsFullfilled && candidate.getTotalDistance() < localOptimum.getTotalDistance()){
                     counter++;
                     localOptimum = candidate;
                     if(localOptimum.getTotalDistance() < best.getTotalDistance()){
-                        best = localOptimum;
+                        best = new Solution();
                     }
                     System.out.println(localOptimum.getTotalDistance());
                 }
@@ -503,7 +473,7 @@ public class Problem {
                             counter++;
                             System.out.println("worse candidate accepted with " + acceptRate + " (" + temperature + ")");
                             localOptimum = candidate;
-                            System.out.println(localOptimum.getTotalDistance() + "\t" + acceptRate + "\t" + temperature);
+                            System.out.println(localOptimum.getTotalDistance());
 
                         }
                     }
