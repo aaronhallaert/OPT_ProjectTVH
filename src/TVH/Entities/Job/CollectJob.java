@@ -7,7 +7,9 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 //Statische klasse
@@ -66,5 +68,14 @@ public class CollectJob implements Job {
     }
     public MachineType getMachineType(){
         return machine.getType();
+    }
+
+    public ArrayList<Move> generatePossibleMoves(){
+        ArrayList<Move> moves = new ArrayList<>();
+        //Eerst alle drop opties verwijderen waar we de machine niet meer kunnen zetten hebben
+        for(Location l: drop){
+            moves.add(new Move(machine, collect, l));
+        }
+        return moves;
     }
 }

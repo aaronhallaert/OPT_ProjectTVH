@@ -206,6 +206,19 @@ public class Truck {
         }
     }
 
+    public List<Proposal> getProposals(Job j){
+        ArrayList<Proposal> proposals = new ArrayList<>();
+        ArrayList<Move> moves = j.generatePossibleMoves();
+        for(Move m: moves){
+            Route copy = new Route(route);
+            int oldCost = copy.getCost();
+            copy.addMove(m);
+            int newCost = copy.getCost();
+            proposals.add(new Proposal(this,j, m, newCost-oldCost));
+        }
+        return proposals;
+    }
+
     public void setRoute(Route route) {
         this.route = route;
     }

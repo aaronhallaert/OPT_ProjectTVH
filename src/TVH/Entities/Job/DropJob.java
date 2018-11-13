@@ -1,5 +1,6 @@
 package TVH.Entities.Job;
 
+import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Edge;
 import TVH.Entities.Node.Location;
 import TVH.Entities.Machine.MachineType;
@@ -8,6 +9,7 @@ import TVH.Problem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 //Statische klasse
@@ -67,5 +69,15 @@ public class DropJob implements Job {
             distanceToAllNodes += e.getDistance();
         }
         return distanceToAllNodes;
+    }
+    public ArrayList<Move> generatePossibleMoves(){
+        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+        ArrayList<Move> moves = new ArrayList<>();
+        for(Location l: collect){
+            Node node = nodesMap.get(l);
+            Machine machine = node.viewMachineOfType(machineType);
+            moves.add(new Move(machine, l, drop));
+        }
+        return moves;
     }
 }

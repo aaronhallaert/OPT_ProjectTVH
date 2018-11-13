@@ -228,8 +228,9 @@ public class Problem {
 //            t.optimizeTruck();
 //        }
         System.out.println(init);
+        Solution best = init;
         //Solution best = simulatedAnnealing(600000, 100);
-        Solution best = testje(600000, 20);
+        //Solution best = testje(600000, 20);
         System.out.println(best);
         System.out.println("DEBUG:");
         System.out.println("Init: "+init.getTotalDistance());
@@ -413,59 +414,77 @@ public class Problem {
             Job randomJob = jobs.get(r.nextInt(jobs.size()));
             Truck oldTruck = jobTruckMap.get(randomJob);
             int oldDistance = localOptimum.getTotalDistance();
-            if(oldTruck != null){ //Het kan zijn dat bepaalde jobs niet worden uitgevoerd door een truck omdat ze al gecompleet worden door een andere job
+            if(oldTruck != null) { //Het kan zijn dat bepaalde jobs niet worden uitgevoerd door een truck omdat ze al gecompleet worden door een andere job
                 oldTruck.removeJob(randomJob, true);
                 jobTruckMap.remove(randomJob);
-            }
-            //Zorgen dat een collectjob enkel drops losmaakt en omgekeerd
-            List<Job> jobsOfSameType = new ArrayList<>(jobTypeMap.get(randomJob.getMachineType()));
-            if(randomJob instanceof CollectJob){
-                for(Job j: jobTypeMap.get(randomJob.getMachineType())){
-                    if(j instanceof  CollectJob) jobsOfSameType.remove(j);
-                }
-            }
-            if(randomJob instanceof  DropJob){
-                for(Job j: jobTypeMap.get(randomJob.getMachineType())){
-                    if(j instanceof DropJob) jobsOfSameType.remove(j);
-                }
-            }
-            Collections.sort(jobsOfSameType, new JobLocationComparator(randomJob.getFixedLocation()));
 
-            Set<Job> affectedJobs = new HashSet<>();
-            //Maken ook 5 jobs van hetzelfde type los, zodat er meer variatie mogelijk is;
-            if(!jobsOfSameType.isEmpty()) {
-                for (int i = 0; i < Math.min(jobsOfSameType.size(), 5); i++) {
-                    Job j = jobsOfSameType.get(i);
-                    //System.out.println(j.getFixedLocation().distanceTo(randomJob.getFixedLocation()));
-                    if (jobTruckMap.containsKey(j)) {
-                        jobTruckMap.get(j).removeJob(j, true);
-                        jobTruckMap.remove(j);
+                //Zorgen dat een collectjob enkel drops losmaakt en omgekeerd
+                List<Job> jobsOfSameType = new ArrayList<>(jobTypeMap.get(randomJob.getMachineType()));
+                if (randomJob instanceof CollectJob) {
+                    for (Job j : jobTypeMap.get(randomJob.getMachineType())) {
+                        if (j instanceof CollectJob) jobsOfSameType.remove(j);
                     }
-                    affectedJobs.add(j);
                 }
-            }
-            if(randomJob.notDone()){
-                boolean allJobsFullfilled = true;
-                allJobsFullfilled = assignJobToRandomTruck(randomJob, oldTruck);
-                for(Job j: jobs){
-                    if(j.notDone()){
+                if (randomJob instanceof DropJob) {
+                    for (Job j : jobTypeMap.get(randomJob.getMachineType())) {
+                        if (j instanceof DropJob) jobsOfSameType.remove(j);
+                    }
+                }
+                //Sorteer op basis van afstand tot de random job;
+                Collections.sort(jobsOfSameType, new JobLocationComparator(randomJob.getFixedLocation()));
+
+                Set<Job> affectedJobs = new HashSet<>();
+                affectedJobs.add(randomJob);
+                //Maken ook 3 jobs van hetzelfde type los, zodat er meer variatie mogelijk is;
+                if (!jobsOfSameType.isEmpty()) {
+                    for (int i = 0; i < Math.min(jobsOfSameType.size(), 3); i++) {
+                        Job j = jobsOfSameType.get(i);
+                        //System.out.println(j.getFixedLocation().distanceTo(randomJob.getFixedLocation()));
+                        if (jobTruckMap.containsKey(j)) {
+                            jobTruckMap.get(j).removeJob(j, true);
+                            jobTruckMap.remove(j);
+                        }
                         affectedJobs.add(j);
                     }
                 }
-                for(Job j: affectedJobs){
-                    allJobsFullfilled = assignJobToRandomTruck(j,null);
+                //Kijken welke jobs er misschien nog "affected" zijn door het verwijderen van deze jobs
+                for (Job j : jobs) {
+                    if (j.notDone()) {
+                        affectedJobs.add(j);
+                    }
+                }
+                HashMultimap<Job, Proposal> proposals = HashMultimap.create();
+                //We voegen hier ook alle proposals toe van de affected jobs
+                for (Job j : affectedJobs) {
+                    for (Truck t : trucks) {
+                        proposals.putAll(j, t.getProposals(j));
+                    }
+                }
+                //Bepalen welke proposals we zullen uitvoeren
+                ArrayList<Proposal> acceptedProposals = new ArrayList<>();
+                HashMap<Job, Proposal> bestProposalPerJob = new HashMap<>();
+                for(Proposal p: acceptedProposals){
+                    if(p.getCost() < bestProposalPerJob.get(p.getJ1()).getCost()){
+                        bestProposalPerJob.put(p.getJ1(), p);
+                    }
+                }
+
+
+                    boolean allJobsFullfilled = true;
+                allJobsFullfilled = assignJobToRandomTruck(randomJob, oldTruck);
+                for (Job j : affectedJobs) {
+                    allJobsFullfilled = assignJobToRandomTruck(j, null);
                 }
                 Solution candidate = new Solution();
-                if(allJobsFullfilled && candidate.getTotalDistance() < localOptimum.getTotalDistance()){
+                if (allJobsFullfilled && candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
                     counter++;
                     localOptimum = candidate;
-                    if(localOptimum.getTotalDistance() < best.getTotalDistance()){
+                    if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
                         best = new Solution();
                     }
                     System.out.println(localOptimum.getTotalDistance());
-                }
-                else{
-                    if(allJobsFullfilled && candidate.getTotalDistance() > localOptimum.getTotalDistance()+30) {
+                } else {
+                    if (allJobsFullfilled && candidate.getTotalDistance() > localOptimum.getTotalDistance() + 30) {
                         double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / temperature);
                         if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
                         double random = r.nextDouble();
@@ -479,10 +498,10 @@ public class Problem {
                     }
                     localOptimum.loadSolution();
                 }
-            }
-            if(counter > 10){
-                counter=0;
-                temperature = 0.95 * temperature;
+                if (counter > 10) {
+                    counter = 0;
+                    temperature = 0.95 * temperature;
+                }
             }
 
         }

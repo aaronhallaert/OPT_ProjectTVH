@@ -43,6 +43,20 @@ public class Route {
         for(Stop s: r.stops){
             stops.add(new Stop(s));
         }
+        this.totalDistance = r.totalDistance;
+        this.cost = r.cost;
+        this.orderViolations = r.orderViolations;
+        this.timeViolations = r.timeViolations;
+        this.fillRateViolations = r.fillRateViolations;
+        this.avgStopsOnTruck = r.avgStopsOnTruck;
+        this.totalTime = r.totalTime;
+        this.hash1 = r.hash1;
+        this.hash2 = r.hash2;
+        this.hash3 = r.hash3;
+        this.hash4 = r.hash4;
+        this.hash5 = r.hash5;
+        this.hash6 = r.hash6;
+        this.hash7 = r.hash7;
     }
     public boolean addMove(Move m){
         //Backups nemen van stops en locationstopmap

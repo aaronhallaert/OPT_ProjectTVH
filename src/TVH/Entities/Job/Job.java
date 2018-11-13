@@ -3,6 +3,9 @@ package TVH.Entities.Job;
 import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.Location;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public interface Job {
 
     int getRemoteFactor();
@@ -12,5 +15,7 @@ public interface Job {
     boolean notDone();
 
     MachineType getMachineType();
+
+    ArrayList<Move> generatePossibleMoves();
 
 }
