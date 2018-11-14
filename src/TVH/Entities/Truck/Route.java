@@ -202,9 +202,9 @@ public class Route {
     private int calculateCost(){
             int timeFactor = 100;
             int orderFactor = 1000;
-            int fillrateViolationFactor = 100;
+            int fillrateViolationFactor = 1000;
             int distanceFactor = 1;
-            int avgFillRateFactor = 10;
+            int avgFillRateFactor = 0;
 
             return distanceFactor * getTotalDistance()
                     + avgFillRateFactor * getAvgStopsOnTruck()

@@ -79,6 +79,7 @@ public class Depot implements Node{
     public HashMultimap<MachineType, Machine> getTypeMachineMap() {
         return machines;
     }
+
     public List<Machine> getAvailableMachines(){
         return new ArrayList<>(machines.values());
     }

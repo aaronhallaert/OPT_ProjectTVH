@@ -126,7 +126,7 @@ public class Truck {
         route = r;
         jobMoveMap.put(j, m);
         Node collect = nodesMap.get(m.getCollect());
-        Node drop =  nodesMap.get(m.getDrop());
+        Node drop = nodesMap.get(m.getDrop());
         collect.takeMachine(m.getMachine());
         drop.putMachine(m.getMachine());
 
