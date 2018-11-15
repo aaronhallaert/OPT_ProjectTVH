@@ -71,10 +71,14 @@ public class CollectJob implements Job {
     }
 
     public ArrayList<Move> generatePossibleMoves(){
+        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
         ArrayList<Move> moves = new ArrayList<>();
         //Eerst alle drop opties verwijderen waar we de machine niet meer kunnen zetten hebben
         for(Location l: drop){
-            moves.add(new Move(machine, collect, l));
+            Node node = nodesMap.get(l);
+            if(node.canPutMachineType(machine.getType())){
+                moves.add(new Move(machine, collect, l));
+            }
         }
         return moves;
     }

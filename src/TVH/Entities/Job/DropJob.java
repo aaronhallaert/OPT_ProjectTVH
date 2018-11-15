@@ -73,10 +73,13 @@ public class DropJob implements Job {
     public ArrayList<Move> generatePossibleMoves(){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
         ArrayList<Move> moves = new ArrayList<>();
+        //We voegen alle mogelijke moves toe;
         for(Location l: collect){
             Node node = nodesMap.get(l);
-            Machine machine = node.viewMachineOfType(machineType);
-            if(machine != null) moves.add(new Move(machine, l, drop));
+            if(node.hasMachineAvailableOfType(machineType)){
+                Machine machine = node.viewMachineOfType(machineType);
+                moves.add(new Move(machine, l, drop));
+            }
         }
         return moves;
     }
