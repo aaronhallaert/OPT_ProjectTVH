@@ -230,7 +230,7 @@ public class Problem {
 //        }
         System.out.println(init);
         //Solution best = init;
-        Solution best = simulatedAnnealing(20000, 20, 2);
+        Solution best = simulatedAnnealing(600000, 50, 3);
         //Solution best = testje(600000, 20);
         System.out.println(best);
         System.out.println("DEBUG:");
@@ -299,7 +299,7 @@ public class Problem {
             i++;
 
             if (j.notDone()) {
-                if (!assignJobToBestTruck(j)) System.out.println("error");
+                if (!assignJobToBestTruck(j,true)) System.out.println("error");
             }
         }
     }
@@ -312,6 +312,11 @@ public class Problem {
         double currentTemp = temperature;
         int counter = 0;
         Random r = new Random();
+        for(Job j: jobs){
+            if(j.notDone()){
+                System.out.println("verwijder dit");
+            }
+        }
         while (System.currentTimeMillis() < endTime) {
             MachineType mt = machineTypes.get(r.nextInt(machineTypes.size()));
             //We maken een groep jobs van hetzelfde type los, zodat er meer skuivinge mogelijk is
@@ -337,7 +342,8 @@ public class Problem {
             boolean allJobsAdded = true;
             for (Job j : deletedJobs) {
                 if (j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
-                    allJobsAdded = assignJobToRandomTruck(j, false);
+                    List<Move> allMoves = j.generatePossibleMoves();
+                    allJobsAdded = assignMoveToBestTruck(j, allMoves.get((int) (Math.random()*allMoves.size())));
                 }
             }
             if (allJobsAdded) {
@@ -351,7 +357,7 @@ public class Problem {
                 //Candidate is better than local
                 if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
                     //if(!tabu.contains(candidate.getHash())) {
-                    counter++;
+                    //counter++;
                     localOptimum = new Solution();
                     //tabu.add(candidate.getHash());
                     if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
@@ -361,7 +367,7 @@ public class Problem {
                     System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
-                    if (localOptimum.getTotalDistance() + 10 < candidate.getTotalDistance()) {
+                    if (localOptimum.getTotalDistance() + 30 < candidate.getTotalDistance()) {
                         double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / currentTemp);
                         if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
                         double random = r.nextDouble();
@@ -379,7 +385,7 @@ public class Problem {
                 }
             }
             localOptimum.loadSolution();
-            if (counter > 10) {
+            if (counter > 1) {
                 counter = 0;
                 currentTemp = 0.95 * currentTemp;
             }
@@ -509,7 +515,10 @@ public class Problem {
         return true;
     }
 
-    public boolean assignJobToBestTruck(Job j) {
+    public boolean assignJobToBestTruck(Job job, boolean bestMove) {
+        if(job.getFixedLocation().getLocationID() == 15){
+            System.out.println("verwijder dit");
+        }
         Truck optimalTruck = null;
         Route optimalRoute = null;
         Move optimalMove = null;
@@ -517,7 +526,7 @@ public class Problem {
         for (Truck t : trucks) {
             int cost = t.getRoute().getCost();
             LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
-            if (t.addJob(j, true)) {
+            if (t.addJob(job, bestMove)) {
                 int addedCost = t.getRoute().getCost() - cost;
                 //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
                 //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
@@ -525,16 +534,48 @@ public class Problem {
                     minAddedCost = addedCost;
                     optimalTruck = t;
                     optimalRoute = new Route(t.getRoute());
-                    optimalMove = t.getJobMoveMap().get(j);
+                    optimalMove = t.getJobMoveMap().get(job);
                 }
-                t.removeJob(j, false);
+                t.removeJob(job, false);
                 t.getRoute().setStops(previousOrder);
             }
         }
         if (optimalTruck != null) {
             //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
-            optimalTruck.addJob(j, optimalMove, optimalRoute);
-            jobTruckMap.put(j, optimalTruck);
+            optimalTruck.addJob(job, optimalMove, optimalRoute);
+            jobTruckMap.put(job, optimalTruck);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean assignMoveToBestTruck(Job job, Move m){
+        Truck optimalTruck = null;
+        Route optimalRoute = null;
+        Move optimalMove = null;
+        int minAddedCost = Integer.MAX_VALUE;
+        for (Truck t : trucks) {
+            int cost = t.getRoute().getCost();
+            LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
+            if (t.addJob(job, m)) {
+                int addedCost = t.getRoute().getCost() - cost;
+                //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
+                //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
+                if (addedCost < minAddedCost) {
+                    minAddedCost = addedCost;
+                    optimalTruck = t;
+                    optimalRoute = new Route(t.getRoute());
+                    optimalMove = t.getJobMoveMap().get(job);
+                }
+                t.removeJob(job, false);
+                t.getRoute().setStops(previousOrder);
+            }
+        }
+        if (optimalTruck != null) {
+            //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
+            optimalTruck.addJob(job, optimalMove, optimalRoute);
+            jobTruckMap.put(job, optimalTruck);
             return true;
         } else {
             return false;

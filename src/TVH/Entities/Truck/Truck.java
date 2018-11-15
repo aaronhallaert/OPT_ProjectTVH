@@ -52,34 +52,7 @@ public class Truck {
     public boolean addJob(Job j, boolean searchBestMove){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
         //Alle mogelijke moves zoeken die deze job kunnen voltooien
-        List<Move> moves = new ArrayList<>();
-        if(j instanceof DropJob){
-            DropJob dj = (DropJob) j;
-            Location drop = dj.getDrop();
-            MachineType mt = dj.getMachineType();
-            List<Location> possibleCollects = new LinkedList<>(dj.getCollect());
-            //We voegen alle mogelijke moves toe;
-            for(Location collect: dj.getCollect()){
-                Node node = nodesMap.get(collect);
-                if(node.hasMachineAvailableOfType(mt)){
-                    Machine machine = node.viewMachineOfType(mt);
-                    moves.add(new Move(machine, collect, drop));
-                }
-            }
-        }
-        else{
-            CollectJob cj = (CollectJob) j;
-            Location collect = cj.getCollect();
-            Machine machine = cj.getMachine();
-            List<Location> possibleDrops = new LinkedList<>(cj.getDrop());
-            //Eerst alle drop opties verwijderen waar we de machine niet meer kunnen zetten hebben
-            for(Location drop: cj.getDrop()){
-                Node node = nodesMap.get(drop);
-                if(node.canPutMachineType(machine.getType())){
-                    moves.add(new Move(machine, collect, drop));
-                }
-            }
-        }
+        List<Move> moves = j.generatePossibleMoves();
         if(searchBestMove) {
             Move optimalMove = null;
             int minCost = Integer.MAX_VALUE;
@@ -107,7 +80,6 @@ public class Truck {
             boolean moveAdded = false;
             while(!moveAdded && !moves.isEmpty()){
                 Move randomMove = moves.get((int) (Math.random()*moves.size()));
-                LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
                 if(route.addMove(randomMove)){
                     moveAdded = true;
                     jobMoveMap.put(j, randomMove);
@@ -122,6 +94,22 @@ public class Truck {
             }
             return moveAdded;
         }
+    }
+
+    public boolean addJob(Job j, Move m){
+        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+
+        if(route.addMove(m)){
+            jobMoveMap.put(j, m);
+            Node collect = nodesMap.get(m.getCollect());
+            Node drop = nodesMap.get(m.getDrop());
+            collect.takeMachine(m.getMachine());
+            drop.putMachine(m.getMachine());
+            return true;
+        }
+
+        return false;
+
     }
 
     //Deze methode voegt een job toe aan een truck, met bijhoorde move en route direct er al bij

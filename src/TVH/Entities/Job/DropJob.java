@@ -76,7 +76,7 @@ public class DropJob implements Job {
         for(Location l: collect){
             Node node = nodesMap.get(l);
             Machine machine = node.viewMachineOfType(machineType);
-            moves.add(new Move(machine, l, drop));
+            if(machine != null) moves.add(new Move(machine, l, drop));
         }
         return moves;
     }
