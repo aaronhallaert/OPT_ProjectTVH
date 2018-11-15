@@ -49,8 +49,9 @@ public class Truck {
         }
     }
 
-    public boolean addJob(Job j){
+    public boolean addJob(Job j, boolean searchBestMove){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+        //Alle mogelijke moves zoeken die deze job kunnen voltooien
         List<Move> moves = new ArrayList<>();
         if(j instanceof DropJob){
             DropJob dj = (DropJob) j;
@@ -79,28 +80,62 @@ public class Truck {
                 }
             }
         }
-        Move optimalMove = null;
-        int minCost = Integer.MAX_VALUE;
-        for(Move candidate: moves){
-            LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
-            if(route.addMove(candidate)){
-                if(route.getCost() < minCost){
-                    optimalMove = candidate;
-                    minCost = route.getCost();
+        if(searchBestMove) {
+            Move optimalMove = null;
+            int minCost = Integer.MAX_VALUE;
+            for (Move candidate : moves) {
+                LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
+                if (route.addMove(candidate)) {
+                    if (route.getCost() < minCost) {
+                        optimalMove = candidate;
+                        minCost = route.getCost();
+                    }
+                    route.removeMove(candidate, false);
+                    route.setStops(previousOrder);
                 }
-                route.removeMove(candidate, false);
-                route.setStops(previousOrder);
             }
+            if (optimalMove == null) return false;
+            route.addMove(optimalMove);
+            jobMoveMap.put(j, optimalMove);
+            Node collectNode = nodesMap.get(optimalMove.getCollect());
+            Node dropNode = nodesMap.get(optimalMove.getDrop());
+            collectNode.takeMachine(optimalMove.getMachine());
+            dropNode.putMachine(optimalMove.getMachine());
+            return true;
         }
-        if(optimalMove == null) return false;
+        else{
+            boolean moveAdded = false;
+            while(!moveAdded && !moves.isEmpty()){
+                Move randomMove = moves.get((int) (Math.random()*moves.size()));
+                LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
+                if(route.addMove(randomMove)){
+                    moveAdded = true;
+                    jobMoveMap.put(j, randomMove);
+                    Node collectNode = nodesMap.get(randomMove.getCollect());
+                    Node dropNode = nodesMap.get(randomMove.getDrop());
+                    collectNode.takeMachine(randomMove.getMachine());
+                    dropNode.putMachine(randomMove.getMachine());
+                }
+                else{
+                    moves.remove(randomMove);
+                }
+            }
+            return moveAdded;
+        }
+    }
 
-        route.addMove(optimalMove);
-        jobMoveMap.put(j, optimalMove);
-        Node collectNode = nodesMap.get(optimalMove.getCollect());
-        Node dropNode =  nodesMap.get(optimalMove.getDrop());
-        collectNode.takeMachine(optimalMove.getMachine());
-        dropNode.putMachine(optimalMove.getMachine());
-        return true;
+    //Deze methode voegt een job toe aan een truck, met bijhoorde move en route direct er al bij
+    //We zijn zeker dat deze route feasible is
+    public void addJob(Job j, Move m, Route r){
+        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+
+        route = r;
+        jobMoveMap.put(j, m);
+        Node collect = nodesMap.get(m.getCollect());
+        Node drop = nodesMap.get(m.getDrop());
+        collect.takeMachine(m.getMachine());
+        drop.putMachine(m.getMachine());
+
     }
 
     public void removeJob(Job j, boolean optimize){
@@ -115,20 +150,6 @@ public class Truck {
         Node drop =  nodesMap.get(move.getDrop());
         collect.undoTakeMachine(move.getMachine());
         drop.undoPutMachine(move.getMachine());
-
-    }
-
-    //Deze methode voegt een job toe aan een truck, met bijhoorde move en route direct er al bij
-    //We zijn zeker dat deze route feasible is
-    public void addJob(Job j, Move m, Route r){
-        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
-
-        route = r;
-        jobMoveMap.put(j, m);
-        Node collect = nodesMap.get(m.getCollect());
-        Node drop = nodesMap.get(m.getDrop());
-        collect.takeMachine(m.getMachine());
-        drop.putMachine(m.getMachine());
 
     }
 
@@ -185,7 +206,7 @@ public class Truck {
                 Route backup = new Route(route);
                 Move oldMove = jobMoveMap.get(j);
                 removeJob(j, false);
-                if(addJob(j)){
+                if(addJob(j, true)){
                     int cost = route.getCost();
                     if(minCost > cost){
                         System.out.println("improvement found");
