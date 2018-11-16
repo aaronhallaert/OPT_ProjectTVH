@@ -12,11 +12,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-//Statische klasse
+//Statische klasse -> item ophalen
 public class CollectJob implements Job {
-    private Location collect;
-    private List<Location> drop;
-    private Machine machine;
+
+    private Location collect; // op deze locatie
+    private List<Location> drop; // link naar alle locaties waar je dat specifiek item kan afdroppen
+    private Machine machine; // welk machinetype
 
     public CollectJob(Location collect, List<Location> drop, Machine machine) {
         this.collect = collect;
@@ -24,10 +25,10 @@ public class CollectJob implements Job {
         this.machine = machine;
     }
 
-    public boolean notDone(){
-        HashMap<Location,Node> nodesMap = Problem.getInstance().nodesMap;
+    public boolean notDone(){ // nog niet uitgevoerd, (volledig)
+        HashMap<Location,Node> nodesMap = Problem.getInstance().nodesMap; // daar zitten zowel client en depot in
         Node collectNode = nodesMap.get(collect);
-        return collectNode.getAvailableMachines().contains(machine);
+        return collectNode.getAvailableMachines().contains(machine); // done als de machine niet meer in de node zit
 
     }
 
@@ -74,7 +75,7 @@ public class CollectJob implements Job {
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
         ArrayList<Move> moves = new ArrayList<>();
         //Eerst alle drop opties verwijderen waar we de machine niet meer kunnen zetten hebben
-        for(Location l: drop){
+        for(Location l: drop){ //alle locations waar we het gecollecte item kunnen droppen
             Node node = nodesMap.get(l);
             if(node.canPutMachineType(machine.getType())){
                 moves.add(new Move(machine, collect, l));

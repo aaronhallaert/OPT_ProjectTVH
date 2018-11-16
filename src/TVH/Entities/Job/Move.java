@@ -5,8 +5,8 @@ import TVH.Entities.Node.Location;
 
 import java.util.Objects;
 
-//Statische klasse
-public class Move {
+//Statische klasse, maar er worden er wel aangemaakt en verwijderd
+public class Move { //een egde (een pijl tussen 2 Nodes)
     Machine machine;
     Location collect;
     Location drop;

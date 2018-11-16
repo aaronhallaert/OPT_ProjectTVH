@@ -7,7 +7,7 @@ import java.util.*;
 
 
 //Dynamische klasse
-public class Client implements Node{
+public class Client implements Node{ // geen depot, maar wel een client
 
     private Location location;
     private ArrayList<Machine> toCollect;
@@ -30,7 +30,6 @@ public class Client implements Node{
 
     public void addToCollect(Machine machine) {
         //dropped.add(machine);
-        //Speciaal voor locatie 88 van probleem 4, waarbij je een machine moet komen collecten die ook gedropt moet worden >:(
         //if (!toDrop.contains(machine.getMachineType())) {
         toCollect.add(machine);
         //}

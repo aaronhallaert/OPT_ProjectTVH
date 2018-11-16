@@ -43,6 +43,8 @@ public class Solution {
         for(Truck t: trucks){
             hash += Objects.hash(t.getTruckId(),t.getRoute().getStops());
         }
+
+        // hier moet ik de listener triggeren
     }
 
     public void loadSolution(){
