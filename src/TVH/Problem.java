@@ -231,10 +231,10 @@ public class Problem {
         System.out.println(init);
         //Solution best = init;
 
-        Solution best = simulatedAnnealingAaron(40000, 100000, Integer.MAX_VALUE, 3);
-        best.loadSolution();
+        Solution best = simulatedAnnealingJeroen(40000, 50, Integer.MAX_VALUE, 2);
+        /*best.loadSolution();
         System.out.println("start second annealing");
-        best= simulatedAnnealingJeroen(20000,50, Integer.MAX_VALUE,1);
+        best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);*/
         best.loadSolution();
         for (Truck truck : trucks) {
             truck.optimizeTruck();
@@ -326,7 +326,7 @@ public class Problem {
             Set<Integer> randomIndices= new HashSet<>();
             for (int i = 0; i < nMachineTypesToRemove; i++) {
                 int randomIndex= r.nextInt(machineTypes.size());
-                while(randomIndices.contains(randomIndex)){
+                while(randomIndices.contains(randomIndex) || jobTypeMap.get(machineTypes.get(randomIndex)).size()<2){
                     randomIndex= r.nextInt(machineTypes.size());
                 }
                 randomIndices.add(randomIndex);
@@ -335,7 +335,7 @@ public class Problem {
             //We maken een groep jobs van hetzelfde type los, zodat er meer skuivinge mogelijk is
             List<Job> allJobsOfType = new ArrayList<>();
             for (Integer randomIndex : randomIndices) {
-                jobTypeMap.get(machineTypes.get(randomIndex));
+                allJobsOfType.addAll(jobTypeMap.get(machineTypes.get(randomIndex)));
             }
 
             Collections.shuffle(allJobsOfType);
@@ -504,7 +504,7 @@ public class Problem {
             localOptimum.loadSolution();
             if (counter > 1) {
                 counter = 0;
-                currentTemp = 0.85 * currentTemp;
+                currentTemp = 0.7 * currentTemp;
             }
         }
         best.loadSolution();
