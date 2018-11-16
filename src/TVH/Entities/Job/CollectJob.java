@@ -19,11 +19,21 @@ public class CollectJob implements Job {
     private Location collect;
     private List<Location> drop;
     private Machine machine;
+    private List<Move> allMoves;
 
     public CollectJob(Location collect, List<Location> drop, Machine machine) {
         this.collect = collect;
         this.drop = drop;
         this.machine = machine;
+
+        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+        allMoves = new ArrayList<>();
+        for(Location l: drop){
+            Node node = nodesMap.get(l);
+            if(node.canPutMachineType(machine.getType())){
+                allMoves.add(new Move(machine, collect, l));
+            }
+        }
     }
 
     public boolean notDone(){
@@ -74,15 +84,19 @@ public class CollectJob implements Job {
 
     public ArrayList<Move> generatePossibleMoves(){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
-        ArrayList<Move> moves = new ArrayList<>();
+        ArrayList<Move> possibleMoves = new ArrayList<>();
         //Eerst alle drop opties verwijderen waar we de machine niet meer kunnen zetten hebben
-        for(Location l: drop){
-            Node node = nodesMap.get(l);
+        for(Move m: allMoves){
+            Node node = nodesMap.get(m.getDrop());
             if(node.canPutMachineType(machine.getType())){
-                moves.add(new Move(machine, collect, l));
+                possibleMoves.add(m);
             }
         }
-        return moves;
+        return possibleMoves;
+    }
+
+    public List<Move> getAllMoves() {
+        return allMoves;
     }
 
     public String toString(){

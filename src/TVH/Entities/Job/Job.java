@@ -36,6 +36,8 @@ public interface Job {
 
     Location getFixedLocation();
 
+    public List<Move> getAllMoves();
+
 
 
 }

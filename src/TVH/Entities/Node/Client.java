@@ -75,6 +75,10 @@ public class Client implements Node{
         return false;
     }
 
+    public boolean hasMachineAvailable(Machine m) {
+        return toCollect.contains(m);
+    }
+
     public List<Machine> getAvailableMachines(){
         return toCollect;
     }

@@ -69,6 +69,10 @@ public class Depot implements Node{
         return !machines.get(mt).isEmpty();
     }
 
+    public boolean hasMachineAvailable(Machine m) {
+        return machines.get(m.getType()).contains(m);
+    }
+
     public Location getLocation() {
         return location;
     }

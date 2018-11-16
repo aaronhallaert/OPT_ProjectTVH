@@ -19,11 +19,24 @@ public class DropJob implements Job {
     private Location drop;
     private List<Location> collect;
     private MachineType machineType;
+    private List<Move> allMoves;
 
     public DropJob(Location drop, List<Location> collect, MachineType mt) {
         this.drop = drop;
         this.collect = collect;
         this.machineType = mt;
+
+        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+        allMoves = new ArrayList<>();
+        for(Location l: collect){
+            Node node = nodesMap.get(l);
+            List<Machine> available = node.getAvailableMachines();
+            for(Machine m: available){
+                if(m.getType() == machineType) {
+                    allMoves.add(new Move(m, l, drop));
+                }
+            }
+        }
     }
     public DropJob(DropJob dj){
         this.drop = dj.drop;
@@ -72,18 +85,22 @@ public class DropJob implements Job {
         }
         return distanceToAllNodes;
     }
+
     public ArrayList<Move> generatePossibleMoves(){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
-        ArrayList<Move> moves = new ArrayList<>();
+        ArrayList<Move> possibleMoves = new ArrayList<>();
         //We voegen alle mogelijke moves toe;
-        for(Location l: collect){
-            Node node = nodesMap.get(l);
-            if(node.hasMachineAvailableOfType(machineType)){
-                Machine machine = node.viewMachineOfType(machineType);
-                moves.add(new Move(machine, l, drop));
+        for(Move m: allMoves){
+            Node node = nodesMap.get(m.getCollect());
+            if(node.hasMachineAvailable(m.getMachine())){
+                possibleMoves.add(m);
             }
         }
-        return moves;
+        return possibleMoves;
+    }
+
+    public List<Move> getAllMoves() {
+        return allMoves;
     }
 
     public String toString(){

@@ -14,6 +14,8 @@ public interface Node {
 
     public boolean hasMachineAvailableOfType(MachineType mt);
 
+    public boolean hasMachineAvailable(Machine m);
+
     public List<Machine> getAvailableMachines();
 
     public boolean canPutMachineType(MachineType mt);
