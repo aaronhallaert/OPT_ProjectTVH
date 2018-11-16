@@ -33,11 +33,13 @@ public class Problem {
     public HashMap<Job, Truck> jobTruckMap = new HashMap<>();                   //niet-statisch object
 
     public static Problem getInstance() {
+
         return instance;
     }
 
     public static Problem newInstance(File inputFile) throws FileNotFoundException {
         instance = new Problem(inputFile);
+        instance.createJobs();
         return instance;
     }
 
@@ -222,9 +224,6 @@ public class Problem {
 
             }
         }
-
-        createJobs();
-
         //System.out.println("Input read");
 
     }
@@ -246,9 +245,9 @@ public class Problem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Solution best = init;
+        Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(100000, 50, 15, 1, 1);
+        //Solution best = simulatedAnnealingJeroen(100000, 50, 15, 1, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
