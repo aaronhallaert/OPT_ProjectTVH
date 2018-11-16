@@ -12,32 +12,35 @@ import TVH.Problem;
 
 public class Proposal {
     Truck truck;
-    Job j1;
-    Job j2;
-    Move m;
+    Job primaryJob;
+    Job secondaryJob;
+    Move move;
+    Route route;
     int cost;
 
-    public Proposal(Truck truck, Job job, Move m, int cost) {
+    public Proposal(Truck truck, Job job, Move move, Route route, int cost) {
         this.truck = truck;
-        this.j1 = job;
-        this.m = m;
+        this.primaryJob = job;
+        this.move = move;
+        this.route = route;
         this.cost = cost;
-        this.j2 = null;
+        this.secondaryJob = null;
 
-        if(j1 instanceof DropJob){
-            DropJob dj = (DropJob) j1;
-            for(Job j: Problem.getInstance().jobTypeMap.get(dj.getMachineType())){
-                if(j instanceof CollectJob && j.getFixedLocation() == m.getCollect()){
-                    j2 = j;
+        //Check if primairy job fulfills a secondary one
+        if (primaryJob instanceof DropJob) {
+            DropJob dj = (DropJob) primaryJob;
+            for (Job j : Problem.getInstance().jobTypeMap.get(dj.getMachineType())) {
+                if (j instanceof CollectJob && j.getFixedLocation() == move.getCollect()) {
+                    secondaryJob = j;
                     break;
                 }
             }
         }
-        if(j1 instanceof CollectJob){
-            CollectJob cj = (CollectJob) j1;
-            for(Job j: Problem.getInstance().jobTypeMap.get(cj.getMachineType())){
-                if(j instanceof DropJob && j.getFixedLocation() == m.getDrop()){
-                    j2 = j;
+        if (primaryJob instanceof CollectJob) {
+            CollectJob cj = (CollectJob) primaryJob;
+            for (Job j : Problem.getInstance().jobTypeMap.get(cj.getMachineType())) {
+                if (j instanceof DropJob && j.getFixedLocation() == move.getDrop()) {
+                    secondaryJob = j;
                     break;
                 }
             }
@@ -48,21 +51,24 @@ public class Proposal {
         return truck;
     }
 
-    public Job getJ1() {
-        return j1;
+    public Job getPrimaryJob() {
+        return primaryJob;
     }
 
-    public Job getJ2() {
-        return j2;
+    public Job getSecondaryJob() {
+        return secondaryJob;
     }
 
-    public Move getM() {
-        return m;
+    public Move getMove() {
+        return move;
     }
 
     public int getCost() {
-        if(j2 == null) return cost;
-        //Indien deze proposal 2 jobs voltooid, delen we de kost in 2;
-        else return cost/2;
+        return cost;
+    }
+
+
+    public Route getRoute() {
+        return route;
     }
 }

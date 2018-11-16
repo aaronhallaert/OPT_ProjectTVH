@@ -586,39 +586,25 @@ public class Problem {
                 oldTruck.removeJob(randomJob, true);
                 jobTruckMap.remove(randomJob);
 
-                //Zorgen dat een collectjob enkel drops losmaakt en omgekeerd
-                List<Job> jobsOfSameType = new ArrayList<>(jobTypeMap.get(randomJob.getMachineType()));
-                if (randomJob instanceof CollectJob) {
-                    for (Job j : jobTypeMap.get(randomJob.getMachineType())) {
-                        if (j instanceof CollectJob) jobsOfSameType.remove(j);
-                    }
-                }
-                if (randomJob instanceof DropJob) {
-                    for (Job j : jobTypeMap.get(randomJob.getMachineType())) {
-                        if (j instanceof DropJob) jobsOfSameType.remove(j);
-                    }
-                }
-                //Sorteer op basis van afstand tot de random job;
-                Collections.sort(jobsOfSameType, new JobLocationComparator(randomJob.getFixedLocation()));
+                for(Truck t: trucks){
 
-                Set<Job> affectedJobs = new HashSet<>();
-                affectedJobs.add(randomJob);
-                //Maken ook 3 jobs van hetzelfde type los, zodat er meer variatie mogelijk is;
-                if (!jobsOfSameType.isEmpty()) {
-                    for (int i = 0; i < Math.min(jobsOfSameType.size(), 3); i++) {
-                        Job j = jobsOfSameType.get(i);
-                        //System.out.println(j.getFixedLocation().distanceTo(randomJob.getFixedLocation()));
-                        if (jobTruckMap.containsKey(j)) {
-                            jobTruckMap.get(j).removeJob(j, true);
-                            jobTruckMap.remove(j);
-                        }
-                        affectedJobs.add(j);
-                    }
                 }
-                //Kijken welke jobs er misschien nog "affected" zijn door het verwijderen van deze jobs
-                for (Job j : jobs) {
-                    if (j.notDone()) {
-                        affectedJobs.add(j);
+                //Kijken welke jobs er misschien nog "affected" zijn door het verwijderen van deze job
+                ArrayList<Job> affectedJobs = new ArrayList<>();
+                boolean allAffectedJobsAdded = false;
+                while(!allAffectedJobsAdded) {
+                    allAffectedJobsAdded = true;
+                    for (Job j : jobs) {
+                        if (j.notDone() && !affectedJobs.contains(j)) {
+                            allAffectedJobsAdded = false;
+                            affectedJobs.add(j);
+                            //Als deze job nog in een Truck zat moeten we hem deletne
+                            if (jobTruckMap.containsKey(j)) {
+                                oldTruck.removeJob(j, true);
+                                jobTruckMap.remove(j);
+                            }
+                            break;
+                        }
                     }
                 }
                 HashMultimap<Job, Proposal> proposals = HashMultimap.create();
@@ -632,8 +618,8 @@ public class Problem {
                 ArrayList<Proposal> acceptedProposals = new ArrayList<>();
                 HashMap<Job, Proposal> bestProposalPerJob = new HashMap<>();
                 for (Proposal p : acceptedProposals) {
-                    if (p.getCost() < bestProposalPerJob.get(p.getJ1()).getCost()) {
-                        bestProposalPerJob.put(p.getJ1(), p);
+                    if (p.getCost() < bestProposalPerJob.get(p.getPrimaryJob()).getCost()) {
+                        bestProposalPerJob.put(p.getPrimaryJob(), p);
                     }
                 }
 
