@@ -230,7 +230,7 @@ public class Problem {
 //        }
         System.out.println(init);
         //Solution best = init;
-        Solution best = simulatedAnnealing(200000, 50, 3);
+        Solution best = simulatedAnnealingJeroen(100000, 50, Integer.MAX_VALUE);
         //Solution best = testje(600000, 20);
         System.out.println(best);
         System.out.println("DEBUG:");
@@ -304,7 +304,7 @@ public class Problem {
         }
     }
 
-    public Solution simulatedAnnealing(int duration, double temperature, int nJobsToRemove) {
+    public Solution simulatedAnnealingJeroen(int duration, double temperature, int nJobsToRemove) {
         long endTime = System.currentTimeMillis() + duration;
         Solution best = new Solution();
         Solution localOptimum = new Solution();
@@ -313,9 +313,11 @@ public class Problem {
         int counter = 0;
         Random r = new Random();
         while (System.currentTimeMillis() < endTime) {
-            MachineType mt = machineTypes.get(r.nextInt(machineTypes.size()));
+            MachineType mt1 = machineTypes.get(r.nextInt(machineTypes.size()));
+            MachineType mt2 = machineTypes.get(r.nextInt(machineTypes.size()));
             //We maken een groep jobs van hetzelfde type los, zodat er meer skuivinge mogelijk is
-            List<Job> allJobsOfType = new ArrayList<>(jobTypeMap.get(mt));
+            List<Job> allJobsOfType = new ArrayList<>(jobTypeMap.get(mt1));
+            allJobsOfType.addAll(jobTypeMap.get(mt2));
             Collections.shuffle(allJobsOfType);
             //Take n random jobs of this type
             List<Job> deletedJobs = new ArrayList<>(allJobsOfType.subList(0, (allJobsOfType.size() < nJobsToRemove ? allJobsOfType.size() : nJobsToRemove)));
@@ -340,8 +342,8 @@ public class Problem {
             for (Job j : deletedJobs) {
                 if (j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
                     List<Move> allMoves = j.generatePossibleMoves();
-                    allJobsAdded = assignMoveToBestTruck(j, allMoves.get((int) (Math.random()*allMoves.size())));
-                    //allJobsAdded = assignJobToBestTruck(j, true);
+                    //allJobsAdded = assignMoveToBestTruck(j, allMoves.get((int) (Math.random()*allMoves.size())));
+                    allJobsAdded = assignJobToBestTruck(j, true);
                 }
             }
             if (allJobsAdded) {
@@ -353,14 +355,15 @@ public class Problem {
                     //counter++;
                     localOptimum = new Solution();
                     //tabu.add(candidate.getHash());
+                    long timestamp = System.currentTimeMillis()-(endTime-duration);
                     if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
                         best = localOptimum;
+                        System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
                     }
-                    long timestamp = System.currentTimeMillis()-(endTime-duration);
-                    System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
+                    //System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
-                    if (localOptimum.getTotalDistance() + 30 < candidate.getTotalDistance()) {
+                    if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
                         double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / currentTemp);
                         if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
                         double random = r.nextDouble();
@@ -371,7 +374,7 @@ public class Problem {
                             //tabu.add(candidate.getHash());
                             long timestamp = System.currentTimeMillis()-(endTime-duration);
                             DecimalFormat df = new DecimalFormat("#.##");
-                            System.out.println(timestamp +"\t" +localOptimum.getTotalDistance() + "\t" + df.format(acceptRate*100) + "%\t" + df.format(currentTemp));
+                            //System.out.println(timestamp +"\t" +localOptimum.getTotalDistance() + "\t" + df.format(acceptRate*100) + "%\t" + df.format(currentTemp));
 
                         }
                     }

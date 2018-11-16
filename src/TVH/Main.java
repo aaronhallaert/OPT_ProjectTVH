@@ -14,13 +14,13 @@ public class Main {
         OUTPUT_FILE = args[0]+"_out.txt";
 
         File inputFile = new File(INPUT_FILE);
-        long startTIme = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
         try{
             Problem problem = Problem.newInstance(inputFile);
             Solution solution = problem.solve();
             solution.writeToFile(OUTPUT_FILE);
-            System.out.println("Calculation time: "+(System.currentTimeMillis()-startTIme)+"ms");
+            System.out.println("Calculation time: "+(System.currentTimeMillis()-startTime)+"ms");
         } catch (IOException e) {
             e.printStackTrace();
         }
