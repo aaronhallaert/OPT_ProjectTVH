@@ -1,11 +1,7 @@
 package TVH.Entities.Truck;
 
-import TVH.Entities.Job.CollectJob;
-import TVH.Entities.Job.DropJob;
 import TVH.Entities.Job.Job;
 import TVH.Entities.Job.Move;
-import TVH.Entities.Machine.Machine;
-import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.Location;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
@@ -140,6 +136,7 @@ public class Truck {
         drop.undoPutMachine(move.getMachine());
 
     }
+
 
     public int getDistanceToLocation(Location l){
         int minDistance = Integer.MAX_VALUE;
