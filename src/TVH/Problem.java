@@ -390,6 +390,92 @@ public class Problem {
         return best;
     }
 
+
+    public Solution simulatedAnnealingAaron(int duration, double temperature, int nJobsToRemove) {
+        long endTime = System.currentTimeMillis() + duration;
+        Solution best = new Solution();
+        Solution localOptimum = new Solution();
+        //LinkedList<Integer> tabu = new LinkedList<>();
+        double currentTemp = temperature;
+        int counter = 0;
+        Random r = new Random();
+        while (System.currentTimeMillis() < endTime) {
+
+            /* truck losmaken ipv machinetypes --------------------------------------*/
+
+            List<Job> allJobsOfTruck = new ArrayList<>(trucks.get(r.nextInt(trucks.size())).getJobMoveMap().keySet());
+
+            Collections.shuffle(allJobsOfTruck);
+            //Take n random jobs of this type
+            List<Job> deletedJobs = new ArrayList<>(allJobsOfTruck.subList(0, (allJobsOfTruck.size() < nJobsToRemove ? allJobsOfTruck.size() : nJobsToRemove)));
+            //Remove them from their trucks
+            for (Job j : deletedJobs) {
+                Truck t = jobTruckMap.get(j);
+                if (t != null) { //Het kan zijn dat bepaalde jobs niet worden uitgevoerd door een truck omdat ze al gecompleet worden door een andere job
+                    t.removeJob(j, true);
+                    jobTruckMap.remove(j);
+                }
+            }
+            //Check if any other jobs are now uncompleted
+            for(Job j: jobs){
+                if(j.notDone() && !deletedJobs.contains(j)){
+                    deletedJobs.add(j);
+                }
+            }
+
+            Collections.shuffle(deletedJobs);
+
+            boolean allJobsAdded = true;
+            for (Job j : deletedJobs) {
+                if (j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
+                    //List<Move> allMoves = j.generatePossibleMoves();
+                    //allJobsAdded = assignMoveToBestTruck(j, allMoves.get((int) (Math.random()*allMoves.size())));
+                    allJobsAdded = assignJobToBestTruck(j, true);
+                }
+            }
+            if (allJobsAdded) {
+                Solution candidate = new Solution();
+                //System.out.println(candidate.getTotalDistance());
+                //Candidate is better than local
+                if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
+                    //if(!tabu.contains(candidate.getHash())) {
+                    //counter++;
+                    localOptimum = new Solution();
+                    //tabu.add(candidate.getHash());
+                    long timestamp = System.currentTimeMillis()-(endTime-duration);
+                    if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
+                        best = localOptimum;
+                        //System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
+                    }
+                    System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
+                } else {
+                    //Candidate not better than local, but maybe it will be accepted with simulated annealing
+                    if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
+                        double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / currentTemp);
+                        if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
+                        double random = r.nextDouble();
+                        if (random <= acceptRate) {
+                            counter++;
+                            //System.out.println("worse candidate accepted with " + acceptRate + " (" + currentTemp + ")");
+                            localOptimum = candidate;
+                            //tabu.add(candidate.getHash());
+                            long timestamp = System.currentTimeMillis()-(endTime-duration);
+                            DecimalFormat df = new DecimalFormat("#.##");
+                            System.out.println(timestamp +"\t" +localOptimum.getTotalDistance() + "\t" + df.format(acceptRate*100) + "%\t" + df.format(currentTemp));
+
+                        }
+                    }
+                }
+            }
+            localOptimum.loadSolution();
+            if (counter > 1) {
+                counter = 0;
+                currentTemp = 0.95 * currentTemp;
+            }
+        }
+        best.loadSolution();
+        return best;
+    }
     public Solution testje(int duration, double temperature) {
         long endTime = System.currentTimeMillis() + duration;
         Solution best = new Solution();
