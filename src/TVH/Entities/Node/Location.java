@@ -4,7 +4,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-//Statische klasse
+/**
+ * De klasse Location bevat alle punten op de kaart, met hun ID, lat & lon etc.
+ * Het bevat een Map met alle edges waarbij het vertrekpunt deze locatie is.
+ * Het bevat ook een gesorteerde lijst van deze edges op basis van afstand.
+ */
 public class Location {
     private int locationID;
     private double latitude;
@@ -25,7 +29,6 @@ public class Location {
 
     public void addEdge(Edge edge){
         edgeMap.put(edge.getTo(), edge);
-        //TVH.Entities.Node.Edge list moet altijd gesorteerd blijven op basis van afstand
         sortedEdgeList.add(edge);
         sortedEdgeList.sort(Comparator.comparing(Edge::getDistance));
     }

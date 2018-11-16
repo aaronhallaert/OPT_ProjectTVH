@@ -5,8 +5,10 @@ import TVH.Entities.Machine.MachineType;
 
 import java.util.*;
 
-
-//Dynamische klasse
+/**
+ * De klasse Client bevat elke Node waar we jobs moeten bij uitvoeren. Ze bevatten lijsten met machines die nog moeten
+ * gecollect of gedropt worden. Dit is een dynamische klasse.
+ */
 public class Client implements Node{
 
     private Location location;
@@ -25,15 +27,10 @@ public class Client implements Node{
         location = n.location;
         toCollect = new ArrayList<>(n.toCollect);
         toDrop = new ArrayList<>(n.toDrop);
-        //dropped = new LinkedList<>(n.dropped);
     }
 
     public void addToCollect(Machine machine) {
-        //dropped.add(machine);
-        //Speciaal voor locatie 88 van probleem 4, waarbij je een machine moet komen collecten die ook gedropt moet worden >:(
-        //if (!toDrop.contains(machine.getMachineType())) {
         toCollect.add(machine);
-        //}
     }
 
     public void addToDrop(MachineType machineType){
@@ -41,7 +38,6 @@ public class Client implements Node{
     }
 
     public void takeMachine(Machine machine){
-        //dropped.remove(machine);
         toCollect.remove(machine);
     }
 
@@ -69,7 +65,6 @@ public class Client implements Node{
     }
 
     public boolean needsCollect(Machine m){
-        //We returnen true als de machine moet gecollect worden en zich ook nog bij de client bevat.
         return (toCollect.contains(m));
     }
 
@@ -85,16 +80,10 @@ public class Client implements Node{
     }
 
     public boolean needsDrop(MachineType machineType){
-        //We nemen het verschil van de dropped die bij de client staan en diegene die gecollect moeten worden.
-        //Hierdoor houden we enkel de dropped over die al gedropt zijn.
-
-        //We tellen hoeveel dropped we nodig hebben van een bepaald type
-        int nMachinesNeeded = 0;
         for(MachineType mt: toDrop){
-            if(mt == machineType) nMachinesNeeded++;
+            if(mt == machineType) return true;
         }
-        //return true als we er nog minstens 1 nodig hebben
-        return nMachinesNeeded > 0;
+        return false;
     }
 
     public boolean canPutMachineType(MachineType mt){

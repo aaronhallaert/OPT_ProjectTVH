@@ -7,7 +7,12 @@ import TVH.Problem;
 
 import java.util.*;
 
-//Dynamische klasse
+/**
+ * De klasse Route geeft aan langs waar een truck rijdt.
+ * Een route kan zijn eigen kosf bepalen en zichzelf optimaliseren
+ * Het is een dynamiche klasse
+ */
+
 public class Route {
     private LinkedList<Stop> stops;
     private int totalDistance = 0;
@@ -58,9 +63,17 @@ public class Route {
         this.hash6 = r.hash6;
         this.hash7 = r.hash7;
     }
+
+    /**
+     * Deze methode probeert een bepaalde Move toe te voegen aan de route.
+     * @param m Move die moet toegevoegd worden.
+     * @return true als de move succesvol is toegevoegd (zonder constraints te breken)
+     */
     public boolean addMove(Move m){
         //Backups nemen van stops en locationstopmap
         LinkedList<Stop> previousOrder = new LinkedList<>(stops);
+
+        //De kans bestaat dat de truck al langs drop of collect locatie van de move passeert:
         Stop collectStop = null;
         Stop dropStop = null;
         //Collect stop opzoeken
@@ -70,37 +83,52 @@ public class Route {
                 collectNotFound = false;
                 collectStop = s;
             }
-            if(s.getLocation() == m.getDrop()){
-                dropStop = s;
-            }
         }
         //Indien deze nog niet in de route zit, hem toevoegen.
         if(collectStop == null) {
             collectStop = new Stop(m.getCollect());
             stops.add(stops.size()-1,collectStop);
         }
-
+        //Drop stop toevoegen
+        for(Stop s: stops) {
+            if (s.getLocation() == m.getDrop()) {
+                dropStop = s;
+            }
+        }
+        //Indien deze nog niet in de route zit, hem toevoegen.
         if(dropStop == null) {
             dropStop = new Stop(m.getDrop());
             stops.add(stops.size()-1,dropStop);
         }
 
+        //De machine toevoegen aan de beide stops (collecten en droppen)
         collectStop.addToCollect(m.getMachine());
         dropStop.addToDrop(m.getMachine());
+
         optimizeRoute();
+        //De optimalisatie geeft geen garantie van feasibility, er moet dus nog gekeken worden als de rit feasible is
         if(!isFeasible()){
+            //Zo niet herstellen, verwijderen we de move terug en zetten we de volgorde terug naar de originele
             removeMove(m, false);
             stops = previousOrder;
 
             return false;
         }
+
         return true;
     }
+
+    /**
+     * Deze methode verwijdert een move terug van de route
+     * @param m
+     * @param optimize
+     */
+
     public void removeMove(Move m, boolean optimize){
-        boolean stopsRemoved = false;
         Stop collectStop = null;
         Stop dropStop = null;
 
+        //Respectieve stops waar de move effect op had opzoeken en de machine verwijderen van collect en drop
         for(Stop s: stops){
             if(s.getLocation() == m.getCollect()){
                 collectStop = s;
@@ -113,31 +141,37 @@ public class Route {
 
             }
         }
+        //Als er bij een bepaalde stop niets meer gedaan moet worden kan deze verwijderd worden uit de route behalve
+        //als het de eerste of laatste stop i
         if(collectStop.isEmpty() && collectStop != stops.getFirst() && collectStop != stops.getLast()){
             stops.remove(collectStop);
-            stopsRemoved = true;
         }
         if(dropStop.isEmpty() && dropStop != stops.getFirst() && dropStop != stops.getLast()){
             stops.remove(dropStop);
-            stopsRemoved = true;
         }
 
-        if(stopsRemoved && optimize){
+        if(optimize){
             optimizeRoute();
         }
     }
 
+    /**
+     * Deze methode optimaliseert de route met behulp van 2-opt swaps
+     */
     private void optimizeRoute(){
         boolean betterRouteFound = true;
-        int randomSwapsDone = 0;
+        //int randomSwapsDone = 0;
         Route localBest = new Route(new LinkedList<>(stops));
         Route overallBest = new Route(new LinkedList<>(stops));
         while(betterRouteFound){
             betterRouteFound = false;
+            //Elke mogelijk combinatie van swap overlopen
             for(int i=1; i < stops.size()-1; i++){
                 for(int j=1; j < stops.size()-1; j++){
-                    if(i != j) {
+                    //Enkel als i kleiner is dan j is het nuttig op de swap uit te voeren
+                    if(i < j) {
                         Route candidate = new Route(twoOptSwap(i, j, localBest.stops));
+                        //kijken als de nieuwe route beter is
                         if (candidate.getCost() < localBest.getCost()) {
                             localBest.setStops(new LinkedList<>(candidate.stops));
                             betterRouteFound = true;
@@ -148,7 +182,7 @@ public class Route {
                     }
                 }
             }
-            //TODO: das hier echt raar gedrag whi;
+            //TODO: Dit hier juist implementeren
             /*if(!betterRouteFound && randomSwapsDone < ((stops.size()-2)/5)){
                 int index1 = (int) (Math.random() * ((stops.size()-1) - 1)) + 1;
                 int index2 = (int) (Math.random() * ((stops.size()-1) - 1)) + 1;
@@ -161,44 +195,48 @@ public class Route {
         }
         stops = new LinkedList<>(overallBest.getStops());
     }
-    public static LinkedList<Stop> twoOptSwap(int i1, int i2, LinkedList<Stop> stopList){
-        int beginCut = Math.min(i1, i2);
-        int endCut = Math.max(i1, i2);
+
+    /**
+     * Effectieve 2opt swap methode
+     * @param firstCut waar de 1ste cut gemaakt wordt
+     * @param secondCut waar de 2de cut gemaakt wordt
+     * @param stopList de lijst die geswapped moet worden
+     * @return geswapte lijst
+     */
+    public static LinkedList<Stop> twoOptSwap(int firstCut, int secondCut, LinkedList<Stop> stopList){
+        //TODO: korter schrijven
         LinkedList<Stop> candidate = new LinkedList<>();
         int size = stopList.size();
 
         //in order;
-        for(int i=0; i < beginCut; i++){
+        for(int i=0; i < firstCut; i++){
             candidate.add(stopList.get(i));
         }
         //reversed;
         int count = 0;
-        for(int i=beginCut; i < endCut+1; i++){
-            candidate.add(stopList.get(endCut - count));
+        for(int i=firstCut; i < secondCut+1; i++){
+            candidate.add(stopList.get(secondCut - count));
             count++;
         }
         //in order;
-        for(int i=endCut+1; i < stopList.size(); i++){
+        for(int i=secondCut+1; i < stopList.size(); i++){
             candidate.add(stopList.get(i));
         }
         return candidate;
 
     }
+
+    /**
+     * Deze methode checkt de feasibility van de route
+     * @return true als de route feasible is
+     */
     public boolean isFeasible(){
         if(getOrderViolations() > 0) return false;
         if(getTimeViolations() > 0) return false;
         if(getFillRateViolations() > 0) return false;
         return true;
     }
-    /*private void recalculateAll(){
-        totalDistance = calculateDistance();
-        totalTime = calculateTime();
-        avgStopsOnTruck = calculateAvgStopsOnTruck();
-        timeViolations = calculateTimeViolations();
-        orderViolations = calculateOrderViolations();
-        fillRateViolations = calculateFillRateViolations();
-        cost = calculateCost();
-    }*/
+
     private int calculateCost(){
             int timeFactor = 100;
             int orderFactor = 1000;

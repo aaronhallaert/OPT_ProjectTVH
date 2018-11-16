@@ -7,10 +7,10 @@ import java.util.LinkedList;
 import java.util.Objects;
 
 /**
- * Each truck has stops. These stops define it's route. Stop objects give information about the state of the truck when
- * it is ready to leave stop.
+ * Elke Route bevat een lijst van Stops. Deze bepalen waar de truck rijdt en wat hij doet op die locatie.
+ * Het is een dynamische klasse
  */
-//Dynamische klasse
+
 public class Stop {
 
     private Location location;
@@ -24,8 +24,7 @@ public class Stop {
         this.drop = drop;
     }
 
-    //Make single collect stop
-    public Stop(Location location){
+    public Stop(Location location) {
         this.location = location;
         this.collect = new LinkedList<>();
         this.drop = new LinkedList<>();
@@ -33,41 +32,45 @@ public class Stop {
     }
 
     //Copy constructor
-    public Stop(Stop s){
+    public Stop(Stop s) {
         this.location = s.location;
         this.collect = new LinkedList<>(s.collect);
         this.drop = new LinkedList<>(s.drop);
     }
 
-
-    public boolean isEmpty(){
-        if(collect.isEmpty() && drop.isEmpty()) return true;
+    /**
+     * Checkt als er iets gebeurt op deze stop
+     * @return true als er niets wordt uitgevoerd
+     */
+    public boolean isEmpty() {
+        if (collect.isEmpty() && drop.isEmpty()) return true;
         return false;
     }
 
-    public void addToCollect(Machine m){
+    public void addToCollect(Machine m) {
         collect.add(m);
     }
 
-    public void addToDrop(Machine m){
+    public void addToDrop(Machine m) {
         drop.add(m);
     }
 
-    public void removeFromCollect(Machine m){
+    public void removeFromCollect(Machine m) {
         collect.remove(m);
     }
-    public void removeFromDrop(Machine m){
+
+    public void removeFromDrop(Machine m) {
         drop.remove(m);
     }
 
 
-    public int getTimeSpend(){
+    public int getTimeSpend() {
         //TODO:Efficienter maken
         int time = 0;
-        for(Machine m: collect){
+        for (Machine m : collect) {
             time += m.getType().getServiceTime();
         }
-        for(Machine m: drop){
+        for (Machine m : drop) {
             time += m.getType().getServiceTime();
         }
         return time;
@@ -97,7 +100,7 @@ public class Stop {
         this.drop = drop;
     }
 
-    public String toString(){
+    public String toString() {
         return location.toString();
     }
 

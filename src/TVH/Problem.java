@@ -40,6 +40,11 @@ public class Problem {
         return instance;
     }
 
+    /**
+     * Leest in en creëert een nieuw probleem
+     * @param inputFile
+     * @throws FileNotFoundException
+     */
     private Problem(File inputFile) throws FileNotFoundException {
 
         Scanner sc = new Scanner(inputFile).useLocale(Locale.US);
@@ -206,23 +211,27 @@ public class Problem {
             for (int to = 0; to < distanceMatrixSize; to++) {
                 int time = timeMatrix[from][to];
                 int distance = distanceMatrix[from][to];
-                //if(!(time == 0 && distance == 0)){
                 Location fromLoc = locations.get(from);
                 Location toLoc = locations.get(to);
                 Edge edge = new Edge(fromLoc, toLoc, time, distance);
                 edges.add(edge);
                 //We voegen ook nog een verwijzing naar de edge toe aan de "from location" (handig zoeken);
                 fromLoc.addEdge(edge);
-                //}
 
             }
         }
+
+        createJobs();
+
         //System.out.println("Input read");
 
     }
 
+    /**
+     * Los het probleem op
+     * @return
+     */
     public Solution solve() {
-        createJobs();
         createInitialSolution();
         Solution init = new Solution();
 //        for(Truck t: trucks){
@@ -257,11 +266,8 @@ public class Problem {
     }
 
     /**
-     * This will use clusters to decide initial routes of trucks.
-     *
-     * @return
+     * Deze methode maakt alle Jobs aan die moeten uitgevoerd worden op basis van de drop en collect requests van Clients
      */
-
     public void createJobs() {
         for (Client client : clientMap.values()) {
             Location loc = client.getLocation();
@@ -289,20 +295,21 @@ public class Problem {
                 jobs.add(new CollectJob(loc, to, m));
             }
         }
-        Collections.sort(jobs, new JobRemotenessComparator());
         for (Job j : jobs) {
             jobTypeMap.put(j.getMachineType(), j);
         }
     }
 
-
+    /**
+     * Maak een initiële feasible oplossing die later kan geoptimaliseerd worden
+     */
     public void createInitialSolution() {
 
+        //Sorteer de jobs op een bepaalde manier;
+        Collections.sort(jobs, new JobRemotenessComparator());
 
-        //Next step is to assign jobs to trucks;
 
-
-        //Assign each move to a truck
+        //Wijs elke Job toe aan de Truck die hem het best kan uitvoeren met het minst extra afstand
         int i = 0;
         for (Job j : jobs) {
             System.out.println(i);
@@ -614,6 +621,7 @@ public class Problem {
         }
         return localOptimum;
     }
+
 
     public boolean assignJobToRandomTruck(Job job, boolean bestMove) {
         ArrayList<Truck> trucksToCheck = new ArrayList<>(trucks);

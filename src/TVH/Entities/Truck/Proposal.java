@@ -6,6 +6,10 @@ import TVH.Entities.Job.Job;
 import TVH.Entities.Job.Move;
 import TVH.Problem;
 
+/**
+ * NEGEER VOORLOPIG
+ */
+
 public class Proposal {
     Truck truck;
     Job j1;

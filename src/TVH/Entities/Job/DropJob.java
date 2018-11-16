@@ -12,7 +12,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+//DropJob bevat drop opdrachten moeten uitgevoerd worden
 //Statische klasse
+
 public class DropJob implements Job {
     private Location drop;
     private List<Location> collect;

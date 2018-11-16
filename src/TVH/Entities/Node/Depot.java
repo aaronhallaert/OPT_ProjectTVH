@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-//Dynamische klasse
+/**
+ * De klasse Depot bevat elke Node waar machines beschikbaar zijn zonder verplichtingen. Een Depot heeft een lijst
+ * waar machines uit kunnen genomen worden op gedropt te worden bij Clients. Een Depot kan ook altijd eender welke
+ * machine ontvangen. Dit is een dynamische klasse
+ */
 public class Depot implements Node{
 
     private Location location;
@@ -62,10 +66,7 @@ public class Depot implements Node{
 
 
     public boolean hasMachineAvailableOfType(MachineType mt){
-        for(Machine m: machines.get(mt)){
-            return true;
-        }
-        return false;
+        return !machines.get(mt).isEmpty();
     }
 
     public Location getLocation() {

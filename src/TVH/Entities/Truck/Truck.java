@@ -8,7 +8,9 @@ import TVH.Problem;
 
 import java.util.*;
 
-//Dynamische klasse
+/**
+ * Een truck kan Jobs uitvoeren doormiddel van Moves toe te voegen aan zijn Route.
+ */
 public class Truck {
 
     private int truckId;
@@ -45,13 +47,22 @@ public class Truck {
         }
     }
 
+    /**
+     * Laat deze truck aan nieuwe job afhandelen
+     * @param j de Job in kwestie
+     * @param searchBestMove boolean die aangeeft als de best mogelijke move moet gezocht worden of als het gewoon
+     *                       random mag zijn.
+     * @return true als het de truck de nieuwe job heeft kunnen afhandelen
+     */
     public boolean addJob(Job j, boolean searchBestMove){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
-        //Alle mogelijke moves zoeken die deze job kunnen voltooien
         List<Move> moves = j.generatePossibleMoves();
+
+        //Als de beste move moet gezocht worden
         if(searchBestMove) {
             Move optimalMove = null;
             int minCost = Integer.MAX_VALUE;
+            //Elke move eens toevoegen aan de route en kijken welke move zorgt voor het minst extra kost
             for (Move candidate : moves) {
                 LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
                 if (route.addMove(candidate)) {
@@ -63,20 +74,26 @@ public class Truck {
                     route.setStops(previousOrder);
                 }
             }
+            //Als geen optimale move gevonden is, betekent dit dat de truck de job niet kan uitvoeren
             if (optimalMove == null) return false;
+            //De optimale move toevoegen aan de route
             route.addMove(optimalMove);
             jobMoveMap.put(j, optimalMove);
+            //Dit registeren bij collect en drop node
             Node collectNode = nodesMap.get(optimalMove.getCollect());
             Node dropNode = nodesMap.get(optimalMove.getDrop());
             collectNode.takeMachine(optimalMove.getMachine());
             dropNode.putMachine(optimalMove.getMachine());
             return true;
         }
+        //Als een willekeurige move mag toegevoegd worden.
         else{
             boolean moveAdded = false;
+            Random r = new Random();
             while(!moveAdded && !moves.isEmpty()){
-                Move randomMove = moves.get((int) (Math.random()*moves.size()));
+                Move randomMove = moves.get(r.nextInt(moves.size()));
                 if(route.addMove(randomMove)){
+                    //Indien de route de move kan doen: job registreren
                     moveAdded = true;
                     jobMoveMap.put(j, randomMove);
                     Node collectNode = nodesMap.get(randomMove.getCollect());
@@ -85,6 +102,7 @@ public class Truck {
                     dropNode.putMachine(randomMove.getMachine());
                 }
                 else{
+                    //Indien de route de move niet kan doen: move verwijderen en andere move proberen
                     moves.remove(randomMove);
                 }
             }
@@ -92,6 +110,12 @@ public class Truck {
         }
     }
 
+    /**
+     * Laat deze truck een nieuwe Job afhandelen met een specifieke Move
+     * @param j Job die moet afgehandeld worden
+     * @param m Specifieke Move die de route moet doen op de Job te voltooien
+     * @return true als de Job succesvol is toegevoegd
+     */
     public boolean addJob(Job j, Move m){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
 
@@ -108,8 +132,13 @@ public class Truck {
 
     }
 
-    //Deze methode voegt een job toe aan een truck, met bijhoorde move en route direct er al bij
-    //We zijn zeker dat deze route feasible is
+    /**
+     * Laat deze truck een nieuwe Job afhandelen met specifieke Move en Route. Enkel te gebruiken als de route zeker
+     * feasible is.
+     * @param j Job die moet afgehandeld worden.
+     * @param m Specifieke Move
+     * @param r Specifieke Route
+     */
     public void addJob(Job j, Move m, Route r){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
 
@@ -122,14 +151,21 @@ public class Truck {
 
     }
 
+    /**
+     * Verwijder een Job van een Truck
+     * @param j Job die moet verwijderd worden
+     * @param optimize Als de Route moet geoptimaliseerd worden of niet
+     */
     public void removeJob(Job j, boolean optimize){
 
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
-        Move move = jobMoveMap.get(j);
 
+        //Move opzoeken en verwijderen uit Route
+        Move move = jobMoveMap.get(j);
         route.removeMove(move, optimize);
         jobMoveMap.remove(j);
 
+        //Registreren bij collect en drop node
         Node collect = nodesMap.get(move.getCollect());
         Node drop =  nodesMap.get(move.getDrop());
         collect.undoTakeMachine(move.getMachine());
@@ -137,7 +173,11 @@ public class Truck {
 
     }
 
-
+    /**
+     * Geeft de kortste afstand terug die een Truck komt bij een bepaalde Location tijdens zijn Route.
+     * @param l bepaalde Location
+     * @return afstand
+     */
     public int getDistanceToLocation(Location l){
         int minDistance = Integer.MAX_VALUE;
         for(Stop s: route.getStops()){
@@ -181,6 +221,10 @@ public class Truck {
         return jobMoveMap;
     }
 
+    /**
+     * Deze methode kan de truck zelf optimaliseren door jobs te verwijderen en opnieuw toe te voegen.
+     * Dit kan nog de paar laatste kilometers eraf doen op het einde.
+     */
     public void optimizeTruck(){
         List<Job> jobs = new ArrayList<>(jobMoveMap.keySet());
         boolean improvement = true;
@@ -212,6 +256,11 @@ public class Truck {
         }
     }
 
+    /**
+     * NEGEER
+     * @param j
+     * @return
+     */
     public List<Proposal> getProposals(Job j){
         ArrayList<Proposal> proposals = new ArrayList<>();
         ArrayList<Move> moves = j.generatePossibleMoves();

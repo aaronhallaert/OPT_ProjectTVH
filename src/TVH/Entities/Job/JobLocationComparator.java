@@ -4,6 +4,7 @@ import TVH.Entities.Node.Location;
 
 import java.util.Comparator;
 
+//Comparator die jobs sorteert op basis van hun afstand van een bepaalde locatie "toCompare"
 public class JobLocationComparator implements Comparator<Job> {
     Location toCompare;
 

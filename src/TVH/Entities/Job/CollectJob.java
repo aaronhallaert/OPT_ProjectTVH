@@ -12,7 +12,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+//De klasse CollectJob bevat collect opdrachten die de trucks moeten uitvoeren.
 //Statische klasse
+
 public class CollectJob implements Job {
     private Location collect;
     private List<Location> drop;

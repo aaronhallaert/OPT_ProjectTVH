@@ -1,6 +1,10 @@
 package TVH.Entities.Node;
 
-//Statische klasse
+
+/**
+ * De klasse Edge geeft info over de verbindingen tussen Locations. Voor elke locatie paar bevat het een time en distance
+ * waarde om te reizen van "from" naar "to". Dit is een statische klasse
+ */
 public class Edge {
     Location from;
     Location to;

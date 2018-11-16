@@ -5,7 +5,12 @@ import TVH.Entities.Node.Location;
 
 import java.util.Objects;
 
+/**
+ * Een Move geeft aan dat een machine van locatie "collect" naar locatie "drop" moet vervoerd worden.
+ * Het geeft geen info over welke job het daarmee voltooid, of welke truck deze Move moet uitvoeren.
+ */
 //Statische klasse
+
 public class Move {
     Machine machine;
     Location collect;
