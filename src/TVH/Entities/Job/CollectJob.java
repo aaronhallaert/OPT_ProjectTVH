@@ -86,6 +86,6 @@ public class CollectJob implements Job {
     }
 
     public String toString(){
-        return getFixedLocation().toString();
+        return getFixedLocation().toString()+ " ("+getMachineType()+")";
     }
 }

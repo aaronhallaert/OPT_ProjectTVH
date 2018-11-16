@@ -65,4 +65,8 @@ public class MachineType {
     public void setServiceTime(int serviceTime) {
         this.serviceTime = serviceTime;
     }
+
+    public String toString(){
+        return name;
+    }
 }

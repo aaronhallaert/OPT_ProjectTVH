@@ -189,6 +189,10 @@ public class Truck {
         return minDistance;
     }
 
+    public boolean isIdle(){
+        return route.getStops().size() == 2;
+    }
+
     public int getTruckId() {
         return truckId;
     }
@@ -226,6 +230,7 @@ public class Truck {
      * Dit kan nog de paar laatste kilometers eraf doen op het einde.
      */
     public void optimizeTruck(){
+        //TODO: Er zit hier nog ergens een bug in
         List<Job> jobs = new ArrayList<>(jobMoveMap.keySet());
         boolean improvement = true;
         int minCost = route.getCost();
@@ -252,8 +257,14 @@ public class Truck {
                     jobMoveMap.put(j, oldMove);
 
                 }
+                for(Job job: jobs){
+                    if(j.notDone()){
+                        System.out.println("stop");
+                    }
+                }
             }
         }
+
     }
 
     /**

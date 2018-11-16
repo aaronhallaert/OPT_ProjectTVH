@@ -226,6 +226,16 @@ public class Route {
 
     }
 
+    public Location getGeographicalCenter(){
+        double totallat = 0;
+        double totallon = 0;
+        for(Stop s: stops){
+            totallat += s.getLocation().getLatitude();
+            totallon += s.getLocation().getLongitude();
+        }
+        return new Location(-1, null, totallat/stops.size(), totallon/stops.size());
+    }
+
     /**
      * Deze methode checkt de feasibility van de route
      * @return true als de route feasible is
@@ -245,7 +255,7 @@ public class Route {
             int avgFillRateFactor = 0;
 
             return distanceFactor * getTotalDistance()
-                    + avgFillRateFactor * getAvgStopsOnTruck()
+                    //+ avgFillRateFactor * getAvgStopsOnTruck()
                     + timeFactor * getTimeViolations()
                     + orderFactor * getOrderViolations()
                     + fillrateViolationFactor * getFillRateViolations();
