@@ -231,10 +231,10 @@ public class Problem {
         System.out.println(init);
         //Solution best = init;
 
-        Solution best = simulatedAnnealingAaron(30000, 500, Integer.MAX_VALUE, 4);
+        Solution best = simulatedAnnealingAaron(40000, 100000, Integer.MAX_VALUE, 3);
         best.loadSolution();
         System.out.println("start second annealing");
-        best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE);
+        best= simulatedAnnealingJeroen(20000,50, Integer.MAX_VALUE,1);
         best.loadSolution();
         for (Truck truck : trucks) {
             truck.optimizeTruck();
@@ -314,7 +314,7 @@ public class Problem {
         }
     }
 
-    public Solution simulatedAnnealingJeroen(int duration, double temperature, int nJobsToRemove) {
+    public Solution simulatedAnnealingJeroen(int duration, double temperature, int nJobsToRemove, int nMachineTypesToRemove) {
         long endTime = System.currentTimeMillis() + duration;
         Solution best = new Solution();
         Solution localOptimum = new Solution();
@@ -323,13 +323,21 @@ public class Problem {
         int counter = 0;
         Random r = new Random();
         while (System.currentTimeMillis() < endTime) {
-            MachineType mt1 = machineTypes.get(r.nextInt(machineTypes.size()));
-            MachineType mt2 = machineTypes.get(r.nextInt(machineTypes.size()));
-            //We maken een groep jobs van hetzelfde type los, zodat er meer skuivinge mogelijk is
-            List<Job> allJobsOfType = new ArrayList<>(jobTypeMap.get(mt1));
-            if(!mt1.equals(mt2)) {
-                allJobsOfType.addAll(jobTypeMap.get(mt2));
+            Set<Integer> randomIndices= new HashSet<>();
+            for (int i = 0; i < nMachineTypesToRemove; i++) {
+                int randomIndex= r.nextInt(machineTypes.size());
+                while(randomIndices.contains(randomIndex)){
+                    randomIndex= r.nextInt(machineTypes.size());
+                }
+                randomIndices.add(randomIndex);
             }
+
+            //We maken een groep jobs van hetzelfde type los, zodat er meer skuivinge mogelijk is
+            List<Job> allJobsOfType = new ArrayList<>();
+            for (Integer randomIndex : randomIndices) {
+                jobTypeMap.get(machineTypes.get(randomIndex));
+            }
+
             Collections.shuffle(allJobsOfType);
             //Take n random jobs of this type
             List<Job> deletedJobs = new ArrayList<>(allJobsOfType.subList(0, (allJobsOfType.size() < nJobsToRemove ? allJobsOfType.size() : nJobsToRemove)));
@@ -404,6 +412,7 @@ public class Problem {
 
 
     public Solution simulatedAnnealingAaron(int duration, double temperature, int nJobsToRemove, int nTrucksToRemove) {
+
         long endTime = System.currentTimeMillis() + duration;
         Solution best = new Solution();
         Solution localOptimum = new Solution();
@@ -412,7 +421,7 @@ public class Problem {
         int counter = 0;
         Random r = new Random();
         while (System.currentTimeMillis() < endTime) {
-
+            //System.out.println("simulated annealing aaron");
             /* truck losmaken ipv machinetypes --------------------------------------*/
             Set<Integer> randomIndices= new HashSet<>();
             for (int i = 0; i < nTrucksToRemove; i++) {
@@ -424,8 +433,8 @@ public class Problem {
             }
 
             List<Job> allJobsOfTruck = new ArrayList<>();
-            for (Integer randomIndex : randomIndices) {
-                allJobsOfTruck.addAll(new ArrayList<>(trucks.get(randomIndex).getJobMoveMap().keySet()));
+            for (Integer random : randomIndices) {
+                allJobsOfTruck.addAll(new ArrayList<>(trucks.get(random).getJobMoveMap().keySet()));
             }
 
 
@@ -472,7 +481,7 @@ public class Problem {
                         best = localOptimum;
                         System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
                     }
-                    //System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
+                    System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
                     if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
@@ -486,16 +495,16 @@ public class Problem {
                             //tabu.add(candidate.getHash());
                             long timestamp = System.currentTimeMillis()-(endTime-duration);
                             DecimalFormat df = new DecimalFormat("#.##");
-                            //System.out.println(timestamp +"\t" +localOptimum.getTotalDistance() + "\t" + df.format(acceptRate*100) + "%\t" + df.format(currentTemp));
+                            System.out.println(timestamp +"\t" +localOptimum.getTotalDistance() + "\t" + df.format(acceptRate*100) + "%\t" + df.format(currentTemp));
 
                         }
                     }
                 }
             }
             localOptimum.loadSolution();
-            if (counter >= 1) {
+            if (counter > 1) {
                 counter = 0;
-                currentTemp = 0.95 * currentTemp;
+                currentTemp = 0.85 * currentTemp;
             }
         }
         best.loadSolution();
@@ -596,9 +605,9 @@ public class Problem {
                     }
                     localOptimum.loadSolution();
                 }
-                if (counter > 10) {
+                if (counter > 1) {
                     counter = 0;
-                    temperature = 0.95 * temperature;
+                    temperature = 0.8 * temperature;
                 }
             }
 
