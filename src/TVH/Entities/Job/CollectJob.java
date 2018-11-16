@@ -82,4 +82,8 @@ public class CollectJob implements Job {
         }
         return moves;
     }
+
+    public String toString(){
+        return getFixedLocation().toString();
+    }
 }

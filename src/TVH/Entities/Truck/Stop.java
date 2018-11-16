@@ -46,9 +46,6 @@ public class Stop {
     }
 
     public void addToCollect(Machine m){
-        if(m == null){
-            System.out.println("verwijder");
-        }
         collect.add(m);
     }
 
@@ -68,9 +65,6 @@ public class Stop {
         //TODO:Efficienter maken
         int time = 0;
         for(Machine m: collect){
-            if(m == null){
-                System.out.println("verwijder");
-            }
             time += m.getType().getServiceTime();
         }
         for(Machine m: drop){

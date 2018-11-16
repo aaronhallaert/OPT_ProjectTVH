@@ -51,12 +51,14 @@ public class Solution {
         problem.clientMap = new HashMap<>();
         problem.depotMap = new HashMap<>();
         for(Client c: clients){
-            problem.clientMap.put(c.getLocation(), new Client(c));
-            problem.nodesMap.put(c.getLocation(), new Client(c));
+            Client copy = new Client(c);
+            problem.clientMap.put(c.getLocation(), copy);
+            problem.nodesMap.put(c.getLocation(), copy);
         }
         for(Depot d: depots){
-            problem.depotMap.put(d.getLocation(), new Depot(d));
-            problem.nodesMap.put(d.getLocation(), new Depot(d));
+            Depot copy = new Depot(d);
+            problem.depotMap.put(d.getLocation(), copy);
+            problem.nodesMap.put(d.getLocation(), copy);
         }
         //De trucks inladen
         //De links tussen Jobs en trucks opnieuw maken in de hashmap

@@ -230,7 +230,7 @@ public class Problem {
 //        }
         System.out.println(init);
         //Solution best = init;
-        Solution best = simulatedAnnealing(600000, 50, 3);
+        Solution best = simulatedAnnealing(200000, 50, 3);
         //Solution best = testje(600000, 20);
         System.out.println(best);
         System.out.println("DEBUG:");
@@ -312,11 +312,6 @@ public class Problem {
         double currentTemp = temperature;
         int counter = 0;
         Random r = new Random();
-        for(Job j: jobs){
-            if(j.notDone()){
-                System.out.println("verwijder dit");
-            }
-        }
         while (System.currentTimeMillis() < endTime) {
             MachineType mt = machineTypes.get(r.nextInt(machineTypes.size()));
             //We maken een groep jobs van hetzelfde type los, zodat er meer skuivinge mogelijk is
@@ -334,7 +329,9 @@ public class Problem {
             }
             //Check if any other jobs are now uncompleted
             for(Job j: jobs){
-                if(j.notDone() && !deletedJobs.contains(j)) deletedJobs.add(j);
+                if(j.notDone() && !deletedJobs.contains(j)){
+                    deletedJobs.add(j);
+                }
             }
 
             Collections.shuffle(deletedJobs);
@@ -344,15 +341,11 @@ public class Problem {
                 if (j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
                     List<Move> allMoves = j.generatePossibleMoves();
                     allJobsAdded = assignMoveToBestTruck(j, allMoves.get((int) (Math.random()*allMoves.size())));
+                    //allJobsAdded = assignJobToBestTruck(j, true);
                 }
             }
             if (allJobsAdded) {
                 Solution candidate = new Solution();
-                for(Job j: jobs){
-                    if(j.notDone()){
-                        int verwijder = 0;
-                    }
-                }
                 //System.out.println(candidate.getTotalDistance());
                 //Candidate is better than local
                 if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
@@ -516,9 +509,6 @@ public class Problem {
     }
 
     public boolean assignJobToBestTruck(Job job, boolean bestMove) {
-        if(job.getFixedLocation().getLocationID() == 15){
-            System.out.println("verwijder dit");
-        }
         Truck optimalTruck = null;
         Route optimalRoute = null;
         Move optimalMove = null;
