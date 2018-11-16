@@ -351,65 +351,65 @@ public class Route {
     }
 
     public int getTotalDistance() {
-        int hash = Objects.hashCode(stops);
-        if(hash != hash1){
+        //int hash = Objects.hashCode(stops);
+        //if(hash != hash1){
             totalDistance = calculateDistance();
-            hash1 = hash;
-        }
+        //    hash1 = hash;
+        //}
         return totalDistance;
     }
 
     public int getCost() {
-        int hash = Objects.hashCode(stops);
-        if(hash != hash2){
+        //int hash = Objects.hashCode(stops);
+        //if(hash != hash2){
             cost = calculateCost();
-            hash2 = hash;
-        }
+        //    hash2 = hash;
+        //}
         return cost;
     }
 
     public int getOrderViolations() {
-        int hash = Objects.hashCode(stops);
-        if(hash != hash3){
+        //int hash = Objects.hashCode(stops);
+        //if(hash != hash3){
             orderViolations = calculateOrderViolations();
-            hash3 = hash;
-        }
+        //    hash3 = hash;
+        //}
         return orderViolations;
     }
 
     public int getTimeViolations() {
-        int hash = Objects.hashCode(stops);
-        if(hash != hash4){
+        //int hash = Objects.hashCode(stops);
+        //if(hash != hash4){
             timeViolations = calculateTimeViolations();
-            hash4 = hash;
-        }
+        //    hash4 = hash;
+        //}
         return timeViolations;
     }
 
     public int getFillRateViolations() {
-        int hash = Objects.hashCode(stops);
-        if(hash != hash5){
+        //int hash = Objects.hashCode(stops);
+        //if(hash != hash5){
             fillRateViolations = calculateFillRateViolations();
-            hash5 = hash;
-        }
+        //    hash5 = hash;
+        //}
         return fillRateViolations;
     }
 
     public int getAvgStopsOnTruck() {
-        int hash = Objects.hashCode(stops);
-        if(hash != hash6){
+        //int hash = Objects.hashCode(stops);
+        //if(hash != hash6){
             avgStopsOnTruck = calculateAvgStopsOnTruck();
-            hash6 = hash;
-        }
+        //    hash6 = hash;
+        //}
         return avgStopsOnTruck;
     }
 
     public int getTotalTime() {
-        int hash = Objects.hashCode(stops);
-        if(hash != hash7){
+        //int hash = Objects.hashCode(stops);
+        //if(hash != hash7){
             totalTime = calculateTime();
-            hash7 = hash;
-        }
+        //    hash7 = hash;
+        //}
         return totalTime;
     }
 }

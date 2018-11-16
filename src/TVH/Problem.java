@@ -240,7 +240,7 @@ public class Problem {
         System.out.println(init);
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(40000, 50, Integer.MAX_VALUE, 2);
+        Solution best = simulatedAnnealingAaron(40000, 50, Integer.MAX_VALUE, 2);
         /*best.loadSolution();
         System.out.println("start second annealing");
         best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);*/
