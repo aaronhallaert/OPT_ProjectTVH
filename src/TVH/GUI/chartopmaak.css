@@ -1,6 +1,11 @@
-
-.chart-symbol{
-    -fx-background-color: #bc0007;
-    -fx-background-radius: 3px;
-    -fx-padding: 3px;
+.chart
+{
+    -fx-create-symbols: true;
+}
+.default-color0.chart-series-line {
+    -fx-stroke: #bc0007;
+    -fx-stroke-width: 2px;
+}
+.default-color0.chart-line-symbol {
+    -fx-background-color: rgb(106,0,6);
 }

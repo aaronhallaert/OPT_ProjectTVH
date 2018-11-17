@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.chart.ScatterChart?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="568.0" prefWidth="764.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.Gui.GraphController">
+<AnchorPane prefHeight="568.0" prefWidth="764.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.Gui.GraphController">
    <children>
       <AnchorPane layoutX="39.0" layoutY="61.0" prefHeight="475.0" prefWidth="683.0">
          <children>
-            <ScatterChart fx:id="scatterChart" prefHeight="475.0" prefWidth="683.0" stylesheets="@chartopmaak.css">
+            <LineChart fx:id="lineChart" prefHeight="475.0" prefWidth="683.0" stylesheets="@chartopmaak.css">
               <xAxis>
                 <NumberAxis side="BOTTOM" />
               </xAxis>
               <yAxis>
                 <NumberAxis side="LEFT" />
               </yAxis>
-            </ScatterChart>
+            </LineChart>
          </children></AnchorPane>
       <Label alignment="CENTER" layoutY="14.0" prefHeight="53.0" prefWidth="764.0" text="distance - time plot">
          <font>

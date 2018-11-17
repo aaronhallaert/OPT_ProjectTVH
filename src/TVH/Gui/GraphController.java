@@ -1,11 +1,8 @@
 package TVH.Gui;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.chart.*;
 import javafx.scene.control.Label;
-
-import javax.sound.sampled.Line;
 
 public class GraphController {
 
@@ -15,27 +12,27 @@ public class GraphController {
     private XYChart.Series series1; // = dataverzameling
 
     @FXML
-    private ScatterChart<Number, Number> scatterChart;
+    private LineChart<Integer, Integer> lineChart;
 
     @FXML
     public void initialize(){
 
         //zodat alle punten er altijd op zullen graken
-       // scatterChart.getXAxis().setTickLength(1000); // 1 seconde
-        //scatterChart.getYAxis().setTickLength(20);
-        scatterChart.getXAxis().setLabel("tijd");
-        scatterChart.getYAxis().setLabel("aantal km");
-        scatterChart.getXAxis().setAutoRanging(true);
-        scatterChart.getYAxis().setAutoRanging(true); // schaalt zodat alle punten zichtbaar zijn
+       // lineChart.getXAxis().setTickLength(1000); // 1 seconde
+        //lineChart.getYAxis().setTickLength(20);
+        lineChart.getXAxis().setLabel("tijd");
+        lineChart.getYAxis().setLabel("aantal km");
+        lineChart.getXAxis().setAutoRanging(true);
+        lineChart.getYAxis().setAutoRanging(true); // schaalt zodat alle punten zichtbaar zijn
 
-        //css file inladen (punten anders veel te dik)
+        //css file inladen -> in de fxml zelf
 
-        //scatterChart.getYAxis().setAutoRanging(true);
+        //lineChart.getYAxis().setAutoRanging(true);
 
         series1 = new XYChart.Series();
         series1.setName("verzameling");
 
-        scatterChart.getData().add(series1);
+        lineChart.getData().add(series1);
 
 
 
