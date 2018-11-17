@@ -15,7 +15,7 @@ public class GraphController {
     private XYChart.Series series1; // = dataverzameling
 
     @FXML
-    private ScatterChart<Integer, Integer> scatterChart;
+    private ScatterChart<Number, Number> scatterChart;
 
     @FXML
     public void initialize(){
@@ -44,7 +44,7 @@ public class GraphController {
     }
 
     public void addPunt(Integer currentTime, Integer aantalKm){
-        series1.getData().add(new XYChart.Data(currentTime+"",aantalKm));
+        series1.getData().add(new XYChart.Data(currentTime,aantalKm));
     }
 
 

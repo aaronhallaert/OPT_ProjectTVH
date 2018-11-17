@@ -1,5 +1,6 @@
 package TVH.GUI;
 
+import TVH.Gui.GraphController;
 import TVH.Main;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
