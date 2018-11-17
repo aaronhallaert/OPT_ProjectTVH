@@ -36,10 +36,10 @@ public class CollectJob implements Job {
         }
     }
 
-    public boolean notDone(){
-        HashMap<Location,Node> nodesMap = Problem.getInstance().nodesMap;
+    public boolean notDone(){ // nog niet uitgevoerd, (volledig)
+        HashMap<Location,Node> nodesMap = Problem.getInstance().nodesMap; // daar zitten zowel client en depot in
         Node collectNode = nodesMap.get(collect);
-        return collectNode.getAvailableMachines().contains(machine);
+        return collectNode.getAvailableMachines().contains(machine); // done als de machine niet meer in de node zit
 
     }
 
