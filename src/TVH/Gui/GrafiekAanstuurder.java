@@ -38,7 +38,7 @@ public class GrafiekAanstuurder extends Thread {
                     spelViewStage.setTitle("grafiek");
                     //width en height van de scene bepalen
                     //dit moet hier geset worden, jammergenoeg, we kunnen dit niet later aanpassen
-                    Scene startScene= new Scene(finalRoot, 500,500); //misschien nog wijzigen
+                    Scene startScene= new Scene(finalRoot, 700,500); //misschien nog wijzigen
                     spelViewStage.setScene(startScene);
                     spelViewStage.setResizable(false);
                     spelViewStage.show();
@@ -49,15 +49,14 @@ public class GrafiekAanstuurder extends Thread {
 
     }
 
+    public void addPunt(Integer currentTime, Integer aantalKm){
+        grafContr.addPunt(currentTime, aantalKm);
+    }
+
 
     //ander tuug
     @Override
     public void run() {
-
-
-
-
-
 
     }
 }

@@ -29,7 +29,7 @@ public class Main extends Application{
 
 
         try{
-            Problem problem = Problem.newInstance(inputFile);
+            Problem problem = Problem.newInstance(inputFile, grafiekAanstuurder);
             Solution solution = problem.solve();
             solution.writeToFile(OUTPUT_FILE);
             System.out.println("Calculation time: "+(System.currentTimeMillis()-startTime)+"ms");

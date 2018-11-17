@@ -5,7 +5,9 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.*;
 import TVH.Entities.Truck.*;
+import TVH.Gui.GrafiekAanstuurder;
 import com.google.common.collect.HashMultimap;
+import javafx.application.Platform;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,20 +32,25 @@ public class Problem {
     public List<Job> jobs = new ArrayList<>();                                  //statisch object
     public HashMultimap<MachineType, Job> jobTypeMap = HashMultimap.create();   //statisch object
     public HashMap<Job, Truck> jobTruckMap = new HashMap<>();                   //niet-statisch object
+    public GrafiekAanstuurder grafiekAanstuurder;
 
     public static Problem getInstance() {
         return instance;
     }
 
-    public static Problem newInstance(File inputFile) throws FileNotFoundException {
-        instance = new Problem(inputFile);
+    public static Problem newInstance(File inputFile, GrafiekAanstuurder grafiekAanstuurder) throws FileNotFoundException {
+        instance = new Problem(inputFile, grafiekAanstuurder);
+
         return instance;
     }
 
-    private Problem(File inputFile) throws FileNotFoundException {
+    private Problem(File inputFile, GrafiekAanstuurder grafA) throws FileNotFoundException {
+
+
+        this.grafiekAanstuurder = grafA;
 
         Scanner sc = new Scanner(inputFile).useLocale(Locale.US);
-        ;
+
 
         info = sc.nextLine().split(": ")[1];
         TRUCK_CAPACITY = Integer.parseInt(sc.nextLine().split(": ")[1]);
@@ -307,6 +314,9 @@ public class Problem {
     public Solution simulatedAnnealingJeroen(int duration, double temperature, int nJobsToRemove) {
         long endTime = System.currentTimeMillis() + duration;
         Solution best = new Solution();
+
+
+
         Solution localOptimum = new Solution();
         //LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
@@ -359,6 +369,13 @@ public class Problem {
                     if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
                         best = localOptimum;
                         System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
+
+                        //voeg punt toe aan gui
+                        Integer toGuiDistance = localOptimum.getTotalDistance();
+                        Platform.runLater(
+                                () -> {
+                                    grafiekAanstuurder.addPunt((int) timestamp, toGuiDistance);
+                                });
                     }
                     //System.out.println(timestamp+"\t"+localOptimum.getTotalDistance());
                 } else {
