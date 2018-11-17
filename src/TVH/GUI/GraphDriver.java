@@ -1,6 +1,6 @@
 package TVH.GUI;
 
-import TVH.Gui.GraphController;
+import TVH.GUI.GraphController;
 import TVH.Main;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +25,8 @@ public class GraphDriver extends Thread {
         Parent root = null;
         GraphController controller = null;
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("GUI/graph.fxml"));
+            //FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("TVH/GUI/graph.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("graph.fxml"));
             root = fxmlLoader.load();
             controller = fxmlLoader.getController();
 

@@ -14,7 +14,7 @@ public class SolutionListener {
         startTime = System.currentTimeMillis();
         graphDriver = new GraphDriver();
         //GUI thread aanmaken en laten runnen
-        graphDriver.run();
+        graphDriver.start();
     }
 
     public static SolutionListener getInstance(){

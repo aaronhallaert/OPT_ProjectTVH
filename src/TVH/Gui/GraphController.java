@@ -1,4 +1,4 @@
-package TVH.Gui;
+package TVH.GUI;
 
 import javafx.fxml.FXML;
 import javafx.scene.chart.*;
@@ -18,7 +18,7 @@ public class GraphController {
     public void initialize(){
 
         //zodat alle punten er altijd op zullen graken
-       // lineChart.getXAxis().setTickLength(1000); // 1 seconde
+        // lineChart.getXAxis().setTickLength(1000); // 1 seconde
         //lineChart.getYAxis().setTickLength(20);
         lineChart.getXAxis().setLabel("tijd");
         lineChart.getYAxis().setLabel("aantal km");
