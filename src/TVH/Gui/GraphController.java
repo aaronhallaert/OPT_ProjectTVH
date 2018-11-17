@@ -26,6 +26,7 @@ public class GraphController {
         scatterChart.getXAxis().setLabel("tijd");
         scatterChart.getYAxis().setLabel("aantal km");
         scatterChart.getXAxis().setAutoRanging(true);
+        scatterChart.getYAxis().setAutoRanging(true); // schaalt zodat alle punten zichtbaar zijn
 
         //css file inladen (punten anders veel te dik)
 
