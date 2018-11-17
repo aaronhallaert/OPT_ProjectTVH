@@ -5,9 +5,7 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.*;
 import TVH.Entities.Truck.*;
-import TVH.Gui.GrafiekAanstuurder;
 import com.google.common.collect.HashMultimap;
-import javafx.application.Platform;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,14 +31,13 @@ public class Problem {
     public List<Job> jobs = new ArrayList<>();                                  //statisch object
     public HashMultimap<MachineType, Job> jobTypeMap = HashMultimap.create();   //statisch object
     public HashMap<Job, Truck> jobTruckMap = new HashMap<>();                   //niet-statisch object
-    public GrafiekAanstuurder grafiekAanstuurder;
 
     public static Problem getInstance() {
         return instance;
     }
 
-    public static Problem newInstance(File inputFile, GrafiekAanstuurder grafiekAanstuurder) throws FileNotFoundException {
-        instance = new Problem(inputFile, grafiekAanstuurder);
+    public static Problem newInstance(File inputFile) throws FileNotFoundException {
+        instance = new Problem(inputFile);
         instance.createJobs();
         return instance;
     }
@@ -51,9 +48,8 @@ public class Problem {
      * @param inputFile
      * @throws FileNotFoundException
      */
-    private Problem(File inputFile, GrafiekAanstuurder grafA) throws FileNotFoundException {
+    private Problem(File inputFile) throws FileNotFoundException {
 
-        this.grafiekAanstuurder = grafA;
         Scanner sc = new Scanner(inputFile).useLocale(Locale.US);
 
         info = sc.nextLine().split(": ")[1];
@@ -247,9 +243,9 @@ public class Problem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Solution best = init;
+        //Solution best = init;
 
-        //Solution best = simulatedAnnealingJeroen(100000, 50, 15, 1, 1);
+        Solution best = simulatedAnnealingJeroen(100000, 50, 15, 1, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -339,7 +335,6 @@ public class Problem {
         int counter = 0;
         Random r = new Random();
         while (System.currentTimeMillis() < endTime) {
-            System.out.println("run");
             //We selecteren nMachineTypes om Jobs van te verwijderen
             Set<MachineType> randomMachineTypes = new HashSet<>();
             List<Job> selectedSameTypeJobs = new ArrayList<>();

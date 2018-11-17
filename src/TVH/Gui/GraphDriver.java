@@ -9,19 +9,19 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class GrafiekAanstuurder extends Thread {
+public class GraphDriver extends Thread {
 
     //attributen
-    private GrafiekController grafContr;
+    private GraphController grafContr;
 
     //constructor
-    public GrafiekAanstuurder(){
+    public GraphDriver(){
         grafContr = loadAndSetGui();
     }
 
-    private GrafiekController loadAndSetGui() {
+    private GraphController loadAndSetGui() {
         Parent root = null;
-        GrafiekController controller = null;
+        GraphController controller = null;
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("Gui/grafiek.fxml"));
             root = fxmlLoader.load();
@@ -49,7 +49,7 @@ public class GrafiekAanstuurder extends Thread {
 
     }
 
-    public void addPunt(Integer currentTime, Integer aantalKm){
+    public void addPoint(Integer currentTime, Integer aantalKm){
         grafContr.addPunt(currentTime, aantalKm);
     }
 

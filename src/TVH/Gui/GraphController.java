@@ -7,7 +7,7 @@ import javafx.scene.control.Label;
 
 import javax.sound.sampled.Line;
 
-public class GrafiekController {
+public class GraphController {
 
     @FXML
     private Label solutionLabel;
