@@ -274,13 +274,14 @@ public class Truck {
      */
     public List<Proposal> getProposals(Job j){
         List<Proposal> proposals = new ArrayList<>();
-        List<Move> moves = j.getAllMoves();
+        List<Move> moves = j.generatePossibleMoves();
         for(Move m: moves){
             Route copy = new Route(route);
             int oldCost = copy.getCost();
-            copy.addMove(m);
-            int newCost = copy.getCost();
-            proposals.add(new Proposal(this ,j, m, copy ,newCost-oldCost));
+            if(copy.addMove(m)) {
+                int newCost = copy.getCost();
+                proposals.add(new Proposal(this, j, m, copy, newCost - oldCost));
+            }
         }
         return proposals;
     }

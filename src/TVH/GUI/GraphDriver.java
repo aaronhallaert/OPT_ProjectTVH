@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -35,14 +36,15 @@ public class GraphDriver extends Thread {
         Parent finalRoot = root;
         Platform.runLater(
                 () -> {
-                    Stage spelViewStage= new Stage();
-                    spelViewStage.setTitle("Graph");
+                    Stage graphStage= new Stage();
+                    graphStage.setTitle("Graph");
+                    graphStage.getIcons().add(new Image("TVH/GUI/lilpump.png"));
                     //width en height van de scene bepalen
                     //dit moet hier geset worden, jammergenoeg, we kunnen dit niet later aanpassen
                     Scene startScene= new Scene(finalRoot); //misschien nog wijzigen
-                    spelViewStage.setScene(startScene);
-                    spelViewStage.setResizable(false);
-                    spelViewStage.show();
+                    graphStage.setScene(startScene);
+                    graphStage.setResizable(false);
+                    graphStage.show();
                 }
         );
 

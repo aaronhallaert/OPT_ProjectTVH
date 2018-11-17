@@ -19,21 +19,21 @@ public class CollectJob implements Job {
     private Location collect;
     private List<Location> drop;
     private Machine machine;
-    private List<Move> allMoves;
+    //private List<Move> allMoves;
 
     public CollectJob(Location collect, List<Location> drop, Machine machine) {
         this.collect = collect;
         this.drop = drop;
         this.machine = machine;
 
-        HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+        /*HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
         allMoves = new ArrayList<>();
         for(Location l: drop){
             Node node = nodesMap.get(l);
             if(node.canPutMachineType(machine.getType())){
                 allMoves.add(new Move(machine, collect, l));
             }
-        }
+        }*/
     }
 
     public boolean notDone(){ // nog niet uitgevoerd, (volledig)
@@ -84,20 +84,20 @@ public class CollectJob implements Job {
 
     public ArrayList<Move> generatePossibleMoves(){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
-        ArrayList<Move> possibleMoves = new ArrayList<>();
+        ArrayList<Move> moves = new ArrayList<>();
         //Eerst alle drop opties verwijderen waar we de machine niet meer kunnen zetten hebben
-        for(Move m: allMoves){
-            Node node = nodesMap.get(m.getDrop());
+        for(Location l: drop){
+            Node node = nodesMap.get(l);
             if(node.canPutMachineType(machine.getType())){
-                possibleMoves.add(m);
+                moves.add(new Move(machine, collect, l));
             }
         }
-        return possibleMoves;
+        return moves;
     }
 
-    public List<Move> getAllMoves() {
+   /* public List<Move> getAllMoves() {
         return allMoves;
-    }
+    }*/
 
     public String toString(){
         return getFixedLocation().toString()+ " ("+getMachineType()+")";
