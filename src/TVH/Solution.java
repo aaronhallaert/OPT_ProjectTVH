@@ -2,12 +2,11 @@ package TVH;
 
 import TVH.Entities.Job.Job;
 import TVH.Entities.Machine.Machine;
-import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Client;
 import TVH.Entities.Node.Depot;
 import TVH.Entities.Truck.Stop;
 import TVH.Entities.Truck.Truck;
-import TVH.Gui.SolutionListener;
+import TVH.GUI.SolutionListener;
 
 import java.io.*;
 import java.util.ArrayList;

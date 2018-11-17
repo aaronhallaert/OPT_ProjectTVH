@@ -1,4 +1,4 @@
-package TVH.Gui;
+package TVH.GUI;
 
 import TVH.Solution;
 import javafx.application.Platform;

@@ -1,4 +1,4 @@
-package TVH.Gui;
+package TVH.GUI;
 
 import TVH.Main;
 import javafx.application.Platform;
@@ -12,18 +12,18 @@ import java.io.IOException;
 public class GraphDriver extends Thread {
 
     //attributen
-    private GraphController grafContr;
+    private GraphController graphController;
 
     //constructor
     public GraphDriver(){
-        grafContr = loadAndSetGui();
+        graphController = loadAndSetGui();
     }
 
     private GraphController loadAndSetGui() {
         Parent root = null;
         GraphController controller = null;
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("Gui/grafiek.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("GUI/graph.fxml"));
             root = fxmlLoader.load();
             controller = fxmlLoader.getController();
 
@@ -35,10 +35,10 @@ public class GraphDriver extends Thread {
         Platform.runLater(
                 () -> {
                     Stage spelViewStage= new Stage();
-                    spelViewStage.setTitle("grafiek");
+                    spelViewStage.setTitle("Graph");
                     //width en height van de scene bepalen
                     //dit moet hier geset worden, jammergenoeg, we kunnen dit niet later aanpassen
-                    Scene startScene= new Scene(finalRoot, 700,500); //misschien nog wijzigen
+                    Scene startScene= new Scene(finalRoot); //misschien nog wijzigen
                     spelViewStage.setScene(startScene);
                     spelViewStage.setResizable(false);
                     spelViewStage.show();
@@ -49,8 +49,8 @@ public class GraphDriver extends Thread {
 
     }
 
-    public void addPoint(Integer currentTime, Integer aantalKm){
-        grafContr.addPunt(currentTime, aantalKm);
+    public void addPoint(int currentTime, int aantalKm){
+        graphController.addPunt(currentTime, aantalKm);
     }
 
 
