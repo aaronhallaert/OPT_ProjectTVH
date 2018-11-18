@@ -246,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(20000, 20, 5, 1, 0);
+        Solution best = simulatedAnnealingJeroen(1200000, 20, 10, 1, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -330,7 +330,6 @@ public class Problem {
         double currentTemp = temperature;
         int counter = 0;
         Random r = new Random();
-        boolean doMachineTypes = false;
         Mode mode = Mode.MACHINETYPE;
         while (System.currentTimeMillis() < endTime) {
 
@@ -397,25 +396,44 @@ public class Problem {
                 case MACHINETYPE:
                     for(Job j: selectedJobs){
                         if(j.notDone()){
-                            allJobsAdded = assignJobToBestTruck2(j);
+                            if(!assignJobToBestTruck2(j)){
+                                allJobsAdded = false;
+                                break;
+                            }
                         }
                     }
                     break;
                 case TRUCK:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
-                            allJobsAdded = assignJobToBestTruck2(j);
-                            //allJobsAdded = assignJobToRandomTruck(j, true);
+                            if(!assignJobToBestTruck(j,true)){
+                                allJobsAdded = false;
+                                break;
+                            }
                         }
                     }
                 case NEARBY:
                     for(Job j: selectedJobs){
                         if(j.notDone()){
-                            allJobsAdded = assignJobToBestTruck2(j);
+                            if(!assignJobToBestTruck2(j)){
+                                allJobsAdded = false;
+                                break;
+                            }
                         }
                     }
             }
             if (allJobsAdded) {
+                for(Job j: jobs){
+                    if(j.notDone()){
+                        System.out.println("#########   ERROR");
+                        assignJobToBestTruck2(j);
+                        for(Job j2: jobs){
+                            if(j2.notDone()){
+                                System.out.println("######## ERROR2");
+                            }
+                        }
+                    }
+                }
                 Solution candidate = new Solution();
                 //Candidate is better than local
                 if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
@@ -694,7 +712,7 @@ public class Problem {
 
     //TODO: uitleg schrijven hierbij
     public boolean assignJobToBestTruck2(Job j){
-        //TODO: random move kiezen vooralleer de proposals te vragen
+        //TODO: random job combinatie uitkiezen vooralleer de proposals te vragen, zal voor veel meer snelheid zorgen
         List<Proposal> proposals = new ArrayList<>();
         for (Truck t : trucks) {
             proposals.addAll(t.getProposals(j));
