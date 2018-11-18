@@ -44,7 +44,7 @@ public class GraphDriver extends Thread {
                     //dit moet hier geset worden, jammergenoeg, we kunnen dit niet later aanpassen
                     Scene startScene= new Scene(finalRoot); //misschien nog wijzigen
                     graphStage.setScene(startScene);
-                    graphStage.setResizable(false);
+                    graphStage.setResizable(true);
                     graphStage.show();
                 }
         );

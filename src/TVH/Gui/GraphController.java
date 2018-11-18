@@ -12,7 +12,7 @@ public class GraphController {
     private XYChart.Series series1; // = dataverzameling
 
     @FXML
-    private LineChart<Integer, Integer> lineChart;
+    private LineChart lineChart;
 
     @FXML
     public void initialize(){
@@ -20,19 +20,24 @@ public class GraphController {
         //zodat alle punten er altijd op zullen graken
         // lineChart.getXAxis().setTickLength(1000); // 1 seconde
         //lineChart.getYAxis().setTickLength(20);
-        lineChart.getXAxis().setLabel("tijd");
-        lineChart.getYAxis().setLabel("aantal km");
-        lineChart.getXAxis().setAutoRanging(true);
-        lineChart.getYAxis().setAutoRanging(true); // schaalt zodat alle punten zichtbaar zijn
+        NumberAxis xAxis = (NumberAxis) lineChart.getXAxis();
+        NumberAxis yAxis = (NumberAxis) lineChart.getYAxis();
+
+        xAxis.setLabel("time (ms)");
+        yAxis.setLabel("distance");
+        xAxis.setAutoRanging(true);
+        yAxis.setAutoRanging(true);
+        yAxis.setForceZeroInRange(false);// schaalt zodat alle punten zichtbaar zijn
 
         //css file inladen -> in de fxml zelf
 
         //lineChart.getYAxis().setAutoRanging(true);
 
         series1 = new XYChart.Series();
-        series1.setName("verzameling");
+        series1.setName("Solutions");
 
         lineChart.getData().add(series1);
+
 
 
 
