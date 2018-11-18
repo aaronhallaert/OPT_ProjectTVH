@@ -245,7 +245,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(600000, 10, 10, 1, 1);
+        Solution best = simulatedAnnealingJeroen(600000, 20, 10, 1, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
