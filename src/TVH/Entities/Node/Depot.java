@@ -4,6 +4,7 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 import com.google.common.collect.HashMultimap;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  * waar machines uit kunnen genomen worden op gedropt te worden bij Clients. Een Depot kan ook altijd eender welke
  * machine ontvangen. Dit is een dynamische klasse
  */
-public class Depot implements Node{
+public class Depot implements Node, Serializable {
 
     private Location location;
     private HashMultimap<MachineType, Machine> machines;

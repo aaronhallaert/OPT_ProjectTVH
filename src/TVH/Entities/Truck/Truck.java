@@ -6,12 +6,13 @@ import TVH.Entities.Node.Location;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Een truck kan Jobs uitvoeren doormiddel van Moves toe te voegen aan zijn Route.
  */
-public class Truck {
+public class Truck implements Serializable {
 
     private int truckId;
     private Route route;

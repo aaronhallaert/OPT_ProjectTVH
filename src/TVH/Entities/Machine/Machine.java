@@ -1,7 +1,9 @@
 package TVH.Entities.Machine;
 
+import java.io.Serializable;
+
 //Statische klasse
-public class Machine {
+public class Machine implements Serializable {
     private int id;
     private MachineType type;
 

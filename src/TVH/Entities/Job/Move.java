@@ -3,6 +3,7 @@ package TVH.Entities.Job;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Objects;
  */
 //Statische klasse
 
-public class Move {
+public class Move implements Serializable {
     Machine machine;
     Location collect;
     Location drop;

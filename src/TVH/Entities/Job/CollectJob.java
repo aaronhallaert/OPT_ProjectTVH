@@ -7,6 +7,7 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,7 +16,7 @@ import java.util.List;
 //De klasse CollectJob bevat collect opdrachten die de trucks moeten uitvoeren.
 //Statische klasse
 
-public class CollectJob implements Job {
+public class CollectJob implements Job, Serializable {
     private Location collect;
     private List<Location> drop;
     private Machine machine;

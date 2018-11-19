@@ -1,9 +1,10 @@
 package TVH.Entities.Machine;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 //Statische klasse
-public class MachineType {
+public class MachineType implements Serializable {
     private int id;
     private String name;
     private int volume;

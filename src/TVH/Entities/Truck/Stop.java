@@ -3,6 +3,7 @@ package TVH.Entities.Truck;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -11,7 +12,7 @@ import java.util.Objects;
  * Het is een dynamische klasse
  */
 
-public class Stop {
+public class Stop implements Serializable {
 
     private Location location;
     private LinkedList<Machine> collect;

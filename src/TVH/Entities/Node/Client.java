@@ -3,13 +3,14 @@ package TVH.Entities.Node;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * De klasse Client bevat elke Node waar we jobs moeten bij uitvoeren. Ze bevatten lijsten met machines die nog moeten
  * gecollect of gedropt worden. Dit is een dynamische klasse.
  */
-public class Client implements Node{
+public class Client implements Node, Serializable {
 
     private Location location;
     private ArrayList<Machine> toCollect;

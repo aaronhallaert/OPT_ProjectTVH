@@ -5,6 +5,7 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
 import TVH.Problem;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -13,7 +14,7 @@ import java.util.*;
  * Het is een dynamiche klasse
  */
 
-public class Route {
+public class Route implements Serializable {
     private LinkedList<Stop> stops;
     private int totalDistance = 0;
     private int cost = 0;

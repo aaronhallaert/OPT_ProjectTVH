@@ -1,11 +1,13 @@
 package TVH.Entities.Node;
 
 
+import java.io.Serializable;
+
 /**
  * De klasse Edge geeft info over de verbindingen tussen Locations. Voor elke locatie paar bevat het een time en distance
  * waarde om te reizen van "from" naar "to". Dit is een statische klasse
  */
-public class Edge {
+public class Edge implements Serializable {
     Location from;
     Location to;
     int time;

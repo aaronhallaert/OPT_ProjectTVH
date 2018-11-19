@@ -7,6 +7,7 @@ import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.Node;
 import TVH.Problem;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,7 +16,7 @@ import java.util.List;
 //DropJob bevat drop opdrachten moeten uitgevoerd worden
 //Statische klasse
 
-public class DropJob implements Job {
+public class DropJob implements Job, Serializable {
     private Location drop;
     private List<Location> collect;
     private MachineType machineType;

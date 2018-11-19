@@ -14,13 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class Solution {
+public class Solution implements Serializable{
     private int totalDistance = 0;
     private ArrayList<Truck> trucks = new ArrayList<>();
     private ArrayList<Client> clients = new ArrayList<>();
     private ArrayList<Depot> depots = new ArrayList<>();
     private int hash = 0;
-
 
     public Solution() {
         Problem problem = Problem.getInstance();
@@ -140,5 +139,76 @@ public class Solution {
 
     public int getHash() {
         return hash;
+    }
+
+    public void writeBytesToFile(String fileName){
+
+        FileOutputStream fos= null;
+        try {
+            fos = new FileOutputStream(fileName);
+            ObjectOutputStream oos= new ObjectOutputStream(fos);
+
+            //int totaldistance
+            oos.writeObject(totalDistance);
+
+            //arraylist<Truck> trucks
+            oos.writeObject(trucks);
+
+            //arrayList<Client> clients
+            oos.writeObject(clients);
+
+            //arrayList<Depot> depots
+            oos.writeObject(depots);
+
+            oos.writeObject(hash);
+
+            oos.close();
+            fos.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public void readBytesFromFile(String fileName) {
+
+
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(fileName);
+
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            this.totalDistance = (int) ois.readObject();
+
+            this.trucks = (ArrayList) ois.readObject();
+
+            this.clients = (ArrayList) ois.readObject();
+
+            this.depots = (ArrayList) ois.readObject();
+
+            this.hash = (int) ois.readObject();
+
+            ois.close();
+            fis.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void setNull() {
+        totalDistance = 0;
+        trucks = null;
+        clients = null;
+        depots = null;
     }
 }

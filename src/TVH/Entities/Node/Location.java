@@ -1,5 +1,6 @@
 package TVH.Entities.Node;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,7 +10,7 @@ import java.util.LinkedList;
  * Het bevat een Map met alle edges waarbij het vertrekpunt deze locatie is.
  * Het bevat ook een gesorteerde lijst van deze edges op basis van afstand.
  */
-public class Location {
+public class Location implements Serializable {
     private int locationID;
     private double latitude;
     private double longitude;
