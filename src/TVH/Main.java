@@ -9,11 +9,13 @@ public class Main extends Application{
 
     static String INPUT_FILE;
     static String OUTPUT_FILE ;
+    static long BEGIN_TIME;
 
     public static void main(String[] args) {
 
         INPUT_FILE = args[0]+".txt";
         OUTPUT_FILE = args[0]+"_out.txt";
+        BEGIN_TIME = System.currentTimeMillis();
 
         File inputFile = new File(INPUT_FILE);
         long startTime = System.currentTimeMillis();

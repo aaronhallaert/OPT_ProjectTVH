@@ -122,7 +122,7 @@ public class Route {
             //Zo niet herstellen, verwijderen we de move terug en zetten we de volgorde terug naar de originele
             removeMove(m, false);
             stops = previousOrder;
-
+            changed = false;
             return false;
         }
 
@@ -263,12 +263,11 @@ public class Route {
             orderViolations = 0;
             fillRateViolations = 0;
 
-            List<Machine> onTruckOrder = new LinkedList<>();
-            List<Machine> onTruckFill = new LinkedList<>();
+            Set<Machine> onTruck = new HashSet<>();
 
             Stop s1;
             Stop s2;
-            int totalTime = stops.get(0).getTimeSpend();
+            totalTime = stops.get(0).getTimeSpend();
             for (int i = 0; i < stops.size(); i++) {
                 s1 = stops.get(i);
                 if (i > 0) {
@@ -282,15 +281,18 @@ public class Route {
                     totalTime += s1.getTimeSpend();
                 }
                 //order violations
-                onTruckOrder.addAll(s1.getCollect());
-                orderViolations += (int) s1.getDrop().stream()
+                onTruck.addAll(s1.getCollect());
+                for(Machine m: s1.getDrop()){
+                    if(!onTruck.remove(m)){
+                        orderViolations++;
+                    }
+                }
+                /*orderViolations += (int) s1.getDrop().stream()
                         .filter(drop -> !onTruckOrder.remove(drop))
-                        .count();
+                        .count();*/
 
                 //FillRateViolations
-                onTruckFill.addAll(s1.getCollect());
-                onTruckFill.removeAll(s1.getDrop());
-                int fillRate = calculateFillRate(onTruckFill);
+                int fillRate = calculateFillRate(onTruck);
                 if (fillRate > Problem.getInstance().TRUCK_CAPACITY) {
                     fillRateViolations += fillRate - Problem.getInstance().TRUCK_CAPACITY;
                 }
@@ -347,18 +349,18 @@ public class Route {
     private int calculateFillRateViolations() {
         List<Machine> onTruck = new LinkedList<>();
         int fillRateViolations = 0;
-        for (Stop s : stops) {
+        /*for (Stop s : stops) {
             onTruck.addAll(s.getCollect());
             onTruck.removeAll(s.getDrop());
             int fillRate = calculateFillRate(onTruck);
             if (fillRate > Problem.getInstance().TRUCK_CAPACITY) {
                 fillRateViolations += 100 + fillRate - Problem.getInstance().TRUCK_CAPACITY;
             }
-        }
+        }*/
         return fillRateViolations;
     }
 
-    private int calculateFillRate(List<Machine> machines) {
+    private int calculateFillRate(Set<Machine> machines) {
         int fillrate = 0;
         for (Machine m : machines) {
             fillrate += m.getType().getVolume();

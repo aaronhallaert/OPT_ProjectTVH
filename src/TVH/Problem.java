@@ -10,6 +10,7 @@ import com.google.common.collect.HashMultimap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -238,7 +239,8 @@ public class Problem {
 //        for(Truck t: trucks){
 //            t.optimizeTruck();
 //        }
-        System.out.println(init);
+        System.out.println("Initial solution found in: "+ (System.currentTimeMillis() - Main.BEGIN_TIME));
+        System.out.println(init.getTotalDistance());
         try {
             init.writeToFile("temp.txt");
         } catch (IOException e) {
