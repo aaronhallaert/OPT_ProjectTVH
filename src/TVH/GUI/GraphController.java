@@ -39,7 +39,7 @@ public class GraphController {
         NumberAxis yAxis = (NumberAxis) lineChart.getYAxis();
 
 
-        xAxis.setLabel("time (ms)");
+        xAxis.setLabel("time (s)");
         yAxis.setLabel("distance");
         xAxis.setAutoRanging(true);
         yAxis.setAutoRanging(true);
