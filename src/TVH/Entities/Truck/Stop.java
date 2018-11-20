@@ -16,6 +16,8 @@ public class Stop {
     private Location location;
     private LinkedList<Machine> collect;
     private LinkedList<Machine> drop;
+    private int timespend = 0;
+    private int deltaFillRate = 0;
 
 
     public Stop(Location location, LinkedList<Machine> collect, LinkedList<Machine> drop) {
@@ -36,6 +38,8 @@ public class Stop {
         this.location = s.location;
         this.collect = new LinkedList<>(s.collect);
         this.drop = new LinkedList<>(s.drop);
+        this.timespend = s.timespend;
+        this.deltaFillRate = s.timespend;
     }
 
     /**
@@ -49,31 +53,39 @@ public class Stop {
 
     public void addToCollect(Machine m) {
         collect.add(m);
+
+        timespend += m.getType().getServiceTime();
+        deltaFillRate += m.getType().getVolume();
     }
 
     public void addToDrop(Machine m) {
         drop.add(m);
+
+        timespend += m.getType().getServiceTime();
+        deltaFillRate -= m.getType().getVolume();
     }
 
     public void removeFromCollect(Machine m) {
         collect.remove(m);
+
+        timespend -= m.getType().getServiceTime();
+        deltaFillRate -= m.getType().getVolume();
     }
 
     public void removeFromDrop(Machine m) {
         drop.remove(m);
+
+        timespend -= m.getType().getServiceTime();
+        deltaFillRate += m.getType().getVolume();
     }
 
 
     public int getTimeSpend() {
-        //TODO:Efficienter maken
-        int time = 0;
-        for (Machine m : collect) {
-            time += m.getType().getServiceTime();
-        }
-        for (Machine m : drop) {
-            time += m.getType().getServiceTime();
-        }
-        return time;
+        return timespend;
+    }
+
+    public int getDeltaFillRate(){
+        return deltaFillRate;
     }
 
     public Location getLocation() {
@@ -96,9 +108,6 @@ public class Stop {
         return drop;
     }
 
-    public void setDrop(LinkedList<Machine> drop) {
-        this.drop = drop;
-    }
 
     public String toString() {
         return location.toString();

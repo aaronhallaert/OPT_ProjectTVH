@@ -64,14 +64,13 @@ public class Truck {
             int minCost = Integer.MAX_VALUE;
             //Elke move eens toevoegen aan de route en kijken welke move zorgt voor het minst extra kost
             for (Move candidate : moves) {
-                LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
-                if (route.addMove(candidate)) {
-                    if (route.getCost() < minCost) {
+                Route copy = new Route(route);
+                copy.addMove(candidate);
+                if(op)
+                    if (copy.getCost() < minCost) {
                         optimalMove = candidate;
-                        minCost = route.getCost();
+                        minCost = copy.getCost();
                     }
-                    route.removeMove(candidate, false);
-                    route.setStops(previousOrder);
                 }
             }
             //Als geen optimale move gevonden is, betekent dit dat de truck de job niet kan uitvoeren
@@ -171,6 +170,42 @@ public class Truck {
         collect.undoTakeMachine(move.getMachine());
         drop.undoPutMachine(move.getMachine());
 
+    }
+
+    private static Route optimizeRoute(Route route) {
+        boolean betterRouteFound = true;
+        //int randomSwapsDone = 0;
+        Route best = new Route(route.getStops());
+        boolean feasibleRouteExists = best.quickFeasiblityCheck();
+        while (betterRouteFound) {
+            betterRouteFound = false;
+            //Elke mogelijk combinatie van swap overlopen
+            for (int i = 1; i < route.getStops().size() - 1; i++) {
+                for (int j = 1; j < route.getStops().size() - 1; j++) {
+                    //Enkel als i kleiner is dan j is het nuttig op de swap uit te voeren
+                    if (i < j) {
+                        Route candidate = new Route(best.getStops());
+                        candidate.twoOptSwap(i, j);
+                        if(feasibleRouteExists){
+                            if(!candidate.quickFeasiblityCheck()) break;
+                        }
+                        //kijken als de nieuwe route beter is
+                        if (candidate.getCost() < best.getCost()) {
+                            best.setStops(new LinkedList<>(candidate.getStops()));
+                            betterRouteFound = true;
+                            //Vanaf een feasible candidaat gevonden is, smijten we een oplossing weg van zodra hij niet feasible is
+                            if(candidate.isFeasible()){
+                                feasibleRouteExists = true;
+                            }
+                            if (candidate.getCost() < best.getCost()) {
+                                best.setStops(new LinkedList<>(candidate.getStops()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return route;
     }
 
     /**
