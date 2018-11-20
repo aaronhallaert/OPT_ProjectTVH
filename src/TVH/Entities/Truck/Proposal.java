@@ -18,15 +18,13 @@ public class Proposal {
     Truck truck;
     Job primaryJob;
     Job secondaryJob;
-    Move move;
-    Route route;
+    Move move;;
     int cost;
 
-    public Proposal(Truck truck, Job job, Move move, Route route, int cost) {
+    public Proposal(Truck truck, Job job, Move move, int cost) {
         this.truck = truck;
         this.primaryJob = job;
         this.move = move;
-        this.route = route;
         this.cost = cost;
         this.secondaryJob = null;
 
@@ -71,11 +69,6 @@ public class Proposal {
 
         //return secondaryJob == null ? cost : cost/2;
         return cost;
-    }
-
-
-    public Route getRoute() {
-        return route;
     }
 
     public static List<Proposal> getBestProposalPerJobCombination(List<Proposal> allProposals){

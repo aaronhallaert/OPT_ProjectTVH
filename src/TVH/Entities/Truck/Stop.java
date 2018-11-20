@@ -19,13 +19,6 @@ public class Stop {
     private int timespend = 0;
     private int deltaFillRate = 0;
 
-
-    public Stop(Location location, LinkedList<Machine> collect, LinkedList<Machine> drop) {
-        this.location = location;
-        this.collect = collect;
-        this.drop = drop;
-    }
-
     public Stop(Location location) {
         this.location = location;
         this.collect = new LinkedList<>();
@@ -66,17 +59,19 @@ public class Stop {
     }
 
     public void removeFromCollect(Machine m) {
-        collect.remove(m);
+        if(collect.remove(m)) {
 
-        timespend -= m.getType().getServiceTime();
-        deltaFillRate -= m.getType().getVolume();
+            timespend -= m.getType().getServiceTime();
+            deltaFillRate -= m.getType().getVolume();
+        }
     }
 
     public void removeFromDrop(Machine m) {
-        drop.remove(m);
+        if(drop.remove(m)) {
 
-        timespend -= m.getType().getServiceTime();
-        deltaFillRate += m.getType().getVolume();
+            timespend -= m.getType().getServiceTime();
+            deltaFillRate += m.getType().getVolume();
+        }
     }
 
 

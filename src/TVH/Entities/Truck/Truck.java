@@ -65,13 +65,15 @@ public class Truck {
             //Elke move eens toevoegen aan de route en kijken welke move zorgt voor het minst extra kost
             for (Move candidate : moves) {
                 Route copy = new Route(route);
-                copy.addMove(candidate);
-                if(op)
+                if(copy.addMove(candidate)){
                     if (copy.getCost() < minCost) {
                         optimalMove = candidate;
                         minCost = copy.getCost();
                     }
+                    copy.removeMove(candidate, false);
                 }
+                //De stops van de copy zijn geen diepe kopies, we moeten dus alitjd de move terug verwijderen
+
             }
             //Als geen optimale move gevonden is, betekent dit dat de truck de job niet kan uitvoeren
             if (optimalMove == null) return false;
@@ -88,7 +90,7 @@ public class Truck {
         //Als een willekeurige move mag toegevoegd worden.
         else{
             boolean moveAdded = false;
-            Random r = new Random();
+            Random r = new Random(0);
             while(!moveAdded && !moves.isEmpty()){
                 Move randomMove = moves.get(r.nextInt(moves.size()));
                 if(route.addMove(randomMove)){
@@ -141,6 +143,7 @@ public class Truck {
     public void addJob(Job j, Move m, Route r){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
 
+
         route = r;
         jobMoveMap.put(j, m);
         Node collect = nodesMap.get(m.getCollect());
@@ -170,42 +173,6 @@ public class Truck {
         collect.undoTakeMachine(move.getMachine());
         drop.undoPutMachine(move.getMachine());
 
-    }
-
-    private static Route optimizeRoute(Route route) {
-        boolean betterRouteFound = true;
-        //int randomSwapsDone = 0;
-        Route best = new Route(route.getStops());
-        boolean feasibleRouteExists = best.quickFeasiblityCheck();
-        while (betterRouteFound) {
-            betterRouteFound = false;
-            //Elke mogelijk combinatie van swap overlopen
-            for (int i = 1; i < route.getStops().size() - 1; i++) {
-                for (int j = 1; j < route.getStops().size() - 1; j++) {
-                    //Enkel als i kleiner is dan j is het nuttig op de swap uit te voeren
-                    if (i < j) {
-                        Route candidate = new Route(best.getStops());
-                        candidate.twoOptSwap(i, j);
-                        if(feasibleRouteExists){
-                            if(!candidate.quickFeasiblityCheck()) break;
-                        }
-                        //kijken als de nieuwe route beter is
-                        if (candidate.getCost() < best.getCost()) {
-                            best.setStops(new LinkedList<>(candidate.getStops()));
-                            betterRouteFound = true;
-                            //Vanaf een feasible candidaat gevonden is, smijten we een oplossing weg van zodra hij niet feasible is
-                            if(candidate.isFeasible()){
-                                feasibleRouteExists = true;
-                            }
-                            if (candidate.getCost() < best.getCost()) {
-                                best.setStops(new LinkedList<>(candidate.getStops()));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return route;
     }
 
     /**
@@ -315,7 +282,22 @@ public class Truck {
             int oldCost = copy.getCost();
             if(copy.addMove(m)) {
                 int newCost = copy.getCost();
-                proposals.add(new Proposal(this, j, m, copy, newCost - oldCost));
+                proposals.add(new Proposal(this, j, m, newCost - oldCost));
+                copy.removeMove(m, false);
+            }
+        }
+        return proposals;
+    }
+
+    public List<Proposal> getProposals(Job j, List<Move> moves){
+        List<Proposal> proposals = new ArrayList<>();
+        for(Move m: moves){
+            Route copy = new Route(route);
+            int oldCost = copy.getCost();
+            if(copy.addMove(m)) {
+                int newCost = copy.getCost();
+                proposals.add(new Proposal(this, j, m, newCost - oldCost));
+                copy.removeMove(m, false);
             }
         }
         return proposals;
