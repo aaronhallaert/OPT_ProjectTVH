@@ -246,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(1000*60*20, 20, 15, 2, 1);
+        Solution best = simulatedAnnealingJeroen(1000*60*20, 20, 8, 2, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -417,7 +417,7 @@ public class Problem {
                 case NEARBY:
                     for(Job j: selectedJobs){
                         if(j.notDone()){
-                            if(!assignJobToBestTruck(j, true)){
+                            if(!assignJobToBestTruck2(j)){
                                 allJobsAdded = false;
                                 break;
                             }
@@ -686,7 +686,8 @@ public class Problem {
         //Methode om de volgende te vinden;
         public static Queue<Mode> createQueue(){
             Queue<Mode> modeQueue = new LinkedList<>();
-            //modeQueue.offer(Mode.MACHINETYPE);
+            modeQueue.offer(Mode.MACHINETYPE);
+            modeQueue.offer(Mode.NEARBY);
             modeQueue.offer(Mode.TRUCK);
             modeQueue.offer(Mode.MACHINETYPE);
             modeQueue.offer(Mode.NEARBY);

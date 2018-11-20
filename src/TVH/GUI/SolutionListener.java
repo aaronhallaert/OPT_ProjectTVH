@@ -21,7 +21,7 @@ public class SolutionListener {
                 try {
                     graphDriver.updateClock(System.currentTimeMillis() - startTime);
                     synchronized (this) {
-                        wait(1);
+                        wait(1000);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
