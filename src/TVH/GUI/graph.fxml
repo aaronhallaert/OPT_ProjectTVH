@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="568.0" prefWidth="764.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.GUI.GraphController">
+<AnchorPane prefHeight="568.0" prefWidth="764.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.GUI.GraphController">
     <children>
         <Label alignment="CENTER" layoutX="219.0" layoutY="14.0" prefHeight="53.0" prefWidth="327.0" text="Solution plot" AnchorPane.leftAnchor="219.0" AnchorPane.rightAnchor="218.0" AnchorPane.topAnchor="14.0">
             <font>
@@ -21,5 +26,7 @@
                   <NumberAxis side="LEFT" />
               </yAxis>
           </LineChart>
+      <Label fx:id="timeLabel" layoutX="66.0" layoutY="23.0" />
+      <Label fx:id="remainingTimeLabel" layoutX="604.0" layoutY="23.0" />
     </children>
 </AnchorPane>
