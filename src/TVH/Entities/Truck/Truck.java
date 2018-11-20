@@ -38,7 +38,7 @@ public class Truck {
         this.endLocation = t.endLocation;
 
         //Deep copy the entire route
-        this.route = new Route(t.route);
+        this.route = new Route(t.route, true);
 
         //Add all job move relations to new hashmap;
         jobMoveMap = new HashMap<>();
@@ -64,7 +64,7 @@ public class Truck {
             int minCost = Integer.MAX_VALUE;
             //Elke move eens toevoegen aan de route en kijken welke move zorgt voor het minst extra kost
             for (Move candidate : moves) {
-                Route copy = new Route(route);
+                Route copy = new Route(route, false);
                 if(copy.addMove(candidate)){
                     if (copy.getCost() < minCost) {
                         optimalMove = candidate;
@@ -230,6 +230,8 @@ public class Truck {
     /**
      * Deze methode kan de truck zelf optimaliseren door jobs te verwijderen en opnieuw toe te voegen.
      * Dit kan nog de paar laatste kilometers eraf doen op het einde.
+     *
+     * NIET GEBRUIKEN: BUG
      */
     public void optimizeTruck(){
         //TODO: Er zit hier nog ergens een bug in
@@ -239,7 +241,7 @@ public class Truck {
         while (improvement) {
             improvement = false;
             for(Job j: jobs){
-                Route backup = new Route(route);
+                Route backup = new Route(route, true);
                 Move oldMove = jobMoveMap.get(j);
                 removeJob(j, false);
                 if(addJob(j, true)){
@@ -278,7 +280,7 @@ public class Truck {
         List<Proposal> proposals = new ArrayList<>();
         List<Move> moves = j.generatePossibleMoves();
         for(Move m: moves){
-            Route copy = new Route(route);
+            Route copy = new Route(route, false);
             int oldCost = copy.getCost();
             if(copy.addMove(m)) {
                 int newCost = copy.getCost();
@@ -292,7 +294,7 @@ public class Truck {
     public List<Proposal> getProposals(Job j, List<Move> moves){
         List<Proposal> proposals = new ArrayList<>();
         for(Move m: moves){
-            Route copy = new Route(route);
+            Route copy = new Route(route, false);
             int oldCost = copy.getCost();
             if(copy.addMove(m)) {
                 int newCost = copy.getCost();

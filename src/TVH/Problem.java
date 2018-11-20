@@ -246,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(1200000, 20, 15, 2, 1);
+        Solution best = simulatedAnnealingJeroen(20000, 20, 15, 2, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -435,12 +435,6 @@ public class Problem {
                     }
                 }
                 Solution candidate = new Solution();
-                try {
-                    candidate.writeToFile("temp.txt");
-                    int verwijder = 0;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
                 //Candidate is better than local
                 if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
                     //counter++;
@@ -717,7 +711,6 @@ public class Problem {
         List<Proposal> proposals = new ArrayList<>();
         for (Truck t : trucks) {
             proposals.addAll(t.getProposals(j));
-            System.out.println("stop");
         }
         Random r = new Random(0);
         if (!proposals.isEmpty()) {
@@ -740,7 +733,7 @@ public class Problem {
         }
     }
 
-    public boolean assignRandomMoveToBestTruck(Job job) {
+    /*public boolean assignRandomMoveToBestTruck(Job job) {
         Random r = new Random(0);
         List<Move> moves = job.generatePossibleMoves();
         Move move = moves.get(r.nextInt(moves.size()));
@@ -750,7 +743,7 @@ public class Problem {
         int minAddedCost = Integer.MAX_VALUE;
         for (Truck t : trucks) {
             int cost = t.getRoute().getCost();
-            Route backup = new Route(t.getRoute());
+            Route backup = new Route(t.getRoute(), false);
             if (t.addJob(job, move)) {
                 int addedCost = t.getRoute().getCost() - cost;
                 //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
@@ -773,7 +766,7 @@ public class Problem {
         } else {
             return false;
         }
-    }
+    }*/
 
     private static enum Mode{
         MACHINETYPE, TRUCK, NEARBY;

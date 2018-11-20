@@ -45,9 +45,16 @@ public class Route {
         changed = true;
     }
 
-    //Copy constructor
-    public Route(Route r) {
-        this.stops = new ArrayList<>(r.stops);
+    public Route(Route r, boolean DeepCopyStops){
+        if(DeepCopyStops) {
+            this.stops = new ArrayList<>();
+            for (Stop s : r.stops) {
+                stops.add(new Stop(s));
+            }
+        }
+        else{
+            this.stops = new ArrayList<>(r.stops);
+        }
         this.totalDistance = r.totalDistance;
         this.cost = r.cost;
         this.orderViolations = r.orderViolations;
@@ -78,7 +85,7 @@ public class Route {
      */
     public boolean addMove(Move m) {
         //Backups nemen van stops en locationstopmap
-        Route backup = new Route(this);
+        Route backup = new Route(this, false);
 
         //De kans bestaat dat de truck al langs drop of collect locatie van de move passeert:
         Stop collectStop = null;
@@ -161,7 +168,7 @@ public class Route {
         if (collectStop.isEmpty() && collectStop != stops.get(0) && collectStop != stops.get(stops.size()-1)) {
             stops.remove(collectStop);
         }
-        if (dropStop.isEmpty() && dropStop != stops.get(0) && collectStop != stops.get(stops.size()-1)) {
+        if (dropStop.isEmpty() && dropStop != stops.get(0) && dropStop != stops.get(stops.size()-1)) {
             stops.remove(dropStop);
         }
 
@@ -186,7 +193,7 @@ public class Route {
                 for (int j = 1; j < getStops().size() - 1; j++) {
                     //Enkel als i kleiner is dan j is het nuttig op de swap uit te voeren
                     if (i < j) {
-                        Route candidate = new Route(this);
+                        Route candidate = new Route(this, false);
                         candidate.twoOptSwap(i, j);
                         if(feasibleRouteExists){
                             if(!candidate.quickFeasiblityCheck()) break;

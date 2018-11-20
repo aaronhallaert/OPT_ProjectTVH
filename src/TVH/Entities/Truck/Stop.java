@@ -32,7 +32,7 @@ public class Stop {
         this.collect = new LinkedList<>(s.collect);
         this.drop = new LinkedList<>(s.drop);
         this.timespend = s.timespend;
-        this.deltaFillRate = s.timespend;
+        this.deltaFillRate = s.deltaFillRate;
     }
 
     /**
