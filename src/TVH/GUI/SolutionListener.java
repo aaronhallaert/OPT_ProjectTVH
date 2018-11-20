@@ -15,6 +15,22 @@ public class SolutionListener {
         graphDriver = new GraphDriver();
         //GUI thread aanmaken en laten runnen
         graphDriver.start();
+
+        Runnable clockUpdater = () -> {
+            while (true){
+                try {
+                    graphDriver.updateClock(System.currentTimeMillis() - startTime);
+                    synchronized (this) {
+                        wait(1);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        new Thread(clockUpdater).start();
+
+
     }
 
     public static SolutionListener getInstance(){
@@ -30,4 +46,10 @@ public class SolutionListener {
             });
         }
     }
+
+
+
+
+
+
 }

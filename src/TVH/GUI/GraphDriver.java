@@ -57,6 +57,10 @@ public class GraphDriver extends Thread {
         graphController.addPunt(currentTime, aantalKm);
     }
 
+    public void updateClock(long currentTime){
+        Platform.runLater(() -> {graphController.updateClock(currentTime);});
+    }
+
 
     //ander tuug
     @Override

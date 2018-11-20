@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Clock;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class GraphController {
 
@@ -57,25 +58,20 @@ public class GraphController {
     }
 
     public void addPunt(Integer currentTime, Integer aantalKm){
+        series1.getData().add(new XYChart.Data(currentTime/1000,aantalKm));
+    }
+
+    public void updateClock(long currentTime){
+        String formattedTime = String.format("%02d:%02d:%02d",
+                TimeUnit.MILLISECONDS.toHours(currentTime),
+                TimeUnit.MILLISECONDS.toMinutes(currentTime) -
+                        TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(currentTime)),
+                TimeUnit.MILLISECONDS.toSeconds(currentTime) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(currentTime)));
+        timeLabel.setText(formattedTime+" ("+TimeUnit.MILLISECONDS.toSeconds(currentTime)+")");
 
 
-        long elapsed = System.currentTimeMillis() - start;
 
-        long elapsedSec = elapsed/1000;
-        long secDisp = elapsedSec%60;
-
-
-        long elapsedMin = elapsedSec/60;
-        long minDisp = elapsedMin%60;
-
-
-        long elapsedHours = elapsedMin/60;
-        long hoursDisp = elapsedHours%24;
-
-
-        timeLabel.setText(hoursDisp + ":" + minDisp + ":" + secDisp);
-
-        series1.getData().add(new XYChart.Data(currentTime,aantalKm));
     }
 
 
