@@ -9,7 +9,7 @@ import java.util.*;
 
 /**
  * De klasse Route geeft aan langs waar een truck rijdt.
- * Een route kan zijn eigen kosf bepalen en zichzelf optimaliseren
+ * Een route kan zijn eigen kost bepalen en zichzelf optimaliseren
  * Het is een dynamiche klasse
  */
 
@@ -20,7 +20,7 @@ public class Route {
     private static final int FILL_RATE_VIOLATIONS_FACTOR = 1000;
     private static final int DISTANCE_FACTOR = 1;
 
-    private LinkedList<Stop> stops;
+    private ArrayList<Stop> stops;
     private int totalDistance = 0;
     private int cost = 0;
     private int orderViolations = 0;
@@ -29,33 +29,31 @@ public class Route {
     private int avgStopsOnTruck = 0;
     private int totalTime = 0;
 
-    private int hash1 = 0;
-    private int hash2 = 0;
-    private int hash3 = 0;
-    private int hash4 = 0;
-    private int hash5 = 0;
-    private int hash6 = 0;
-    private int hash7 = 0;
-    private boolean changed = true;
+    public boolean changed;
+    //private String wut;
 
 
     public Route(Stop first, Stop last, Truck truck) {
-        stops = new LinkedList<>();
+        stops = new ArrayList<>();
         stops.add(first);
         stops.add(last);
         changed = true;
     }
 
-    public Route(LinkedList<Stop> stops) {
+    public Route(ArrayList<Stop> stops) {
         this.stops = stops;
         changed = true;
     }
 
-    //Copy constructor
-    public Route(Route r) {
-        stops = new LinkedList<>();
-        for (Stop s : r.stops) {
-            stops.add(new Stop(s));
+    public Route(Route r, boolean DeepCopyStops){
+        if(DeepCopyStops) {
+            this.stops = new ArrayList<>();
+            for (Stop s : r.stops) {
+                stops.add(new Stop(s));
+            }
+        }
+        else{
+            this.stops = new ArrayList<>(r.stops);
         }
         this.totalDistance = r.totalDistance;
         this.cost = r.cost;
@@ -64,14 +62,19 @@ public class Route {
         this.fillRateViolations = r.fillRateViolations;
         this.avgStopsOnTruck = r.avgStopsOnTruck;
         this.totalTime = r.totalTime;
-        changed = r.changed;
-        this.hash1 = r.hash1;
-        this.hash2 = r.hash2;
-        this.hash3 = r.hash3;
-        this.hash4 = r.hash4;
-        this.hash5 = r.hash5;
-        this.hash6 = r.hash6;
-        this.hash7 = r.hash7;
+        this.changed = r.changed;
+    }
+
+    public void loadRoute(Route r){
+        this.stops = r.stops;
+        this.totalDistance = r.totalDistance;
+        this.cost = r.cost;
+        this.orderViolations = r.orderViolations;
+        this.timeViolations = r.timeViolations;
+        this.fillRateViolations = r.fillRateViolations;
+        this.avgStopsOnTruck = r.avgStopsOnTruck;
+        this.totalTime = r.totalTime;
+        this.changed = r.changed;
     }
 
     /**
@@ -82,7 +85,7 @@ public class Route {
      */
     public boolean addMove(Move m) {
         //Backups nemen van stops en locationstopmap
-        LinkedList<Stop> previousOrder = new LinkedList<>(stops);
+        Route backup = new Route(this, false);
 
         //De kans bestaat dat de truck al langs drop of collect locatie van de move passeert:
         Stop collectStop = null;
@@ -115,18 +118,20 @@ public class Route {
         //De machine toevoegen aan de beide stops (collecten en droppen)
         collectStop.addToCollect(m.getMachine());
         dropStop.addToDrop(m.getMachine());
+        changed = true;
 
         optimizeRoute();
+        changed = true;
         //De optimalisatie geeft geen garantie van feasibility, er moet dus nog gekeken worden als de rit feasible is
         if (!isFeasible()) {
             //Zo niet herstellen, verwijderen we de move terug en zetten we de volgorde terug naar de originele
             removeMove(m, false);
-            stops = previousOrder;
-            changed = false;
+            loadRoute(backup);
+
             return false;
         }
 
-        changed = true;
+
         return true;
     }
 
@@ -156,10 +161,14 @@ public class Route {
         }
         //Als er bij een bepaalde stop niets meer gedaan moet worden kan deze verwijderd worden uit de route behalve
         //als het de eerste of laatste stop i
-        if (collectStop.isEmpty() && collectStop != stops.getFirst() && collectStop != stops.getLast()) {
+        if(collectStop == null || dropStop == null){
+            System.out.println("stop");
+        }
+
+        if (collectStop.isEmpty() && collectStop != stops.get(0) && collectStop != stops.get(stops.size()-1)) {
             stops.remove(collectStop);
         }
-        if (dropStop.isEmpty() && dropStop != stops.getFirst() && dropStop != stops.getLast()) {
+        if (dropStop.isEmpty() && dropStop != stops.get(0) && dropStop != stops.get(stops.size()-1)) {
             stops.remove(dropStop);
         }
 
@@ -176,39 +185,32 @@ public class Route {
     private void optimizeRoute() {
         boolean betterRouteFound = true;
         //int randomSwapsDone = 0;
-        Route localBest = new Route(new LinkedList<>(stops));
-        Route overallBest = new Route(new LinkedList<>(stops));
+        boolean feasibleRouteExists = this.quickFeasiblityCheck();
         while (betterRouteFound) {
             betterRouteFound = false;
             //Elke mogelijk combinatie van swap overlopen
-            for (int i = 1; i < stops.size() - 1; i++) {
-                for (int j = 1; j < stops.size() - 1; j++) {
+            for (int i = 1; i < getStops().size() - 1; i++) {
+                for (int j = 1; j < getStops().size() - 1; j++) {
                     //Enkel als i kleiner is dan j is het nuttig op de swap uit te voeren
                     if (i < j) {
-                        Route candidate = new Route(twoOptSwap(i, j, localBest.stops));
+                        Route candidate = new Route(this, false);
+                        candidate.twoOptSwap(i, j);
+                        if(feasibleRouteExists){
+                            if(!candidate.quickFeasiblityCheck()) break;
+                        }
                         //kijken als de nieuwe route beter is
-                        if (candidate.getCost() < localBest.getCost()) {
-                            localBest.setStops(new LinkedList<>(candidate.stops));
+                        if (candidate.getCost() < this.getCost()) {
+                            this.loadRoute(candidate);
                             betterRouteFound = true;
-                            if (candidate.getCost() < overallBest.getCost()) {
-                                overallBest.setStops(new LinkedList<>(candidate.stops));
+                            //Vanaf een feasible kandidaat gevonden is, smijten we een oplossing weg van zodra hij niet feasible is
+                            if(candidate.isFeasible()){
+                                feasibleRouteExists = true;
                             }
                         }
                     }
                 }
             }
-            //TODO: Dit hier juist implementeren
-            /*if(!betterRouteFound && randomSwapsDone < ((stops.size()-2)/5)){
-                int index1 = (int) (Math.random() * ((stops.size()-1) - 1)) + 1;
-                int index2 = (int) (Math.random() * ((stops.size()-1) - 1)) + 1;
-                LinkedList<Stop> swappinge = new LinkedList<>(localBest.stops);
-                Collections.swap(swappinge, index1, index2);
-                localBest.stops = new LinkedList<>(swappinge);
-                betterRouteFound = true;
-                randomSwapsDone++;
-            }*/
         }
-        stops = new LinkedList<>(overallBest.getStops());
     }
 
     /**
@@ -216,27 +218,14 @@ public class Route {
      *
      * @param firstCut  waar de 1ste cut gemaakt wordt
      * @param secondCut waar de 2de cut gemaakt wordt
-     * @param stopList  de lijst die geswapped moet worden
      * @return geswapte lijst
      */
-    public LinkedList<Stop> twoOptSwap(int firstCut, int secondCut, LinkedList<Stop> stopList) {
-        LinkedList<Stop> stops = new LinkedList<>(stopList);
+    public void twoOptSwap(int firstCut, int secondCut) {
         List<Stop> cut = new LinkedList<>(stops.subList(firstCut, secondCut + 1));
         stops.removeAll(cut);
         Collections.reverse(cut);
         stops.addAll(firstCut, cut);
         changed = true;
-        return stops;
-    }
-
-    public Location getGeographicalCenter() {
-        double totallat = 0;
-        double totallon = 0;
-        for (Stop s : stops) {
-            totallat += s.getLocation().getLatitude();
-            totallon += s.getLocation().getLongitude();
-        }
-        return new Location(-1, null, totallat / stops.size(), totallon / stops.size());
     }
 
     /**
@@ -252,6 +241,30 @@ public class Route {
         return true;
     }
 
+    //Bedoelt voor 2opt
+    public boolean quickFeasiblityCheck(){
+        Set<Machine> onTruck = new HashSet<>(stops.get(0).getCollect());
+        int totalTime = stops.get(0).getTimeSpend();
+        int fillrate = stops.get(0).getDeltaFillRate();
+        for (int i = 1; i < stops.size(); i++) {
+            Stop selected = stops.get(i);
+            //Order
+            onTruck.addAll(selected.getCollect());
+            for(Machine m: selected.getDrop()){
+                if(!onTruck.remove(m)) return false;
+            }
+            //Fillrate
+            fillrate += selected.getDeltaFillRate();
+            if(fillrate > Problem.getInstance().TRUCK_CAPACITY) return false;
+
+            //Time
+            totalTime += selected.getLocation().timeTo(stops.get(i-1).getLocation());
+            totalTime += selected.getTimeSpend();
+            if(totalTime > Problem.getInstance().TRUCK_WORKING_TIME) return false;
+        }
+        return true;
+    }
+
     /*
      * Update the cost factors and return the total cost if not changed
      * */
@@ -263,38 +276,34 @@ public class Route {
             orderViolations = 0;
             fillRateViolations = 0;
 
-            Set<Machine> onTruck = new HashSet<>();
+            Set<Machine> onTruck = new HashSet<>(stops.get(0).getCollect());
 
-            Stop s1;
-            Stop s2;
             totalTime = stops.get(0).getTimeSpend();
-            for (int i = 0; i < stops.size(); i++) {
-                s1 = stops.get(i);
-                if (i > 0) {
-                    s2 = stops.get(i - 1);
-                    //Total distance
-                    Location A = s2.getLocation();
-                    Location B = s1.getLocation();
-                    totalDistance += A.distanceTo(B);
-                    //Calculate total time
-                    totalTime += s2.getLocation().timeTo(stops.get(i).getLocation());
-                    totalTime += s1.getTimeSpend();
-                }
+            int fillrate = stops.get(0).getDeltaFillRate();
+            if (fillrate > Problem.getInstance().TRUCK_CAPACITY) {
+                fillRateViolations += fillrate - Problem.getInstance().TRUCK_CAPACITY;
+            }
+
+            for (int i = 1; i < stops.size(); i++) {
+                Stop selected = stops.get(i);
+                //Total distance
+                Location A = selected.getLocation();
+                Location B = stops.get(i-1).getLocation();
+                totalDistance += A.distanceTo(B);
+                //Calculate total time
+                totalTime += A.timeTo(B);
+                totalTime += selected.getTimeSpend();
+
                 //order violations
-                onTruck.addAll(s1.getCollect());
-                for(Machine m: s1.getDrop()){
-                    if(!onTruck.remove(m)){
-                        orderViolations++;
-                    }
+                onTruck.addAll(selected.getCollect());
+                for(Machine m: selected.getDrop()){
+                    if(!onTruck.remove(m)) orderViolations++;
                 }
-                /*orderViolations += (int) s1.getDrop().stream()
-                        .filter(drop -> !onTruckOrder.remove(drop))
-                        .count();*/
 
                 //FillRateViolations
-                int fillRate = calculateFillRate(onTruck);
-                if (fillRate > Problem.getInstance().TRUCK_CAPACITY) {
-                    fillRateViolations += fillRate - Problem.getInstance().TRUCK_CAPACITY;
+                fillrate += selected.getDeltaFillRate();
+                if (fillrate > Problem.getInstance().TRUCK_CAPACITY) {
+                    fillRateViolations += fillrate - Problem.getInstance().TRUCK_CAPACITY;
                 }
             }
 
@@ -349,18 +358,18 @@ public class Route {
     private int calculateFillRateViolations() {
         List<Machine> onTruck = new LinkedList<>();
         int fillRateViolations = 0;
-        /*for (Stop s : stops) {
+        for (Stop s : stops) {
             onTruck.addAll(s.getCollect());
             onTruck.removeAll(s.getDrop());
             int fillRate = calculateFillRate(onTruck);
             if (fillRate > Problem.getInstance().TRUCK_CAPACITY) {
                 fillRateViolations += 100 + fillRate - Problem.getInstance().TRUCK_CAPACITY;
             }
-        }*/
+        }
         return fillRateViolations;
     }
 
-    private int calculateFillRate(Set<Machine> machines) {
+    private int calculateFillRate(List<Machine> machines) {
         int fillrate = 0;
         for (Machine m : machines) {
             fillrate += m.getType().getVolume();
@@ -403,11 +412,11 @@ public class Route {
         return totalDistance;
     }
 
-    public LinkedList<Stop> getStops() {
+    public ArrayList<Stop> getStops() {
         return stops;
     }
 
-    public void setStops(LinkedList<Stop> stops) {
+    public void setStops(ArrayList<Stop> stops) {
         changed = true;
         this.stops = stops;
     }
@@ -472,5 +481,14 @@ public class Route {
         //    hash7 = hash;
         //}
         return totalTime;
+    }
+
+    public boolean isChanged() {
+        return changed;
+    }
+
+    public void setChanged(boolean changed) {
+        this.changed = changed;
+        //getCost();
     }
 }

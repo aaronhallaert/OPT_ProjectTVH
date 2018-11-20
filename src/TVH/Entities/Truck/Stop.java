@@ -16,22 +16,14 @@ public class Stop {
     private Location location;
     private LinkedList<Machine> collect;
     private LinkedList<Machine> drop;
-    private int timeSpend = 0;
-    boolean changed;
-
-
-    public Stop(Location location, LinkedList<Machine> collect, LinkedList<Machine> drop) {
-        this.location = location;
-        this.collect = collect;
-        this.drop = drop;
-        changed = true;
-    }
+    private int timespend = 0;
+    private int deltaFillRate = 0;
 
     public Stop(Location location) {
         this.location = location;
         this.collect = new LinkedList<>();
         this.drop = new LinkedList<>();
-        changed = true;
+
     }
 
     //Copy constructor
@@ -39,8 +31,8 @@ public class Stop {
         this.location = s.location;
         this.collect = new LinkedList<>(s.collect);
         this.drop = new LinkedList<>(s.drop);
-        this.changed = s.changed;
-        this.timeSpend = s.timeSpend;
+        this.timespend = s.timespend;
+        this.deltaFillRate = s.deltaFillRate;
     }
 
     /**
@@ -54,38 +46,41 @@ public class Stop {
 
     public void addToCollect(Machine m) {
         collect.add(m);
-        changed = true;
+
+        timespend += m.getType().getServiceTime();
+        deltaFillRate += m.getType().getVolume();
     }
 
     public void addToDrop(Machine m) {
         drop.add(m);
-        changed = true;
+
+        timespend += m.getType().getServiceTime();
+        deltaFillRate -= m.getType().getVolume();
     }
 
     public void removeFromCollect(Machine m) {
-        collect.remove(m);
-        changed = true;
+        if(collect.remove(m)) {
 
+            timespend -= m.getType().getServiceTime();
+            deltaFillRate -= m.getType().getVolume();
+        }
     }
 
     public void removeFromDrop(Machine m) {
-        drop.remove(m);
-        changed = true;
+        if(drop.remove(m)) {
+
+            timespend -= m.getType().getServiceTime();
+            deltaFillRate += m.getType().getVolume();
+        }
     }
 
 
     public int getTimeSpend() {
-        if(changed) {
-            timeSpend = 0;
-            for (Machine m : collect) {
-                timeSpend += m.getType().getServiceTime();
-            }
-            for (Machine m : drop) {
-                timeSpend += m.getType().getServiceTime();
-            }
-            changed = false;
-        }
-        return timeSpend;
+        return timespend;
+    }
+
+    public int getDeltaFillRate(){
+        return deltaFillRate;
     }
 
     public Location getLocation() {
@@ -97,22 +92,17 @@ public class Stop {
     }
 
     public LinkedList<Machine> getCollect() {
-
         return collect;
     }
 
-    /*public void setCollect(LinkedList<Machine> collect) {
+    public void setCollect(LinkedList<Machine> collect) {
         this.collect = collect;
-    }*/
+    }
 
     public LinkedList<Machine> getDrop() {
-
         return drop;
     }
 
-    /*public void setDrop(LinkedList<Machine> drop) {
-        this.drop = drop;
-    }*/
 
     public String toString() {
         return location.toString();

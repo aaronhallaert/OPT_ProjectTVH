@@ -38,7 +38,7 @@ public class Truck {
         this.endLocation = t.endLocation;
 
         //Deep copy the entire route
-        this.route = new Route(t.route);
+        this.route = new Route(t.route, true);
 
         //Add all job move relations to new hashmap;
         jobMoveMap = new HashMap<>();
@@ -64,15 +64,16 @@ public class Truck {
             int minCost = Integer.MAX_VALUE;
             //Elke move eens toevoegen aan de route en kijken welke move zorgt voor het minst extra kost
             for (Move candidate : moves) {
-                LinkedList<Stop> previousOrder = new LinkedList<>(route.getStops());
-                if (route.addMove(candidate)) {
-                    if (route.getCost() < minCost) {
+                Route copy = new Route(route, false);
+                if(copy.addMove(candidate)){
+                    if (copy.getCost() < minCost) {
                         optimalMove = candidate;
-                        minCost = route.getCost();
+                        minCost = copy.getCost();
                     }
-                    route.removeMove(candidate, false);
-                    route.setStops(previousOrder);
+                    copy.removeMove(candidate, false);
                 }
+                //De stops van de copy zijn geen diepe kopies, we moeten dus alitjd de move terug verwijderen
+
             }
             //Als geen optimale move gevonden is, betekent dit dat de truck de job niet kan uitvoeren
             if (optimalMove == null) return false;
@@ -89,7 +90,7 @@ public class Truck {
         //Als een willekeurige move mag toegevoegd worden.
         else{
             boolean moveAdded = false;
-            Random r = new Random();
+            Random r = new Random(0);
             while(!moveAdded && !moves.isEmpty()){
                 Move randomMove = moves.get(r.nextInt(moves.size()));
                 if(route.addMove(randomMove)){
@@ -141,6 +142,7 @@ public class Truck {
      */
     public void addJob(Job j, Move m, Route r){
         HashMap<Location, Node> nodesMap = Problem.getInstance().nodesMap;
+
 
         route = r;
         jobMoveMap.put(j, m);
@@ -228,6 +230,8 @@ public class Truck {
     /**
      * Deze methode kan de truck zelf optimaliseren door jobs te verwijderen en opnieuw toe te voegen.
      * Dit kan nog de paar laatste kilometers eraf doen op het einde.
+     *
+     * NIET GEBRUIKEN: BUG
      */
     public void optimizeTruck(){
         //TODO: Er zit hier nog ergens een bug in
@@ -237,7 +241,7 @@ public class Truck {
         while (improvement) {
             improvement = false;
             for(Job j: jobs){
-                Route backup = new Route(route);
+                Route backup = new Route(route, true);
                 Move oldMove = jobMoveMap.get(j);
                 removeJob(j, false);
                 if(addJob(j, true)){
@@ -276,11 +280,26 @@ public class Truck {
         List<Proposal> proposals = new ArrayList<>();
         List<Move> moves = j.generatePossibleMoves();
         for(Move m: moves){
-            Route copy = new Route(route);
+            Route copy = new Route(route, false);
             int oldCost = copy.getCost();
             if(copy.addMove(m)) {
                 int newCost = copy.getCost();
-                proposals.add(new Proposal(this, j, m, copy, newCost - oldCost));
+                proposals.add(new Proposal(this, j, m, newCost - oldCost));
+                copy.removeMove(m, false);
+            }
+        }
+        return proposals;
+    }
+
+    public List<Proposal> getProposals(Job j, List<Move> moves){
+        List<Proposal> proposals = new ArrayList<>();
+        for(Move m: moves){
+            Route copy = new Route(route, false);
+            int oldCost = copy.getCost();
+            if(copy.addMove(m)) {
+                int newCost = copy.getCost();
+                proposals.add(new Proposal(this, j, m, newCost - oldCost));
+                copy.removeMove(m, false);
             }
         }
         return proposals;

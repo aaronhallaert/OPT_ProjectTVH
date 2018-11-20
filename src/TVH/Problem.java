@@ -10,7 +10,6 @@ import com.google.common.collect.HashMultimap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.SQLOutput;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -239,8 +238,7 @@ public class Problem {
 //        for(Truck t: trucks){
 //            t.optimizeTruck();
 //        }
-        System.out.println("Initial solution found in: "+ (System.currentTimeMillis() - Main.BEGIN_TIME));
-        System.out.println(init.getTotalDistance());
+        System.out.println(init);
         try {
             init.writeToFile("temp.txt");
         } catch (IOException e) {
@@ -248,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(1000*60*60*7, 20, 15, 2, 1);
+        Solution best = simulatedAnnealingJeroen(20000, 20, 15, 2, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -331,7 +329,7 @@ public class Problem {
         //LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
         int counter = 0;
-        Random r = new Random();
+        Random r = new Random(0);
         Mode mode = Mode.MACHINETYPE;
         while (System.currentTimeMillis() < endTime) {
 
@@ -482,7 +480,7 @@ public class Problem {
         //LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
         int counter = 0;
-        Random r = new Random();
+        Random r = new Random(0);
         while (System.currentTimeMillis() < endTime) {
             //System.out.println("simulated annealing aaron");
             /* truck losmaken ipv machinetypes --------------------------------------*/
@@ -666,7 +664,7 @@ public class Problem {
 
     public boolean assignJobToRandomTruck(Job job, boolean bestMove) {
         ArrayList<Truck> trucksToCheck = new ArrayList<>(trucks);
-        Random r = new Random();
+        Random r = new Random(0);
         while (true) {
             Truck randomTruck = trucksToCheck.get(r.nextInt(trucksToCheck.size()));
             if (randomTruck.addJob(job, bestMove)) {
@@ -680,32 +678,27 @@ public class Problem {
         return true;
     }
 
-    public boolean assignJobToBestTruck(Job job, boolean bestMove) {
-        Truck optimalTruck = null;
-        Route optimalRoute = null;
-        Move optimalMove = null;
-        int minAddedCost = Integer.MAX_VALUE;
+    public boolean assignJobToBestTruck(Job j, boolean bestMove) {
+        //TODO: random job combinatie uitkiezen vooralleer de proposals te vragen, zal voor veel meer snelheid zorgen
+        List<Proposal> proposals = new ArrayList<>();
         for (Truck t : trucks) {
-            int cost = t.getRoute().getCost();
-            LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
-            if (t.addJob(job, bestMove)) {
-                int addedCost = t.getRoute().getCost() - cost;
-                //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
-                //Dit om te voorkomen dat hij geen oplossing meer vindt een keer we hem echt willen toevoegen
-                if (addedCost < minAddedCost) {
-                    minAddedCost = addedCost;
-                    optimalTruck = t;
-                    optimalRoute = new Route(t.getRoute());
-                    optimalMove = t.getJobMoveMap().get(job);
-                }
-                t.removeJob(job, false);
-                t.getRoute().setStops(previousOrder);
-            }
+            proposals.addAll(t.getProposals(j));
         }
-        if (optimalTruck != null) {
-            //Route die we daarnet gevonden hebben terug toevoegen en de job en move terug toevoegen aan de hashmap;
-            optimalTruck.addJob(job, optimalMove, optimalRoute);
-            jobTruckMap.put(job, optimalTruck);
+        if(!proposals.isEmpty()){
+            //Beste proposal zoeken
+            Proposal bestProposal = proposals.get(0);
+            for(Proposal p: proposals){
+                if(p.getCost() < bestProposal.getCost()){
+                    bestProposal = p;
+                }
+            }
+            //Toevoegen
+            Truck truck = bestProposal.getTruck();
+            Job job = bestProposal.getPrimaryJob();
+            Move move = bestProposal.getMove();
+
+            truck.addJob(job, move);
+            jobTruckMap.put(job, truck);
             return true;
         } else {
             return false;
@@ -719,26 +712,20 @@ public class Problem {
         for (Truck t : trucks) {
             proposals.addAll(t.getProposals(j));
         }
-        Random r = new Random();
+        Random r = new Random(0);
         if (!proposals.isEmpty()) {
             //We willen van elk type proposal de beste overhouden.
             //Met andere woorden de beste proposal van elke mogelijk combinatie van primary en secondary job
             proposals = Proposal.getBestProposalPerJobCombination(proposals);
 
             Proposal randomProposal = proposals.get(r.nextInt(proposals.size()));
-            //Proposal randomProposal = proposals.get(0);
-            for(Proposal p: proposals){
-                if(p.getCost() < randomProposal.getCost()){
-                    randomProposal = p;
-                }
-            }
+
             Truck truck = randomProposal.getTruck();
             Job job = randomProposal.getPrimaryJob();
             Move move = randomProposal.getMove();
-            Route route = randomProposal.getRoute();
 
 
-            truck.addJob(job, move, route);
+            truck.addJob(job, move);
             jobTruckMap.put(job, truck);
             return true;
         } else {
@@ -746,8 +733,8 @@ public class Problem {
         }
     }
 
-    public boolean assignRandomMoveToBestTruck(Job job) {
-        Random r = new Random();
+    /*public boolean assignRandomMoveToBestTruck(Job job) {
+        Random r = new Random(0);
         List<Move> moves = job.generatePossibleMoves();
         Move move = moves.get(r.nextInt(moves.size()));
         Truck optimalTruck = null;
@@ -756,7 +743,7 @@ public class Problem {
         int minAddedCost = Integer.MAX_VALUE;
         for (Truck t : trucks) {
             int cost = t.getRoute().getCost();
-            LinkedList<Stop> previousOrder = new LinkedList<>(t.getRoute().getStops());
+            Route backup = new Route(t.getRoute(), false);
             if (t.addJob(job, move)) {
                 int addedCost = t.getRoute().getCost() - cost;
                 //We removen de job opnieuw en zetten de volgorde terug zoals voordien.
@@ -768,7 +755,7 @@ public class Problem {
                     optimalMove = t.getJobMoveMap().get(job);
                 }
                 t.removeJob(job, false);
-                t.getRoute().setStops(previousOrder);
+                t.setRoute(backup);
             }
         }
         if (optimalTruck != null) {
@@ -779,7 +766,7 @@ public class Problem {
         } else {
             return false;
         }
-    }
+    }*/
 
     private static enum Mode{
         MACHINETYPE, TRUCK, NEARBY;

@@ -1,5 +1,7 @@
 package TVH;
 
+import TVH.Entities.Truck.Route;
+import TVH.Entities.Truck.Truck;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
