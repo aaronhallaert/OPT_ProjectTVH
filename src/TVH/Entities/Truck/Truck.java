@@ -90,7 +90,7 @@ public class Truck {
         //Als een willekeurige move mag toegevoegd worden.
         else{
             boolean moveAdded = false;
-            Random r = new Random(0);
+            Random r = new Random();
             while(!moveAdded && !moves.isEmpty()){
                 Move randomMove = moves.get(r.nextInt(moves.size()));
                 if(route.addMove(randomMove)){
@@ -291,7 +291,7 @@ public class Truck {
         return proposals;
     }
 
-    public List<Proposal> getProposals(Job j, List<Move> moves){
+    public List<Proposal> getProposals(Job j, Set<Move> moves){
         List<Proposal> proposals = new ArrayList<>();
         for(Move m: moves){
             Route copy = new Route(route, false);

@@ -26,27 +26,8 @@ public class Proposal {
         this.primaryJob = job;
         this.move = move;
         this.cost = cost;
-        this.secondaryJob = null;
+        this.secondaryJob = move.completesSecondJob(job);
 
-        //Check if primairy job fulfills a secondary one
-        if (primaryJob instanceof DropJob) {
-            DropJob dj = (DropJob) primaryJob;
-            for (Job j : Problem.getInstance().jobTypeMap.get(dj.getMachineType())) {
-                if (j instanceof CollectJob && j.getFixedLocation() == move.getCollect()) {
-                    secondaryJob = j;
-                    break;
-                }
-            }
-        }
-        if (primaryJob instanceof CollectJob) {
-            CollectJob cj = (CollectJob) primaryJob;
-            for (Job j : Problem.getInstance().jobTypeMap.get(cj.getMachineType())) {
-                if (j instanceof DropJob && j.getFixedLocation() == move.getDrop()) {
-                    secondaryJob = j;
-                    break;
-                }
-            }
-        }
     }
 
     public Truck getTruck() {

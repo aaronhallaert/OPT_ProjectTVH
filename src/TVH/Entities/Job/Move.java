@@ -2,6 +2,7 @@ package TVH.Entities.Job;
 
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
+import TVH.Problem;
 
 import java.util.Objects;
 
@@ -47,5 +48,29 @@ public class Move {
     @Override
     public int hashCode() {
         return Objects.hash(machine, collect, drop);
+    }
+
+    public Job completesSecondJob(Job primaryJob){
+        Job secondaryJob = null;
+        //Check if primairy job fulfills a secondary one
+        if (primaryJob instanceof DropJob) {
+            DropJob dj = (DropJob) primaryJob;
+            for (Job j : Problem.getInstance().jobTypeMap.get(dj.getMachineType())) {
+                if (j instanceof CollectJob && j.getFixedLocation() == collect) {
+                    secondaryJob = j;
+                    break;
+                }
+            }
+        }
+        if (primaryJob instanceof CollectJob) {
+            CollectJob cj = (CollectJob) primaryJob;
+            for (Job j : Problem.getInstance().jobTypeMap.get(cj.getMachineType())) {
+                if (j instanceof DropJob && j.getFixedLocation() == drop) {
+                    secondaryJob = j;
+                    break;
+                }
+            }
+        }
+        return secondaryJob;
     }
 }

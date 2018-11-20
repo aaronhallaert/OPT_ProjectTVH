@@ -246,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(20000, 20, 15, 2, 1);
+        Solution best = simulatedAnnealingJeroen(1000*60*20, 20, 15, 2, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -329,8 +329,10 @@ public class Problem {
         //LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
         int counter = 0;
-        Random r = new Random(0);
-        Mode mode = Mode.MACHINETYPE;
+        Random r = new Random();
+        Queue<Mode> modeQueue = Mode.createQueue();
+        Mode mode = modeQueue.poll();
+
         while (System.currentTimeMillis() < endTime) {
 
             List<Job> selectedJobs = new ArrayList<>();
@@ -406,7 +408,7 @@ public class Problem {
                 case TRUCK:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
-                            if(!assignJobToBestTruck(j,true)){
+                            if(!assignJobToBestTruck(j, true)){
                                 allJobsAdded = false;
                                 break;
                             }
@@ -415,7 +417,7 @@ public class Problem {
                 case NEARBY:
                     for(Job j: selectedJobs){
                         if(j.notDone()){
-                            if(!assignJobToBestTruck2(j)){
+                            if(!assignJobToBestTruck(j, true)){
                                 allJobsAdded = false;
                                 break;
                             }
@@ -423,17 +425,6 @@ public class Problem {
                     }
             }
             if (allJobsAdded) {
-                for(Job j: jobs){
-                    if(j.notDone()){
-                        System.out.println("#########   ERROR");
-                        assignJobToBestTruck2(j);
-                        for(Job j2: jobs){
-                            if(j2.notDone()){
-                                System.out.println("######## ERROR2");
-                            }
-                        }
-                    }
-                }
                 Solution candidate = new Solution();
                 //Candidate is better than local
                 if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
@@ -461,7 +452,8 @@ public class Problem {
                     }
                 }
             }
-            mode = mode.next();
+            modeQueue.offer(mode);
+            mode = modeQueue.poll();
             localOptimum.loadSolution();
             if (counter > 1) {
                 counter = 0;
@@ -480,7 +472,7 @@ public class Problem {
         //LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
         int counter = 0;
-        Random r = new Random(0);
+        Random r = new Random();
         while (System.currentTimeMillis() < endTime) {
             //System.out.println("simulated annealing aaron");
             /* truck losmaken ipv machinetypes --------------------------------------*/
@@ -571,100 +563,9 @@ public class Problem {
         return best;
     }
 
-    public Solution testje(int duration, double temperature) {
-        long endTime = System.currentTimeMillis() + duration;
-        Solution best = new Solution();
-        Solution localOptimum = new Solution();
-        //LinkedList<Integer> tabu = new LinkedList<>();
-        int counter = 0;
-        Random r = new Random();
-        while (System.currentTimeMillis() < endTime) {
-            Job randomJob = jobs.get(r.nextInt(jobs.size()));
-            Truck oldTruck = jobTruckMap.get(randomJob);
-            int oldDistance = localOptimum.getTotalDistance();
-            if (oldTruck != null) { //Het kan zijn dat bepaalde jobs niet worden uitgevoerd door een truck omdat ze al gecompleet worden door een andere job
-                oldTruck.removeJob(randomJob, true);
-                jobTruckMap.remove(randomJob);
-
-                for(Truck t: trucks){
-
-                }
-                //Kijken welke jobs er misschien nog "affected" zijn door het verwijderen van deze job
-                ArrayList<Job> affectedJobs = new ArrayList<>();
-                boolean allAffectedJobsAdded = false;
-                while(!allAffectedJobsAdded) {
-                    allAffectedJobsAdded = true;
-                    for (Job j : jobs) {
-                        if (j.notDone() && !affectedJobs.contains(j)) {
-                            allAffectedJobsAdded = false;
-                            affectedJobs.add(j);
-                            //Als deze job nog in een Truck zat moeten we hem deletne
-                            if (jobTruckMap.containsKey(j)) {
-                                oldTruck.removeJob(j, true);
-                                jobTruckMap.remove(j);
-                            }
-                            break;
-                        }
-                    }
-                }
-                HashMultimap<Job, Proposal> proposals = HashMultimap.create();
-                //We voegen hier ook alle proposals toe van de affected jobs
-                for (Job j : affectedJobs) {
-                    for (Truck t : trucks) {
-                        proposals.putAll(j, t.getProposals(j));
-                    }
-                }
-                //Bepalen welke proposals we zullen uitvoeren
-                ArrayList<Proposal> acceptedProposals = new ArrayList<>();
-                HashMap<Job, Proposal> bestProposalPerJob = new HashMap<>();
-                for (Proposal p : acceptedProposals) {
-                    if (p.getCost() < bestProposalPerJob.get(p.getPrimaryJob()).getCost()) {
-                        bestProposalPerJob.put(p.getPrimaryJob(), p);
-                    }
-                }
-
-
-                boolean allJobsFullfilled = true;
-                allJobsFullfilled = assignJobToRandomTruck(randomJob, true);
-                for (Job j : affectedJobs) {
-                    allJobsFullfilled = assignJobToRandomTruck(j, true);
-                }
-                Solution candidate = new Solution();
-                if (allJobsFullfilled && candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
-                    counter++;
-                    localOptimum = candidate;
-                    if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
-                        best = new Solution();
-                    }
-                    System.out.println(localOptimum.getTotalDistance());
-                } else {
-                    if (allJobsFullfilled && candidate.getTotalDistance() > localOptimum.getTotalDistance() + 30) {
-                        double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / temperature);
-                        if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
-                        double random = r.nextDouble();
-                        if (random <= acceptRate) {
-                            counter++;
-                            System.out.println("worse candidate accepted with " + acceptRate + " (" + temperature + ")");
-                            localOptimum = candidate;
-                            System.out.println(localOptimum.getTotalDistance());
-
-                        }
-                    }
-                    localOptimum.loadSolution();
-                }
-                if (counter > 1) {
-                    counter = 0;
-                    temperature = 0.8 * temperature;
-                }
-            }
-
-        }
-        return localOptimum;
-    }
-
     public boolean assignJobToRandomTruck(Job job, boolean bestMove) {
         ArrayList<Truck> trucksToCheck = new ArrayList<>(trucks);
-        Random r = new Random(0);
+        Random r = new Random();
         while (true) {
             Truck randomTruck = trucksToCheck.get(r.nextInt(trucksToCheck.size()));
             if (randomTruck.addJob(job, bestMove)) {
@@ -708,21 +609,32 @@ public class Problem {
     //TODO: uitleg schrijven hierbij
     public boolean assignJobToBestTruck2(Job j){
         //TODO: random job combinatie uitkiezen vooralleer de proposals te vragen, zal voor veel meer snelheid zorgen
+        Random r = new Random();
+        HashMultimap<Job, Move> secondJobMoveMap = HashMultimap.create();
+        for(Move m: j.generatePossibleMoves()){
+            secondJobMoveMap.put(m.completesSecondJob(j), m);
+        }
+        List<Job> secondaryJobs = new ArrayList<>(secondJobMoveMap.keySet());
+        Job selectedSecondaryJob = secondaryJobs.get(r.nextInt(secondaryJobs.size()));
+        Set<Move> toCheckMoves = secondJobMoveMap.get(selectedSecondaryJob);
+
         List<Proposal> proposals = new ArrayList<>();
         for (Truck t : trucks) {
-            proposals.addAll(t.getProposals(j));
+            proposals.addAll(t.getProposals(j, toCheckMoves));
         }
-        Random r = new Random(0);
         if (!proposals.isEmpty()) {
             //We willen van elk type proposal de beste overhouden.
             //Met andere woorden de beste proposal van elke mogelijk combinatie van primary en secondary job
-            proposals = Proposal.getBestProposalPerJobCombination(proposals);
+            Proposal bestProposal = proposals.get(0);
+            for(Proposal p: proposals){
+                if(p.getCost() < bestProposal.getCost()){
+                    bestProposal = p;
+                }
+            }
 
-            Proposal randomProposal = proposals.get(r.nextInt(proposals.size()));
-
-            Truck truck = randomProposal.getTruck();
-            Job job = randomProposal.getPrimaryJob();
-            Move move = randomProposal.getMove();
+            Truck truck = bestProposal.getTruck();
+            Job job = bestProposal.getPrimaryJob();
+            Move move = bestProposal.getMove();
 
 
             truck.addJob(job, move);
@@ -734,7 +646,7 @@ public class Problem {
     }
 
     /*public boolean assignRandomMoveToBestTruck(Job job) {
-        Random r = new Random(0);
+        Random r = new Random();
         List<Move> moves = job.generatePossibleMoves();
         Move move = moves.get(r.nextInt(moves.size()));
         Truck optimalTruck = null;
@@ -772,13 +684,13 @@ public class Problem {
         MACHINETYPE, TRUCK, NEARBY;
 
         //Methode om de volgende te vinden;
-        public Mode next(){
-            switch (this){
-                case MACHINETYPE: return TRUCK;
-                case TRUCK: return NEARBY;
-                case NEARBY: return MACHINETYPE;
-                default: return MACHINETYPE;
-            }
+        public static Queue<Mode> createQueue(){
+            Queue<Mode> modeQueue = new LinkedList<>();
+            //modeQueue.offer(Mode.MACHINETYPE);
+            modeQueue.offer(Mode.TRUCK);
+            modeQueue.offer(Mode.MACHINETYPE);
+            modeQueue.offer(Mode.NEARBY);
+            return modeQueue;
         }
     }
 }
