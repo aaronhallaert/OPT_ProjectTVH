@@ -221,10 +221,11 @@ public class Route {
      * @return geswapte lijst
      */
     public void twoOptSwap(int firstCut, int secondCut) {
-        List<Stop> cut = new LinkedList<>(stops.subList(firstCut, secondCut + 1));
-        stops.removeAll(cut);
+        List<Stop> cut = new ArrayList<>(stops.subList(firstCut, secondCut + 1));
         Collections.reverse(cut);
-        stops.addAll(firstCut, cut);
+        for (int i = 0; i < cut.size(); i++) {
+            stops.set(firstCut + i, cut.get(i));
+        }
         changed = true;
     }
 
