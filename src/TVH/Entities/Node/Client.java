@@ -12,21 +12,21 @@ import java.util.*;
 public class Client implements Node{
 
     private Location location;
-    private ArrayList<Machine> toCollect;
-    private ArrayList<MachineType> toDrop;
+    private HashSet<Machine> toCollect;
+    private HashSet<MachineType> toDrop;
 
     public Client(Location location) {
         this.location = location;
-        this.toCollect = new ArrayList<>();
-        this.toDrop = new ArrayList<>();
+        this.toCollect = new HashSet<>();
+        this.toDrop = new HashSet<>();
         //this.dropped = new LinkedList<>();
     }
 
     //Copy constructor
     public Client(Client n){
         location = n.location;
-        toCollect = new ArrayList<>(n.toCollect);
-        toDrop = new ArrayList<>(n.toDrop);
+        toCollect = new HashSet<>(n.toCollect);
+        toDrop = new HashSet<>(n.toDrop);
     }
 
     public void addToCollect(Machine machine) {
@@ -79,15 +79,17 @@ public class Client implements Node{
         return toCollect.contains(m);
     }
 
-    public List<Machine> getAvailableMachines(){
+    public Set<Machine> getAvailableMachines(){
         return toCollect;
     }
 
     public boolean needsDrop(MachineType machineType){
-        for(MachineType mt: toDrop){
-            if(mt == machineType) return true;
+        if(toDrop.contains(machineType)){
+            return true;
         }
-        return false;
+        else{
+            return false;
+        }
     }
 
     public boolean canPutMachineType(MachineType mt){
@@ -103,11 +105,11 @@ public class Client implements Node{
         this.location = location;
     }
 
-    public ArrayList<Machine> getToCollect() {
+    public Set<Machine> getToCollect() {
         return toCollect;
     }
 
-    public ArrayList<MachineType> getToDrop() {
+    public Set<MachineType> getToDrop() {
         return toDrop;
     }
 }
