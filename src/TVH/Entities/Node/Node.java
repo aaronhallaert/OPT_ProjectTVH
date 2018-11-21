@@ -3,7 +3,7 @@ package TVH.Entities.Node;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Algemene interface van een Node die geïmplementeerd wordt door Client en Depot
@@ -16,7 +16,7 @@ public interface Node {
 
     public boolean hasMachineAvailable(Machine m);
 
-    public Set<Machine> getAvailableMachines();
+    public List<Machine> getAvailableMachines();
 
     public boolean canPutMachineType(MachineType mt);
 

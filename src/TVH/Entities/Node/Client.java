@@ -12,21 +12,21 @@ import java.util.*;
 public class Client implements Node{
 
     private Location location;
-    private HashSet<Machine> toCollect;
-    private HashSet<MachineType> toDrop;
+    private ArrayList<Machine> toCollect;
+    private ArrayList<MachineType> toDrop;
 
     public Client(Location location) {
         this.location = location;
-        this.toCollect = new HashSet<>();
-        this.toDrop = new HashSet<>();
+        this.toCollect = new ArrayList<>();
+        this.toDrop = new ArrayList<>();
         //this.dropped = new LinkedList<>();
     }
 
     //Copy constructor
     public Client(Client n){
         location = n.location;
-        toCollect = new HashSet<>(n.toCollect);
-        toDrop = new HashSet<>(n.toDrop);
+        toCollect = new ArrayList<>(n.toCollect);
+        toDrop = new ArrayList<>(n.toDrop);
     }
 
     public void addToCollect(Machine machine) {
@@ -79,7 +79,7 @@ public class Client implements Node{
         return toCollect.contains(m);
     }
 
-    public Set<Machine> getAvailableMachines(){
+    public List<Machine> getAvailableMachines(){
         return toCollect;
     }
 
@@ -105,11 +105,11 @@ public class Client implements Node{
         this.location = location;
     }
 
-    public Set<Machine> getToCollect() {
+    public List<Machine> getToCollect() {
         return toCollect;
     }
 
-    public Set<MachineType> getToDrop() {
+    public List<MachineType> getToDrop() {
         return toDrop;
     }
 }

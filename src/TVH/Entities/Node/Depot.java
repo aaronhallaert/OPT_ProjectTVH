@@ -4,9 +4,9 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 import com.google.common.collect.HashMultimap;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.List;
 
 /**
  * De klasse Depot bevat elke Node waar machines beschikbaar zijn zonder verplichtingen. Een Depot heeft een lijst
@@ -85,7 +85,7 @@ public class Depot implements Node{
         return machines;
     }
 
-    public Set<Machine> getAvailableMachines(){
-        return new HashSet<>(machines.values());
+    public List<Machine> getAvailableMachines(){
+        return new ArrayList<>(machines.values());
     }
 }
