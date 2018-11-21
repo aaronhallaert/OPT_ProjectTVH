@@ -1,7 +1,12 @@
 package TVH.GUI;
 
+import TVH.Main;
 import TVH.Solution;
 import javafx.application.Platform;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class SolutionListener {
     public static SolutionListener instance = new SolutionListener();
@@ -43,10 +48,29 @@ public class SolutionListener {
             int timestamp = (int)(System.currentTimeMillis() - startTime);
             Platform.runLater(() -> {
                 graphDriver.addPoint(timestamp,s.getTotalDistance());
+                playEskettit();
+
             });
         }
     }
 
+    public static synchronized void playEskettit() {
+        new Thread(new Runnable() {
+            // The wrapper thread is unnecessary, unless it blocks on the
+            // Clip finishing; see comments.
+            public void run() {
+                try {
+                    Clip clip = AudioSystem.getClip();
+                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+                            Main.class.getResourceAsStream("GUI/Esketit.wav"));
+                    clip.open(inputStream);
+                    clip.start();
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+        }).start();
+    }
 
 
 
