@@ -246,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingAaron(1000 * 60 * 1, 30, 8, 2, 2);
+        Solution best = simulatedAnnealingJeroen(1000 * 60 * 10, 20, 10, 2, 1);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -329,6 +329,7 @@ public class Problem {
         //LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
         int counter = 0;
+        int timesRun = 0;
         Random r = new Random();
         Queue<Mode> modeQueue = Mode.createQueue();
         Mode mode = modeQueue.poll();
@@ -417,7 +418,7 @@ public class Problem {
                 case NEARBY:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) {
-                            if (!assignJobToBestTruck2(j)) {
+                            if (!assignJobToBestTruck(j, true)) {
                                 allJobsAdded = false;
                                 break;
                             }
@@ -442,7 +443,7 @@ public class Problem {
                         if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
                         double random = r.nextDouble();
                         if (random <= acceptRate) {
-                            counter++;
+                            //counter++;
                             localOptimum = candidate;
                             long timestamp = System.currentTimeMillis() - (endTime - duration);
                             DecimalFormat df = new DecimalFormat("#.##");
@@ -455,10 +456,14 @@ public class Problem {
             modeQueue.offer(mode);
             mode = modeQueue.poll();
             localOptimum.loadSolution();
-            if (counter > 1) {
+
+            timesRun++;
+            counter++;
+            if(counter == 100) {
+                currentTemp = temperature * (endTime - System.currentTimeMillis()) / duration;
                 counter = 0;
-                currentTemp = 0.95 * currentTemp;
             }
+
         }
         best.loadSolution();
         return best;

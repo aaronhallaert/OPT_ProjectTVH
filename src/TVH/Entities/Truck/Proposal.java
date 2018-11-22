@@ -18,7 +18,7 @@ public class Proposal {
     Truck truck;
     Job primaryJob;
     Job secondaryJob;
-    Move move;;
+    Move move;
     int cost;
 
     public Proposal(Truck truck, Job job, Move move, int cost) {
