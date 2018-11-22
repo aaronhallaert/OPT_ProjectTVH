@@ -31,9 +31,9 @@
       <Slider fx:id="tempslider" layoutX="604.0" layoutY="25.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
       <Label layoutX="604.0" layoutY="47.0" prefHeight="17.0" prefWidth="41.0" text="Temp:" AnchorPane.rightAnchor="119.0" AnchorPane.topAnchor="47.0" />
       <TextField fx:id="tempfield" layoutX="674.0" layoutY="44.0" prefHeight="25.0" prefWidth="81.0" AnchorPane.rightAnchor="38.0" AnchorPane.topAnchor="44.0" />
-      <Label fx:id="bestlabel" alignment="CENTER" layoutX="335.0" layoutY="528.0" prefHeight="17.0" prefWidth="52.0" text="best" AnchorPane.leftAnchor="335.0" AnchorPane.rightAnchor="334.0">
+      <Label fx:id="bestlabel" alignment="CENTER" layoutX="335.0" layoutY="528.0" prefHeight="17.0" prefWidth="52.0" text="4320" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="335.0" AnchorPane.rightAnchor="334.0">
          <font>
-            <Font size="14.0" />
+            <Font name="System Bold" size="23.0" />
          </font>
       </Label>
     </children>
