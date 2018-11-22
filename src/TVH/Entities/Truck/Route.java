@@ -1,5 +1,6 @@
 package TVH.Entities.Truck;
 
+import TVH.Config;
 import TVH.Entities.Job.Move;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Location;
@@ -15,10 +16,10 @@ import java.util.*;
 
 public class Route {
 
-    private static final int TIME_FACTOR = 100;
-    private static final int ORDER_FACTOR = 1000;
-    private static final int FILL_RATE_VIOLATIONS_FACTOR = 1000;
-    private static final int DISTANCE_FACTOR = 1;
+    private static final int TIME_FACTOR = Config.getInstance().getTimefactor(); //100
+    private static final int ORDER_FACTOR = Config.getInstance().getOrderfactor(); //1000
+    private static final int FILL_RATE_VIOLATIONS_FACTOR = Config.getInstance().getFrviolationsfactor(); // 1000
+    private static final int DISTANCE_FACTOR = Config.getInstance().getDistancefactor(); //1
 
     private ArrayList<Stop> stops;
     private int totalDistance = 0;
