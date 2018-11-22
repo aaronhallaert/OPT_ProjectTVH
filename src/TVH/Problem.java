@@ -246,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingAaron(1000 * 60 * 1, 20, 8, 2, 2);
+        Solution best = simulatedAnnealingAaron(1000 * 60 * 5, 40, 8, 2, 2);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -599,10 +599,9 @@ public class Problem {
             modeQueue.offer(mode);
             mode = modeQueue.poll();
             localOptimum.loadSolution();
-            if (counter > 1) {
-                counter = 0;
-                currentTemp = 0.9 * currentTemp;
-            }
+
+            currentTemp = 0.9995 * currentTemp;
+
         }
         best.loadSolution();
         return best;
@@ -620,8 +619,8 @@ public class Problem {
             double maxVerschil = t.getJobMoveMap().keySet().size() / 1.5;
 
 
-            boolean distanceBool = true;
-            while (eind < begin && verschil < minVerschil && verschil < maxVerschil && distanceBool) {
+            boolean distanceBool = false;
+            while (eind < begin && verschil < minVerschil && verschil < maxVerschil && !distanceBool) {
                 begin = r.nextInt(t.getJobMoveMap().keySet().size());
                 eind = r.nextInt(t.getJobMoveMap().keySet().size());
                 verschil = eind - begin;
