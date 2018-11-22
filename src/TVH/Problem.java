@@ -246,7 +246,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingAaron(1000 * 60 * 5, 40, 8, 2, 2);
+        Solution best = simulatedAnnealingAaron(1000 * 60 * 1, 30, 8, 2, 2);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -599,9 +599,10 @@ public class Problem {
             modeQueue.offer(mode);
             mode = modeQueue.poll();
             localOptimum.loadSolution();
-
-            currentTemp = 0.9995 * currentTemp;
-
+            if(counter>1) {
+                currentTemp = 0.95 * currentTemp;
+                counter=0;
+            }
         }
         best.loadSolution();
         return best;
@@ -609,14 +610,14 @@ public class Problem {
 
     public void addTruckToList(List<Job> selectedJobs, Truck t, boolean stop) {
 
-        if(!stop) {
+
             ArrayList<Job> truckJobs = new ArrayList<>(t.getJobMoveMap().keySet());
             Random r = new Random();
             int begin = r.nextInt(t.getJobMoveMap().keySet().size());
             int eind = r.nextInt(t.getJobMoveMap().keySet().size());
             int verschil = eind - begin;
-            double minVerschil = t.getJobMoveMap().keySet().size() / 3;
-            double maxVerschil = t.getJobMoveMap().keySet().size() / 1.5;
+            double minVerschil = t.getJobMoveMap().keySet().size() / 7;
+            double maxVerschil = t.getJobMoveMap().keySet().size() / 1;
 
 
             boolean distanceBool = false;
@@ -634,13 +635,19 @@ public class Problem {
                 selectedJobs.add(truckJobs.get(i));
             }
 
+        if(!stop) {
             for (Edge edge : truckJobs.get(begin).getFixedLocation().getSortedEdgeList()) {
-                if (jobTruckMap.get(locationJobMap.get(edge.getTo())) != t) {
-                    addTruckToList(selectedJobs, jobTruckMap.get(locationJobMap.get(edge.getTo())), true);
+                Truck nextTruck= jobTruckMap.get(locationJobMap.get(edge.getTo()));
+                if (nextTruck!=null && nextTruck != t) {
+
+                    addTruckToList(selectedJobs, nextTruck, true);
                     break;
+
+
                 }
             }
         }
+
     }
 
     /**
