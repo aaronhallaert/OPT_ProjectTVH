@@ -1,0 +1,8 @@
+
+squid:S1319K"pThe type of the "machines" object should be an interface such as "Map" rather than the implementation "HashMap".(Û€îÍ8¹œøşê,
+”squid:S1319?"qThe return type of this method should be an interface such as "List" rather than the implementation "LinkedList".(ûÓüøÿÿÿÿ8 åÿê,
+”squid:S13197"qThe return type of this method should be an interface such as "List" rather than the implementation "LinkedList".(İ‚ãœúÿÿÿÿ8¹œøşê,
+šsquid:S1319;"wThe type of the "pickupItems" object should be an interface such as "List" rather than the implementation "LinkedList".(¤Áâùÿÿÿÿ8¹œøşê,
+squid:S1319G"mThe return type of this method should be an interface such as "Map" rather than the implementation "HashMap".(×±…üüÿÿÿÿ8¹œøşê,
+Zsquid:UselessImportCheck"*Remove this unused import 'java.util.Set'.(ö²„¤şÿÿÿÿ8ÄÀ–şê,
+–squid:S1319C"xThe type of the "dropOffItems" object should be an interface such as "List" rather than the implementation "LinkedList".(ïúÜ¸8 åÿê,

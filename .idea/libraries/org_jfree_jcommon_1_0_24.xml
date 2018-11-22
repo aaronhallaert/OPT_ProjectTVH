@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="org.jfree:jcommon:1.0.24" type="repository">
+    <properties maven-id="org.jfree:jcommon:1.0.24" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jcommon-1.0.24.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

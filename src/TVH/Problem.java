@@ -245,16 +245,17 @@ public class Problem {
             e.printStackTrace();
         }
         //Solution best = init;
-
-        Solution best = simulatedAnnealingJeroen(1000 * 60 * 10, 20, 10, 2, 1);
-        //best.loadSolution();
-        //System.out.println("start second annealing");
-        //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
-        /*best.loadSolution();
-        for (Truck truck : trucks) {
-            truck.optimizeTruck();
+        Config c= Config.getInstance();
+        Solution best=null;
+        System.out.println(c.getTime() +","+  c.getTemperature() +","+ c.getJobs() +","+ c.getMachinetypes()+","+ c.getTrucks());
+        if(c.getType().equals("Jeroen")) {
+             best = simulatedAnnealingJeroen(c.getTime(), c.getTemperature(), c.getJobs(), c.getMachinetypes(), c.getTrucks());
         }
-        best = new Solution();*/
+        else if(c.getType().equals("Aaron")){
+            best = simulatedAnnealingAaron(c.getTime(), c.getTemperature(), c.getJobs(), c.getMachinetypes(), c.getTrucks());
+        }
+
+
         //Solution best = simulatedAnnealingJeroen(100000, 50, Integer.MAX_VALUE);
         //Solution best = testje(600000, 20);
         System.out.println(best);
@@ -323,7 +324,7 @@ public class Problem {
     }
 
     public Solution simulatedAnnealingJeroen(int duration, double temperature, int nJobsToRemove, int nMachineTypesToRemove, int nTrucksToRemove) {
-        long endTime = System.currentTimeMillis() + duration;
+        long endTime = System.currentTimeMillis() + duration*1000;
         Solution best = new Solution();
         Solution localOptimum = new Solution();
         //LinkedList<Integer> tabu = new LinkedList<>();
@@ -470,7 +471,9 @@ public class Problem {
     }
 
     public Solution simulatedAnnealingAaron(int duration, double temperature, int nJobsToRemove, int nMachineTypesToRemove, int nTrucksToRemove) {
-        long endTime = System.currentTimeMillis() + duration;
+
+        long endTime = System.currentTimeMillis() + duration*1000;
+
         Solution best = new Solution();
         Solution localOptimum = new Solution();
         //LinkedList<Integer> tabu = new LinkedList<>();

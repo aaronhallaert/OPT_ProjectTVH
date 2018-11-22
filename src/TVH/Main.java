@@ -1,13 +1,10 @@
 package TVH;
 
-import TVH.Entities.Truck.Route;
-import TVH.Entities.Truck.Truck;
-import TVH.GUI.SolutionListener;
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.io.File;
-import java.io.IOException;
 public class Main extends Application{
 
     static String INPUT_FILE;
@@ -16,28 +13,19 @@ public class Main extends Application{
 
     public static void main(String[] args) {
 
-        INPUT_FILE = args[0]+".txt";
-        OUTPUT_FILE = args[0]+"_out.txt";
-        BEGIN_TIME = System.currentTimeMillis();
-
-        File inputFile = new File(INPUT_FILE);
-        long startTime = System.currentTimeMillis();
-
-        try{
-            Problem problem = Problem.newInstance(inputFile);
-            Solution solution = problem.solve();
-            solution.writeToFile(OUTPUT_FILE);
-            System.out.println("Calculation time: "+(System.currentTimeMillis()-startTime)+"ms");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        launch(args);
 
     }
 
     //dit moet der in, anders krijg je geen javaFX componenten
     @Override
     public void start(Stage primaryStage) throws Exception {
-
+        Parent root = FXMLLoader.load(getClass().getResource("GUI/ConfigGUI.fxml"));
+        primaryStage.setTitle("Configurations");
+        Scene startScene= new Scene(root,650 , 400);
+        primaryStage.setScene(startScene);
+        primaryStage.setResizable(false);
+        primaryStage.show();
 
     }
 }
