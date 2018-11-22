@@ -84,6 +84,7 @@ public class Route {
      * @return true als de move succesvol is toegevoegd (zonder constraints te breken)
      */
     public boolean addMove(Move m) {
+
         //Backups nemen van stops en locationstopmap
         Route backup = new Route(this, false);
 
@@ -91,36 +92,60 @@ public class Route {
         Stop collectStop = null;
         Stop dropStop = null;
         //Collect stop opzoeken
-        boolean collectNotFound = true;
-        for (Stop s : stops) {
-            if (s.getLocation() == m.getCollect() && collectNotFound) {
-                collectNotFound = false;
+        int collectIndex = -1;
+        int dropIndex = -1;
+        for (int i = 0; i < stops.size(); i++) {
+            Stop s = stops.get(i);
+            if (s.getLocation() == m.getCollect() && collectIndex == -1) {
                 collectStop = s;
+                collectIndex = i;
             }
-        }
-        //Indien deze nog niet in de route zit, hem toevoegen.
-        if (collectStop == null) {
-            collectStop = new Stop(m.getCollect());
-            stops.add(stops.size() - 1, collectStop);
-        }
-        //Drop stop toevoegen
-        for (Stop s : stops) {
-            if (s.getLocation() == m.getDrop()) {
+            if(s.getLocation() == m.getDrop()){
                 dropStop = s;
+                dropIndex = i;
             }
         }
+
         //Indien deze nog niet in de route zit, hem toevoegen.
-        if (dropStop == null) {
-            dropStop = new Stop(m.getDrop());
-            stops.add(stops.size() - 1, dropStop);
+        if (collectStop == null && dropStop == null) {
+            if(m.getCollect() == m.getDrop()){
+                Stop collectAndDropStop = new Stop(m.getCollect());
+                collectAndDropStop.addToCollect(m.getMachine());
+                collectAndDropStop.addToDrop(m.getMachine());
+
+                insertStop(collectAndDropStop, 1, stops.size());
+            }
+            else {
+                collectStop = new Stop(m.getCollect());
+                dropStop = new Stop(m.getDrop());
+                collectStop.addToCollect(m.getMachine());
+                dropStop.addToDrop(m.getMachine());
+
+                insertStops(collectStop, dropStop);
+            }
+        }
+        else {
+            if (collectStop == null) {
+                collectStop = new Stop(m.getCollect());
+                collectStop.addToCollect(m.getMachine());
+                dropStop.addToDrop(m.getMachine());
+
+                insertStop(collectStop, 1, dropIndex+1);
+
+            }
+            else if(dropStop == null){
+                dropStop = new Stop(m.getDrop());
+                dropStop.addToDrop(m.getMachine());
+                collectStop.addToCollect(m.getMachine());
+
+                insertStop(dropStop, collectIndex+1, stops.size());
+            }
+            else{
+                dropStop.addToDrop(m.getMachine());
+                collectStop.addToCollect(m.getMachine());
+            }
         }
 
-        //De machine toevoegen aan de beide stops (collecten en droppen)
-        collectStop.addToCollect(m.getMachine());
-        dropStop.addToDrop(m.getMachine());
-        changed = true;
-
-        optimizeRoute();
         changed = true;
         //De optimalisatie geeft geen garantie van feasibility, er moet dus nog gekeken worden als de rit feasible is
         if (!isFeasible()) {
@@ -172,9 +197,9 @@ public class Route {
             stops.remove(dropStop);
         }
 
-        if (optimize) {
+        /*if (optimize) {
             optimizeRoute();
-        }
+        }*/
 
         changed = true;
     }
@@ -182,7 +207,7 @@ public class Route {
     /**
      * Deze methode optimaliseert de route met behulp van 2-opt swaps
      */
-    private void optimizeRoute() {
+    /*private void optimizeRoute() {
         boolean betterRouteFound = true;
         //int randomSwapsDone = 0;
         boolean feasibleRouteExists = this.quickFeasiblityCheck();
@@ -211,6 +236,41 @@ public class Route {
                 }
             }
         }
+    }*/
+
+    private void insertStops(Stop stop1, Stop stop2){
+        int minCost = Integer.MAX_VALUE;
+        Route best = null;
+        for (int i = 1; i < getStops().size(); i++) {
+            for (int j = 1; j < getStops().size(); j++) {
+                if(i <= j) {
+                    Route candidate = new Route(this, false);
+                    candidate.getStops().add(i, stop1);
+                    candidate.getStops().add(j+1, stop2);
+                    candidate.setChanged(true);
+                    if(candidate.getCost() < minCost){
+                        best = candidate;
+                        minCost = candidate.getCost();
+                    }
+                }
+            }
+        }
+        loadRoute(best);
+    }
+
+    private void insertStop(Stop stop1, int lowerbound, int upperbound){
+        int minCost = Integer.MAX_VALUE;
+        Route best = null;
+        for (int i = lowerbound; i < upperbound; i++) {
+            Route candidate = new Route(this, false);
+            candidate.getStops().add(i, stop1);
+            candidate.setChanged(true);
+            if(candidate.getCost() < minCost){
+                best = candidate;
+                minCost = candidate.getCost();
+            }
+        }
+        loadRoute(best);
     }
 
     /**
