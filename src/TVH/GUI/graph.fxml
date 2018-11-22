@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.chart.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="568.0" prefWidth="764.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.GUI.GraphController">
+<AnchorPane prefHeight="568.0" prefWidth="764.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.GUI.GraphController">
     <children>
         <Label alignment="CENTER" layoutX="219.0" layoutY="14.0" prefHeight="53.0" prefWidth="327.0" text="Solution plot" AnchorPane.leftAnchor="219.0" AnchorPane.rightAnchor="218.0" AnchorPane.topAnchor="14.0">
             <font>
@@ -26,7 +23,18 @@
                   <NumberAxis side="LEFT" />
               </yAxis>
           </LineChart>
-      <Label fx:id="timeLabel" layoutX="66.0" layoutY="23.0" />
+      <Label fx:id="timeLabel" alignment="CENTER" layoutX="62.0" layoutY="25.0" prefHeight="30.0" prefWidth="153.0" text="time" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="25.0">
+         <font>
+            <Font size="20.0" />
+         </font></Label>
       <Label fx:id="remainingTimeLabel" layoutX="604.0" layoutY="23.0" />
+      <Slider fx:id="tempslider" layoutX="604.0" layoutY="25.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="25.0" />
+      <Label layoutX="604.0" layoutY="47.0" prefHeight="17.0" prefWidth="41.0" text="Temp:" AnchorPane.rightAnchor="119.0" AnchorPane.topAnchor="47.0" />
+      <TextField fx:id="tempfield" layoutX="674.0" layoutY="44.0" prefHeight="25.0" prefWidth="81.0" AnchorPane.rightAnchor="38.0" AnchorPane.topAnchor="44.0" />
+      <Label fx:id="bestlabel" alignment="CENTER" layoutX="335.0" layoutY="528.0" prefHeight="17.0" prefWidth="52.0" text="best" AnchorPane.leftAnchor="335.0" AnchorPane.rightAnchor="334.0">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>

@@ -2,19 +2,20 @@ package TVH.GUI;
 
 import TVH.Main;
 import TVH.Solution;
+import com.google.common.graph.Graph;
 import javafx.application.Platform;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
-public class SolutionListener {
-    public static SolutionListener instance = new SolutionListener();
+public class Listener {
+    public static Listener instance = new Listener();
     int lowestDistance;
     long startTime;
     GraphDriver graphDriver;
 
-    private SolutionListener(){
+    private Listener(){
         lowestDistance = Integer.MAX_VALUE;
         startTime = System.currentTimeMillis();
         graphDriver = new GraphDriver();
@@ -38,7 +39,7 @@ public class SolutionListener {
 
     }
 
-    public static SolutionListener getInstance(){
+    public static Listener getInstance(){
         return instance;
     }
 
@@ -52,6 +53,10 @@ public class SolutionListener {
 
             });
         }
+    }
+
+    public void updateTemperature(double temp){
+        graphDriver.updateTemp(temp);
     }
 
     public static synchronized void playEskettit() {

@@ -1,8 +1,11 @@
 package TVH.GUI;
 
+import TVH.Problem;
 import javafx.fxml.FXML;
 import javafx.scene.chart.*;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,6 +23,14 @@ public class GraphController {
     @FXML
     Label remainingTimeLabel;
 
+    @FXML
+    Label bestlabel;
+
+    @FXML
+    Slider tempslider;
+
+    @FXML
+    TextField tempfield;
 
     @FXML
     private Label solutionLabel;
@@ -54,11 +65,19 @@ public class GraphController {
 
         lineChart.getData().add(series1);
 
+        tempslider.setMin(0);
+        tempslider.setMax(20);
+
+        tempslider.valueProperty().addListener(e -> {
+            updateTemp(tempslider.getValue());
+        });
+
 
     }
 
     public void addPunt(Integer currentTime, Integer aantalKm){
         series1.getData().add(new XYChart.Data(currentTime/1000,aantalKm));
+        bestlabel.setText(aantalKm+"");
     }
 
     public void updateClock(long currentTime){
@@ -69,10 +88,15 @@ public class GraphController {
                 TimeUnit.MILLISECONDS.toSeconds(currentTime) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(currentTime)));
         timeLabel.setText(formattedTime+" ("+TimeUnit.MILLISECONDS.toSeconds(currentTime)+")");
-
-
-
     }
+
+    public void updateTemp(double temp){
+        tempfield.setText(temp+"");
+        tempslider.setValue(temp);
+        Problem.getInstance().currentTemp = temp;
+    }
+
+
 
 
 

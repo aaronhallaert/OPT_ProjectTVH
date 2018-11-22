@@ -5,6 +5,7 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.*;
 import TVH.Entities.Truck.*;
+import TVH.GUI.Listener;
 import com.google.common.collect.HashMultimap;
 
 import java.io.File;
@@ -32,6 +33,7 @@ public class Problem {
     public HashMultimap<MachineType, Job> jobTypeMap = HashMultimap.create();   //statisch object
     public HashMap<Job, Truck> jobTruckMap = new HashMap<>();                   //niet-statisch object
     public HashMap<Location, Job> locationJobMap = new HashMap<>();
+    public double currentTemp = 0;
 
     public static Problem getInstance() {
         return instance;
@@ -246,7 +248,7 @@ public class Problem {
         }
         //Solution best = init;
 
-        Solution best = simulatedAnnealingJeroen(1000 * 60 * 10, 20, 10, 2, 1);
+        Solution best = simulatedAnnealingJeroen(1000 * 60 * 60 * 2, 20, 12, 2, 2);
         //best.loadSolution();
         //System.out.println("start second annealing");
         //best= simulatedAnnealingJeroen(20000,100, Integer.MAX_VALUE,1);
@@ -327,7 +329,8 @@ public class Problem {
         Solution best = new Solution();
         Solution localOptimum = new Solution();
         //LinkedList<Integer> tabu = new LinkedList<>();
-        double currentTemp = temperature;
+        currentTemp = temperature;
+        Listener.getInstance().updateTemperature(currentTemp);
         int counter = 0;
         int timesRun = 0;
         Random r = new Random();
@@ -361,8 +364,10 @@ public class Problem {
                             selectedTrucks.add(t);
                         }
                     }
+
+
                     for (Truck t : selectedTrucks) {
-                        selectedJobs.addAll(t.getJobMoveMap().keySet());
+                        addTruckToList(selectedJobs, t, false);
                     }
                     break;
                 case NEARBY:
@@ -459,12 +464,14 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if(counter == 100) {
-                currentTemp = temperature * (endTime - System.currentTimeMillis()) / duration;
+            if(counter == 10) {
+                currentTemp = 0.995*currentTemp;
+                Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
             }
 
         }
+        System.out.println("Times run: "+timesRun);
         best.loadSolution();
         return best;
     }
@@ -806,7 +813,7 @@ public class Problem {
             modeQueue.offer(Mode.MACHINETYPE);
             modeQueue.offer(Mode.NEARBY);
             modeQueue.offer(Mode.TRUCK);
-           // modeQueue.offer(Mode.MACHINETYPE);
+            modeQueue.offer(Mode.MACHINETYPE);
             modeQueue.offer(Mode.NEARBY);
             modeQueue.offer(Mode.TRUCK);
             return modeQueue;

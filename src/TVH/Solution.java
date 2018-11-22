@@ -6,7 +6,7 @@ import TVH.Entities.Node.Client;
 import TVH.Entities.Node.Depot;
 import TVH.Entities.Truck.Stop;
 import TVH.Entities.Truck.Truck;
-import TVH.GUI.SolutionListener;
+import TVH.GUI.Listener;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class Solution {
 
         // hier moet ik de listener triggeren
         // inderdaad tibo, maar dat deed je niet grt
-        SolutionListener.getInstance().newSolutionFound(this);
+        Listener.getInstance().newSolutionFound(this);
     }
 
     public void loadSolution(){
