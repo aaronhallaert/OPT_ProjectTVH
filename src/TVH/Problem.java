@@ -256,7 +256,7 @@ public class Problem {
         else if(c.getType().equals("Aaron")){
             best = simulatedAnnealingAaron(c.getTime(), c.getTemperature(), c.getJobs(), c.getMachinetypes(), c.getTrucks());
         }
-        best = new Solution();*/
+        //best = new Solution();
         //Solution best = simulatedAnnealingJeroen(100000, 50, Integer.MAX_VALUE);
         //Solution best = testje(600000, 20);
         System.out.println(best);
