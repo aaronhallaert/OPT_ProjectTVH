@@ -235,7 +235,7 @@ public class Problem {
      * @return
      */
     public Solution solve(Config config) {
-        long endTime = System.currentTimeMillis() + config.getTime()*1000;
+        long endTime = System.currentTimeMillis() + config.getTime() * 1000;
 
         //Variabelen voor kost functie laden uit de config
         Route.DISTANCE_FACTOR = config.getDistancefactor();
@@ -248,12 +248,11 @@ public class Problem {
         Solution initial = new Solution();
 
         //Optimaliseren
-        Solution best=null;
+        Solution best = null;
         System.out.println(config);
-        if(config.getType().equals("Jeroen")) {
-             best = simulatedAnnealingJeroen(endTime, config.getTemperature(), config.getJobs(), config.getMachinetypes(), config.getTrucks());
-        }
-        else if(config.getType().equals("Aaron")){
+        if (config.getType().equals("Jeroen")) {
+            best = simulatedAnnealingJeroen(endTime, config.getTemperature(), config.getJobs(), config.getMachinetypes(), config.getTrucks());
+        } else if (config.getType().equals("Aaron")) {
             best = simulatedAnnealingAaron(endTime, config.getTemperature(), config.getJobs(), config.getMachinetypes(), config.getTrucks());
         }
 
@@ -421,7 +420,7 @@ public class Problem {
                 case NEARBY:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) {
-                            if (!assignJobToBestTruck(j,true)) {
+                            if (!assignJobToBestTruck(j, true)) {
                                 allJobsAdded = false;
                                 break;
                             }
@@ -462,14 +461,14 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if(counter == 10) {
-                currentTemp = 0.95*currentTemp;
+            if (counter == 50) {
+                currentTemp = 0.95 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
             }
 
         }
-        System.out.println("Times run: "+timesRun);
+        System.out.println("Times run: " + timesRun);
         best.loadSolution();
         return best;
     }
@@ -609,9 +608,9 @@ public class Problem {
             modeQueue.offer(mode);
             mode = modeQueue.poll();
             localOptimum.loadSolution();
-            if(counter>1) {
+            if (counter > 1) {
                 currentTemp = 0.95 * currentTemp;
-                counter=0;
+                counter = 0;
             }
         }
         best.loadSolution();
@@ -620,9 +619,10 @@ public class Problem {
 
     public void addTruckToList(List<Job> selectedJobs, Truck t, boolean stop) {
 
-
+        try {
             ArrayList<Job> truckJobs = new ArrayList<>(t.getJobMoveMap().keySet());
             Random r = new Random();
+
             int begin = r.nextInt(t.getJobMoveMap().keySet().size());
             int eind = r.nextInt(t.getJobMoveMap().keySet().size());
             int verschil = eind - begin;
@@ -645,38 +645,43 @@ public class Problem {
                 selectedJobs.add(truckJobs.get(i));
             }
 
-        if(!stop) {
-            for (Edge edge : truckJobs.get(begin).getFixedLocation().getSortedEdgeList()) {
-                Truck nextTruck= jobTruckMap.get(locationJobMap.get(edge.getTo()));
-                if (nextTruck!=null && nextTruck != t) {
+            if (!stop) {
+                for (Edge edge : truckJobs.get(begin).getFixedLocation().getSortedEdgeList()) {
+                    Truck nextTruck = jobTruckMap.get(locationJobMap.get(edge.getTo()));
+                    if (nextTruck != null && nextTruck != t) {
 
-                    addTruckToList(selectedJobs, nextTruck, true);
-                    break;
+                        addTruckToList(selectedJobs, nextTruck, true);
+                        break;
 
 
+                    }
                 }
             }
+        }
+        catch(IllegalArgumentException iae){
+            System.out.println("stop");
         }
 
     }
 
     /**
      * checkt of deel van route dicht bij elkaar ligt
-     *
+     * <p>
      * stel we hebben 3 jobs op een route, als de volgende node in de route niet behoort tot een van de *insert number*
      * dichtste nodes, return false
+     *
      * @param jobs sublist van een route
      * @return
      */
-    public boolean isSubRouteCompact(List<Job> jobs){
+    public boolean isSubRouteCompact(List<Job> jobs) {
         for (int i = 0; i < jobs.size(); i++) {
-            Set<Location> nearestLocations=new HashSet<>();
+            Set<Location> nearestLocations = new HashSet<>();
             for (int i1 = 0; i1 < 30; i1++) {
                 nearestLocations.add(jobs.get(i).getFixedLocation().getSortedEdgeList().getFirst().getTo());
             }
 
-            if(i!=jobs.size()-1){
-                if(!nearestLocations.contains(jobs.get(i+1).getFixedLocation())){
+            if (i != jobs.size() - 1) {
+                if (!nearestLocations.contains(jobs.get(i + 1).getFixedLocation())) {
                     return false;
                 }
             }
@@ -707,11 +712,11 @@ public class Problem {
         for (Truck t : trucks) {
             proposals.addAll(t.getProposals(j));
         }
-        if(!proposals.isEmpty()){
+        if (!proposals.isEmpty()) {
             //Beste proposal zoeken
             Proposal bestProposal = proposals.get(0);
-            for(Proposal p: proposals){
-                if(p.getCost() < bestProposal.getCost()){
+            for (Proposal p : proposals) {
+                if (p.getCost() < bestProposal.getCost()) {
                     bestProposal = p;
                 }
             }
@@ -729,11 +734,11 @@ public class Problem {
     }
 
     //TODO: uitleg schrijven hierbij
-    public boolean assignJobToBestTruck2(Job j){
+    public boolean assignJobToBestTruck2(Job j) {
         //TODO: random job combinatie uitkiezen vooralleer de proposals te vragen, zal voor veel meer snelheid zorgen
         Random r = new Random();
         HashMultimap<Job, Move> secondJobMoveMap = HashMultimap.create();
-        for(Move m: j.generatePossibleMoves()){
+        for (Move m : j.generatePossibleMoves()) {
             secondJobMoveMap.put(m.completesSecondJob(j), m);
         }
         List<Job> secondaryJobs = new ArrayList<>(secondJobMoveMap.keySet());
@@ -748,8 +753,8 @@ public class Problem {
             //We willen van elk type proposal de beste overhouden.
             //Met andere woorden de beste proposal van elke mogelijk combinatie van primary en secondary job
             Proposal bestProposal = proposals.get(0);
-            for(Proposal p: proposals){
-                if(p.getCost() < bestProposal.getCost()){
+            for (Proposal p : proposals) {
+                if (p.getCost() < bestProposal.getCost()) {
                     bestProposal = p;
                 }
             }
@@ -802,11 +807,11 @@ public class Problem {
         }
     }*/
 
-    private static enum Mode{
+    private static enum Mode {
         MACHINETYPE, TRUCK, NEARBY;
 
         //Methode om de volgende te vinden;
-        public static Queue<Mode> createQueue(){
+        public static Queue<Mode> createQueue() {
             Queue<Mode> modeQueue = new LinkedList<>();
             modeQueue.offer(Mode.MACHINETYPE);
             modeQueue.offer(Mode.NEARBY);
