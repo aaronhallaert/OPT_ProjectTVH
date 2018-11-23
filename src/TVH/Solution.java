@@ -100,9 +100,9 @@ public class Solution {
         return i;
     }
 
-    public void writeToFile(String outputfile) throws IOException {
+    public void writeToFile(String outputfile, String inputfile) throws IOException {
         PrintWriter writer = new PrintWriter(outputfile);
-        writer.println("PROBLEM: "+ Main.INPUT_FILE);
+        writer.println("PROBLEM: "+ inputfile);
         writer.println("DISTANCE: "+String.valueOf(totalDistance));
         writer.println("TRUCKS: "+String.valueOf(getTotalUsedTrucks()));
 

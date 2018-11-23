@@ -2,16 +2,14 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.GUI.ConfigController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="TVH.GUI.ConfigController">
    <children>
       <Button fx:id="run" layoutX="534.0" layoutY="14.0" mnemonicParsing="false" onAction="#runProgram" text="Run" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
-      <Spinner fx:id="problem" editable="true" layoutX="375.0" layoutY="14.0" AnchorPane.rightAnchor="76.0" AnchorPane.topAnchor="14.0" />
-      <Label layoutX="235.0" layoutY="18.0" text="Duration" AnchorPane.rightAnchor="318.0" AnchorPane.topAnchor="18.0" />
+      <Label layoutX="206.0" layoutY="19.0" text="Duration" AnchorPane.rightAnchor="336.0" AnchorPane.topAnchor="19.0" />
       <Label fx:id="duration" layoutX="104.0" layoutY="66.0" text="Temperature" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="65.0" />
       <Label layoutX="88.0" layoutY="150.0" text="Number of Jobs" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="150.0" />
       <Label layoutX="41.0" layoutY="118.0" text="Number of Machinetypes" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="122.0" />
@@ -26,7 +24,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <TextField fx:id="time" layoutX="298.0" layoutY="14.0" prefHeight="25.0" prefWidth="61.0" promptText="00:00:00" text="00:01:00" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="14.0" />
+      <TextField fx:id="time" layoutX="298.0" layoutY="14.0" prefHeight="31.0" prefWidth="85.0" promptText="00:00:00" text="00:01:00" AnchorPane.rightAnchor="241.0" AnchorPane.topAnchor="14.0" />
       <TextField fx:id="temperature" layoutX="187.0" layoutY="62.0" prefHeight="25.0" prefWidth="95.0" AnchorPane.rightAnchor="318.0" AnchorPane.topAnchor="62.0" />
       <TextField fx:id="trucks" layoutX="187.0" layoutY="89.0" prefHeight="25.0" prefWidth="95.0" AnchorPane.rightAnchor="318.0" AnchorPane.topAnchor="90.0" />
       <TextField fx:id="machinetypes" layoutX="187.0" layoutY="114.0" prefHeight="25.0" prefWidth="95.0" AnchorPane.rightAnchor="318.0" AnchorPane.topAnchor="118.0" />
@@ -41,8 +39,9 @@
       <Label layoutX="148.0" layoutY="236.0" text="Order Factor" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="239.0" />
       <Label layoutX="41.0" layoutY="259.0" text="Fill Rate Violations Factor" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="265.0" />
       <Label layoutX="148.0" layoutY="296.0" text="Distance Factor" AnchorPane.rightAnchor="424.0" AnchorPane.topAnchor="292.0" />
-      <TextField fx:id="file" layoutX="329.0" layoutY="349.0" text="config" AnchorPane.bottomAnchor="26.0" AnchorPane.rightAnchor="122.0" />
-      <Button layoutX="534.0" layoutY="349.0" mnemonicParsing="false" onAction="#loadConfig" text="Load" AnchorPane.bottomAnchor="26.0" AnchorPane.rightAnchor="24.0" />
+      <TextField fx:id="file" layoutX="317.0" layoutY="343.0" prefHeight="31.0" prefWidth="150.0" text="config" AnchorPane.bottomAnchor="26.0" AnchorPane.rightAnchor="133.0" />
+      <Button layoutX="537.0" layoutY="343.0" mnemonicParsing="false" onAction="#loadConfig" text="Load" AnchorPane.bottomAnchor="26.0" AnchorPane.rightAnchor="10.0" />
       <Button layoutX="483.0" layoutY="349.0" mnemonicParsing="false" onAction="#saveConfig" text="Save" AnchorPane.bottomAnchor="26.0" AnchorPane.rightAnchor="70.0" />
+      <TextField fx:id="problem" layoutX="368.0" layoutY="14.0" prefHeight="31.0" prefWidth="160.0" />
    </children>
 </AnchorPane>

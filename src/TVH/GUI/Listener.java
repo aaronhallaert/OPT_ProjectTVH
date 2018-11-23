@@ -49,7 +49,7 @@ public class Listener {
             int timestamp = (int)(System.currentTimeMillis() - startTime);
             Platform.runLater(() -> {
                 graphDriver.addPoint(timestamp,s.getTotalDistance());
-                playEskettit();
+                //playEskettit();
 
             });
         }

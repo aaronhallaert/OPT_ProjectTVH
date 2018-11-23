@@ -234,34 +234,33 @@ public class Problem {
      *
      * @return
      */
-    public Solution solve() {
+    public Solution solve(Config config) {
+        long endTime = System.currentTimeMillis() + config.getTime()*1000;
+
+        //Variabelen voor kost functie laden uit de config
+        Route.DISTANCE_FACTOR = config.getDistancefactor();
+        Route.FILL_RATE_VIOLATIONS_FACTOR = config.getFrviolationsfactor();
+        Route.ORDER_FACTOR = config.getOrderfactor();
+        Route.TIME_FACTOR = config.getTimefactor();
+
+        //Initiële oplossing maken
         createInitialSolution();
-        Solution init = new Solution();
-//        for(Truck t: trucks){
-//            t.optimizeTruck();
-//        }
-        System.out.println(init);
-        try {
-            init.writeToFile("temp.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //Solution best = init;
-        Config c= Config.getInstance();
+        Solution initial = new Solution();
+
+        //Optimaliseren
         Solution best=null;
-        System.out.println(c.getTime() +","+  c.getTemperature() +","+ c.getJobs() +","+ c.getMachinetypes()+","+ c.getTrucks());
-        if(c.getType().equals("Jeroen")) {
-             best = simulatedAnnealingJeroen(c.getTime(), c.getTemperature(), c.getJobs(), c.getMachinetypes(), c.getTrucks());
+        System.out.println(config);
+        if(config.getType().equals("Jeroen")) {
+             best = simulatedAnnealingJeroen(endTime, config.getTemperature(), config.getJobs(), config.getMachinetypes(), config.getTrucks());
         }
-        else if(c.getType().equals("Aaron")){
-            best = simulatedAnnealingAaron(c.getTime(), c.getTemperature(), c.getJobs(), c.getMachinetypes(), c.getTrucks());
+        else if(config.getType().equals("Aaron")){
+            best = simulatedAnnealingAaron(endTime, config.getTemperature(), config.getJobs(), config.getMachinetypes(), config.getTrucks());
         }
-        //best = new Solution();
-        //Solution best = simulatedAnnealingJeroen(100000, 50, Integer.MAX_VALUE);
-        //Solution best = testje(600000, 20);
+
+
         System.out.println(best);
         System.out.println("DEBUG:");
-        System.out.println("Init: " + init.getTotalDistance());
+        System.out.println("Init: " + initial.getTotalDistance());
         System.out.println("Best: " + best.getTotalDistance());
 
         return best;
@@ -324,8 +323,8 @@ public class Problem {
         }
     }
 
-    public Solution simulatedAnnealingJeroen(int duration, double temperature, int nJobsToRemove, int nMachineTypesToRemove, int nTrucksToRemove) {
-        long endTime = System.currentTimeMillis() + duration*1000;
+    public Solution simulatedAnnealingJeroen(long endTime, double temperature, int nJobsToRemove, int nMachineTypesToRemove, int nTrucksToRemove) {
+        long duration = endTime - System.currentTimeMillis();
         Solution best = new Solution();
         Solution localOptimum = new Solution();
         //LinkedList<Integer> tabu = new LinkedList<>();
@@ -474,10 +473,8 @@ public class Problem {
         return best;
     }
 
-    public Solution simulatedAnnealingAaron(int duration, double temperature, int nJobsToRemove, int nMachineTypesToRemove, int nTrucksToRemove) {
-
-        long endTime = System.currentTimeMillis() + duration*1000;
-
+    public Solution simulatedAnnealingAaron(long endTime, double temperature, int nJobsToRemove, int nMachineTypesToRemove, int nTrucksToRemove) {
+        long duration = endTime - System.currentTimeMillis();
         Solution best = new Solution();
         Solution localOptimum = new Solution();
         //LinkedList<Integer> tabu = new LinkedList<>();

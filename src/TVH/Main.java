@@ -1,5 +1,6 @@
 package TVH;
 
+import TVH.GUI.ConfigController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,12 +18,18 @@ public class Main extends Application{
 
     }
 
-    //dit moet der in, anders krijg je geen javaFX componenten
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("GUI/ConfigGUI.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("GUI/ConfigGUI.fxml"));
+        Parent root = loader.load();
+        ConfigController configc = loader.getController();
+        //Configfile doorgeven aan controller
+        if(!getParameters().getRaw().isEmpty()) {
+            configc.autoLoadConfig(getParameters().getRaw().get(0));
+        }
+
         primaryStage.setTitle("Configurations");
-        Scene startScene= new Scene(root,650 , 400);
+        Scene startScene= new Scene(root);
         primaryStage.setScene(startScene);
         primaryStage.setResizable(false);
         primaryStage.show();

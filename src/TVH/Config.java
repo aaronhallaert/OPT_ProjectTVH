@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
 public class Config {
-    private static Config instance;
 
     private int temperature;
 
@@ -45,15 +44,6 @@ public class Config {
     public Config(){
 
     }
-
-    public static synchronized Config getInstance(){
-        if(instance==null){
-            instance=new Config();
-            return instance;
-        }
-        return instance;
-    }
-
 
     public int getTemperature() {
         return temperature;
@@ -154,7 +144,9 @@ public class Config {
                     ", " + timefactor +
                     ", " + orderfactor +
                     ", " + frviolationsfactor +
-                    ", " + distancefactor);
+                    ", " + distancefactor +
+                    ", " + problem+
+                    ", " + time);
 
             writer.close();
 
@@ -175,8 +167,8 @@ public class Config {
                 ", orderfactor=" + orderfactor +
                 ", frviolationsfactor=" + frviolationsfactor +
                 ", distancefactor=" + distancefactor +
-                ", time=" + time +
-                ", problem='" + problem + '\'' +
+                ", problem="+problem+
+                ", time="+time+ '\''+
                 '}';
     }
 }

@@ -16,10 +16,10 @@ import java.util.*;
 
 public class Route {
 
-    private static final int TIME_FACTOR = Config.getInstance().getTimefactor(); //100
-    private static final int ORDER_FACTOR = Config.getInstance().getOrderfactor(); //1000
-    private static final int FILL_RATE_VIOLATIONS_FACTOR = Config.getInstance().getFrviolationsfactor(); // 1000
-    private static final int DISTANCE_FACTOR = Config.getInstance().getDistancefactor(); //1
+    public static int TIME_FACTOR = 0;
+    public static int ORDER_FACTOR = 0;
+    public static int FILL_RATE_VIOLATIONS_FACTOR = 0;
+    public static int DISTANCE_FACTOR = 0;
 
     private ArrayList<Stop> stops;
     private int totalDistance = 0;
@@ -97,11 +97,12 @@ public class Route {
         int dropIndex = -1;
         for (int i = 0; i < stops.size(); i++) {
             Stop s = stops.get(i);
-            if (s.getLocation() == m.getCollect() && collectIndex == -1) {
+            if (s.getLocation() == m.getCollect() && s != stops.get(stops.size())) {
+                //TODO: dit hier fixen op een slimme manier, hij wil hem nog altijd zo ver mogelijk droppen en zo dicht mogelijk ophalen
                 collectStop = s;
                 collectIndex = i;
             }
-            if(s.getLocation() == m.getDrop()){
+            if(s.getLocation() == m.getDrop() && s != stops.get(0)){
                 dropStop = s;
                 dropIndex = i;
             }
@@ -133,8 +134,6 @@ public class Route {
                     collectStop.addToCollect(m.getMachine());
                     dropStop.addToDrop(m.getMachine());
                     changed = true;
-
-
                     insertStop(collectStop, 1, dropIndex + 1);
 
                 } else if (dropStop == null) {
@@ -146,8 +145,8 @@ public class Route {
                     insertStop(dropStop, collectIndex + 1, stops.size());
                 }
                 //changed = true;
-                //Indien we niets feasible uitkwamen, proberen we eens om een 2 nieuwe stops toe te voegen
-                if(!isFeasible() && timeViolations == 0){
+                //Indien er geen feasible oplossing is gevonden door fillrate problemen kan het misschine opgelost worden door een beide stops opnieuw toe te voegen
+                if(fillRateViolations > 0){
                     //Route herstellen
                     removeMove(m, false);
                     loadRoute(backup);
