@@ -363,8 +363,8 @@ public class Problem {
                         }
                     }
                     for (Truck t : selectedTrucks) {
-                        selectedJobs.addAll(t.getJobMoveMap().keySet());
-                        //addTruckToList(selectedJobs, t, false);
+                        //selectedJobs.addAll(t.getJobMoveMap().keySet());
+                        addTruckToList(selectedJobs, t, false);
                     }
                     break;
                 case NEARBY:
@@ -420,7 +420,7 @@ public class Problem {
                 case NEARBY:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) {
-                            if (!assignJobToBestTruck(j, true)) {
+                            if (!assignJobToBestTruck2(j)) {
                                 allJobsAdded = false;
                                 break;
                             }
@@ -462,7 +462,7 @@ public class Problem {
             timesRun++;
             counter++;
             if (counter == 20) {
-                currentTemp = 0.95 * currentTemp;
+                currentTemp = 0.995 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
             }
@@ -636,7 +636,8 @@ public class Problem {
                 end = r.nextInt(t.getJobMoveMap().keySet().size());
                 difference = end - begin;
                 if (difference > 0) {
-                    distanceBool = isSubRouteCompact(truckJobs.subList(begin, end));
+                    //distanceBool = isSubRouteCompact(truckJobs.subList(begin, end));
+                    distanceBool = true;
                 }
             }
 
@@ -648,12 +649,9 @@ public class Problem {
             if (!stop) {
                 for (Edge edge : truckJobs.get(begin).getFixedLocation().getSortedEdgeList()) {
                     Truck nextTruck = jobTruckMap.get(locationJobMap.get(edge.getTo()));
-                    if (nextTruck != null && nextTruck != t) {
-
+                    if (nextTruck != null && nextTruck != t && !nextTruck.isIdle()) {
                         addTruckToList(selectedJobs, nextTruck, true);
                         break;
-
-
                     }
                 }
             }
