@@ -65,20 +65,24 @@ public class Stop {
         deltaFillRate -= m.getType().getVolume();
     }
 
-    public void removeFromCollect(Machine m) {
+    public boolean removeFromCollect(Machine m) {
         if(collect.remove(m)) {
 
             timespend -= m.getType().getServiceTime();
             deltaFillRate -= m.getType().getVolume();
+            return true;
         }
+        return false;
     }
 
-    public void removeFromDrop(Machine m) {
+    public boolean removeFromDrop(Machine m) {
         if(drop.remove(m)) {
 
             timespend -= m.getType().getServiceTime();
             deltaFillRate += m.getType().getVolume();
+            return true;
         }
+        return false;
     }
 
 

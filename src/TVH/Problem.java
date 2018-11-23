@@ -363,8 +363,8 @@ public class Problem {
                         }
                     }
                     for (Truck t : selectedTrucks) {
-                        //selectedJobs.addAll(t.getJobMoveMap().keySet());
-                        addTruckToList(selectedJobs, t, false);
+                        selectedJobs.addAll(t.getJobMoveMap().keySet());
+                        //addTruckToList(selectedJobs, t, false);
                     }
                     break;
                 case NEARBY:
@@ -461,7 +461,7 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if (counter == 50) {
+            if (counter == 20) {
                 currentTemp = 0.95 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
@@ -624,24 +624,24 @@ public class Problem {
             Random r = new Random();
 
             int begin = r.nextInt(t.getJobMoveMap().keySet().size());
-            int eind = r.nextInt(t.getJobMoveMap().keySet().size());
-            int verschil = eind - begin;
-            double minVerschil = t.getJobMoveMap().keySet().size() / 7;
-            double maxVerschil = t.getJobMoveMap().keySet().size() / 1;
+            int end = r.nextInt(t.getJobMoveMap().keySet().size());
+            int difference = end - begin;
+            double minDifference = t.getJobMoveMap().keySet().size() / 7;
+            double maxDifference = t.getJobMoveMap().keySet().size();
 
 
             boolean distanceBool = false;
-            while (eind < begin && verschil < minVerschil && verschil < maxVerschil && !distanceBool) {
+            while (end < begin && difference < minDifference && difference < maxDifference && !distanceBool) {
                 begin = r.nextInt(t.getJobMoveMap().keySet().size());
-                eind = r.nextInt(t.getJobMoveMap().keySet().size());
-                verschil = eind - begin;
-                if (verschil > 0) {
-                    distanceBool = isSubRouteCompact(truckJobs.subList(begin, eind));
+                end = r.nextInt(t.getJobMoveMap().keySet().size());
+                difference = end - begin;
+                if (difference > 0) {
+                    distanceBool = isSubRouteCompact(truckJobs.subList(begin, end));
                 }
             }
 
 
-            for (int i = begin; i < eind; i++) {
+            for (int i = begin; i < end; i++) {
                 selectedJobs.add(truckJobs.get(i));
             }
 
