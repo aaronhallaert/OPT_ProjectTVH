@@ -35,6 +35,13 @@ public class Stop {
         this.deltaFillRate = s.deltaFillRate;
     }
 
+    public void merge(Stop s){
+        collect.addAll(s.getCollect());
+        drop.addAll(s.getDrop());
+        timespend += s.getTimeSpend();
+        deltaFillRate += s.getDeltaFillRate();
+    }
+
     /**
      * Checkt als er iets gebeurt op deze stop
      * @return true als er niets wordt uitgevoerd

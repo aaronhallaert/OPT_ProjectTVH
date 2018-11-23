@@ -364,6 +364,7 @@ public class Problem {
                         }
                     }
                     for (Truck t : selectedTrucks) {
+                        //selectedJobs.addAll(t.getJobMoveMap().keySet());
                         addTruckToList(selectedJobs, t, false);
                     }
                     break;
@@ -420,7 +421,7 @@ public class Problem {
                 case NEARBY:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) {
-                            if (!assignJobToBestTruck(j, true)) {
+                            if (!assignJobToBestTruck(j,true)) {
                                 allJobsAdded = false;
                                 break;
                             }
@@ -462,7 +463,7 @@ public class Problem {
             timesRun++;
             counter++;
             if(counter == 10) {
-                currentTemp = 0.995*currentTemp;
+                currentTemp = 0.95*currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
             }
