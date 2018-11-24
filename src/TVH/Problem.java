@@ -355,16 +355,29 @@ public class Problem {
                     }
                     break;
                 case TRUCK:
-                    Set<Truck> selectedTrucks = new HashSet<>();
-                    while (selectedTrucks.size() < nTrucksToRemove) {
-                        Truck t = trucks.get(r.nextInt(trucks.size()));
-                        if (!t.isIdle()) {
-                            selectedTrucks.add(t);
+                    if(r.nextInt() < 0.3) {
+                        //Standaard Jern algoritme: een truck volledig verwijderen
+                        Set<Truck> selectedTrucks = new HashSet<>();
+                        while (selectedTrucks.size() < nTrucksToRemove) {
+                            Truck t = trucks.get(r.nextInt(trucks.size()));
+                            if (!t.isIdle()) {
+                                selectedTrucks.add(t);
+                            }
+                        }
+                        for (Truck t : selectedTrucks) {
+                            selectedJobs.addAll(t.getJobMoveMap().keySet());
                         }
                     }
-                    for (Truck t : selectedTrucks) {
-                        //selectedJobs.addAll(t.getJobMoveMap().keySet());
-                        addTruckToList(selectedJobs, t, false);
+                    else{
+                        //Algoritme van Aaron dat stukken verwijderd
+                        Truck selectedTruck = null;
+                        while(selectedTruck == null){
+                            Truck t = trucks.get(r.nextInt(trucks.size()));
+                            if(!t.isIdle()){
+                                selectedTruck = t;
+                            }
+                        }
+                        addTruckToList(selectedJobs, selectedTruck, nTrucksToRemove);
                     }
                     break;
                 case NEARBY:
@@ -514,7 +527,7 @@ public class Problem {
 
 
                     for (Truck t : selectedTrucks) {
-                        addTruckToList(selectedJobs, t, false);
+                        addTruckToList(selectedJobs, t, 1);
                     }
                     break;
                 case NEARBY:
@@ -617,7 +630,7 @@ public class Problem {
         return best;
     }
 
-    public void addTruckToList(List<Job> selectedJobs, Truck t, boolean stop) {
+    public void addTruckToList(List<Job> selectedJobs, Truck t, int n_trucks) {
 
         try {
             ArrayList<Job> truckJobs = new ArrayList<>(t.getJobMoveMap().keySet());
@@ -626,31 +639,31 @@ public class Problem {
             int begin = r.nextInt(t.getJobMoveMap().keySet().size());
             int end = r.nextInt(t.getJobMoveMap().keySet().size());
             int difference = end - begin;
-            double minDifference = t.getJobMoveMap().keySet().size() / 7;
-            double maxDifference = t.getJobMoveMap().keySet().size();
+            int minDifference = t.getJobMoveMap().keySet().size() / 7;
+            int maxDifference = t.getJobMoveMap().keySet().size();
 
-
+            //TODO: Geeft deze methode niet veel meer voorkeur voor punten die in het midden liggen dan punten aan de zijkanten van routes?
             boolean distanceBool = false;
-            while (end < begin && difference < minDifference && difference < maxDifference && !distanceBool) {
+            while (end < begin && difference < minDifference && difference < maxDifference) {
                 begin = r.nextInt(t.getJobMoveMap().keySet().size());
                 end = r.nextInt(t.getJobMoveMap().keySet().size());
                 difference = end - begin;
-                if (difference > 0) {
+                //if (difference > 0) {
                     //distanceBool = isSubRouteCompact(truckJobs.subList(begin, end));
-                    distanceBool = true;
-                }
+                    //distanceBool = true;
+                //}
             }
 
-
+            //todo: de jobs in de jobmovemap zitten niet in dezelfde volgorde als de route, dus er worden gewoon random stukken verwijderd uit de route
             for (int i = begin; i < end; i++) {
                 selectedJobs.add(truckJobs.get(i));
             }
 
-            if (!stop) {
+            if (n_trucks > 1) {
                 for (Edge edge : truckJobs.get(begin).getFixedLocation().getSortedEdgeList()) {
                     Truck nextTruck = jobTruckMap.get(locationJobMap.get(edge.getTo()));
                     if (nextTruck != null && nextTruck != t && !nextTruck.isIdle()) {
-                        addTruckToList(selectedJobs, nextTruck, true);
+                        addTruckToList(selectedJobs, nextTruck, n_trucks-1);
                         break;
                     }
                 }

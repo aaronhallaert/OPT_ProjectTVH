@@ -188,6 +188,7 @@ public class Route {
     }
 
     private void mergeStops(int[] indices) {
+        //todo: bug nog te fixen: soms wordt de eindstop niet gemerged
         Stop stop1 = stops.get(indices[0]);
         Stop stop2 = stops.get(indices[1]);
 

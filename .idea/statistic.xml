@@ -4,6 +4,7 @@
     <option name="excludedDirectories">
       <list>
         <option value="$PROJECT_DIR$/lib" />
+        <option value="$PROJECT_DIR$/src/TVH/GUI" />
       </list>
     </option>
   </component>
