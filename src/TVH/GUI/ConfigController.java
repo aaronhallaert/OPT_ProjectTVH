@@ -102,7 +102,7 @@ public class ConfigController {
         int minutes= Integer.parseInt(time.getText().split(":")[1]);
         int seconds= Integer.parseInt(time.getText().split(":")[2]);
 
-        int totalSeconds= hours*360+minutes*60+seconds;
+        int totalSeconds= hours*3600+minutes*60+seconds;
         System.out.println("duur"+totalSeconds);
 
         // set problem
