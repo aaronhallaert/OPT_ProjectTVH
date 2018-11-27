@@ -179,7 +179,7 @@ public class ConfigController {
 
     public void saveConfig() {
         setConfig();
-        config.writeToFile(file.getText() + ".txt");
+        config.writeToFile("configs/"+file.getText() + ".txt");
     }
 
 }
