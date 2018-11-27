@@ -34,6 +34,7 @@ public class Problem {
     public HashMap<Location, Job> locationJobMap = new HashMap<>();
     public double currentTemp = 0;
     public int minJobsNotAdded = 0;
+    Random r = new Random();
     //public boolean feasibleSolution = false;
 
 
@@ -336,7 +337,6 @@ public class Problem {
         Listener.getInstance().updateTemperature(currentTemp);
         int counter = 0;
         int timesRun = 0;
-        Random r = new Random();
         Queue<Mode> modeQueue = Mode.createQueue();
         Mode mode = modeQueue.poll();
 
@@ -368,7 +368,8 @@ public class Problem {
                         }
                     }
                     for (Truck t : selectedTrucks) {
-                        addTruckToList(selectedJobs, t, 1);
+                        //addTruckToList(selectedJobs, t, 1);
+                        removePartOfRoute(selectedJobs, t);
                     }
                     break;
                 case NEARBY:
@@ -442,7 +443,7 @@ public class Problem {
                         best = localOptimum;
                     }
                     minJobsNotAdded = nJobsNotAdded;
-                    System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "!f"));
+                    System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "nf"));
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
                     if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
@@ -466,7 +467,7 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if (counter == 50) {
+            if (counter == 200) {
                 currentTemp = 0.995 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
@@ -485,7 +486,6 @@ public class Problem {
         //LinkedList<Integer> tabu = new LinkedList<>();
         double currentTemp = temperature;
         int counter = 0;
-        Random r = new Random();
         Queue<Mode> modeQueue = Mode.createQueue();
         Mode mode = modeQueue.poll();
 
@@ -622,12 +622,15 @@ public class Problem {
 
     public void addTruckToList(List<Job> selectedJobs, Truck t, int n_trucks) {
         ArrayList<Job> truckJobs = new ArrayList<>(t.getJobMoveMap().keySet());
-        Random r = new Random();
+        if(truckJobs.isEmpty()){
+            System.out.println("stop");
+        }
 
+        //TODO: der zit hier nog een bugeroni in soms is de keyset leeg
         int begin = r.nextInt(t.getJobMoveMap().keySet().size());
         int end = r.nextInt(t.getJobMoveMap().keySet().size());
         int difference = end - begin;
-        int minDifference = t.getJobMoveMap().keySet().size() / 7;
+        int minDifference = t.getJobMoveMap().keySet().size() / 4;
         int maxDifference = t.getJobMoveMap().keySet().size();
 
         //TODO: Geeft deze methode niet veel meer voorkeur voor punten die in het midden liggen dan punten aan de zijkanten van routes?
@@ -658,6 +661,30 @@ public class Problem {
         }
     }
 
+    public void removePartOfRoute(List<Job> selectedJobs, Truck t){
+        //Aantal stops die de Truck maakt (zonder start en eind)
+        int nStops = t.getRoute().getStops().size()-2;
+        //Aantal stops die we gaan deleten
+        int range = r.nextInt(nStops+1);
+        int start;
+
+        if(range == nStops) start = 1;
+        else start = r.nextInt(nStops - range)+1;
+
+        Set<Machine> machinesToRemove = new HashSet<>();
+        for (int i = start; i < (start+range); i++) {
+            machinesToRemove.addAll(t.getRoute().getStops().get(i).getDrop());
+            machinesToRemove.addAll(t.getRoute().getStops().get(i).getCollect());
+        }
+
+        for(Map.Entry<Job, Move> entry: t.getJobMoveMap().entrySet()){
+            if(machinesToRemove.contains(entry.getValue().getMachine())){
+                selectedJobs.add(entry.getKey());
+            }
+        }
+
+    }
+
     /**
      * checkt of deel van route dicht bij elkaar ligt
      * <p>
@@ -686,7 +713,6 @@ public class Problem {
 
     public boolean assignJobToRandomTruck(Job job, boolean bestMove) {
         ArrayList<Truck> trucksToCheck = new ArrayList<>(trucks);
-        Random r = new Random();
         while (true) {
             Truck randomTruck = trucksToCheck.get(r.nextInt(trucksToCheck.size()));
             if (randomTruck.addJob(job, bestMove)) {
@@ -730,7 +756,6 @@ public class Problem {
     //TODO: uitleg schrijven hierbij
     public boolean assignJobToBestTruck2(Job j) {
         //TODO: random job combinatie uitkiezen vooralleer de proposals te vragen, zal voor veel meer snelheid zorgen
-        Random r = new Random();
         HashMultimap<Job, Move> secondJobMoveMap = HashMultimap.create();
         List<Move> possibleMoves = new ArrayList<>(j.generatePossibleMoves());
         for (Move m : possibleMoves) {
@@ -775,7 +800,6 @@ public class Problem {
     }
 
     /*public boolean assignRandomMoveToBestTruck(Job job) {
-        Random r = new Random();
         List<Move> moves = job.generatePossibleMoves();
         Move move = moves.get(r.nextInt(moves.size()));
         Truck optimalTruck = null;
@@ -817,9 +841,9 @@ public class Problem {
             Queue<Mode> modeQueue = new LinkedList<>();
             modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.NEARBY);
-            modeQueue.offer(Mode.TRUCK);
             modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.NEARBY);
+            modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.TRUCK);
             return modeQueue;
         }

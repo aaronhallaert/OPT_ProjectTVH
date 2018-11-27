@@ -192,7 +192,8 @@ public class Truck {
     }
 
     public boolean isIdle(){
-        return route.getStops().size() == 2;
+        return jobMoveMap.isEmpty();
+        //return route.getStops().size() == 2;
     }
 
     public int getTruckId() {

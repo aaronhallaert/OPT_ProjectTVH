@@ -64,72 +64,72 @@ public class ConfigController {
 
     Config config = new Config();
 
-    public void initialize(){
+    public void initialize() {
 
     }
 
     @FXML
-    public void setConfig(){
+    public void setConfig() {
         // set temperature
-        int temp= Integer.parseInt(temperature.getText());
+        int temp = Integer.parseInt(temperature.getText());
 
         // set trucks
-        int numberofTrucks= Integer.parseInt(trucks.getText());
+        int numberofTrucks = Integer.parseInt(trucks.getText());
 
         // set mt
-        int mt= Integer.parseInt(machinetypes.getText());
+        int mt = Integer.parseInt(machinetypes.getText());
 
         // set jobs
-        int jbs= Integer.parseInt(jobs.getText());
+        int jbs = Integer.parseInt(jobs.getText());
 
         // set type
-        String annealingType= type.getText();
+        String annealingType = type.getText();
 
         // set timefactor
-        int tFactor= Integer.parseInt(timefactor.getText());
+        int tFactor = Integer.parseInt(timefactor.getText());
 
         // set orderfactor
-        int oFactor= Integer.parseInt(orderfactor.getText());
+        int oFactor = Integer.parseInt(orderfactor.getText());
 
         // set frviolationsfactor
-        int fFactor= Integer.parseInt(frviolationsfactor.getText());
+        int fFactor = Integer.parseInt(frviolationsfactor.getText());
 
         // set distancefactor
-        int dFactor= Integer.parseInt(distancefactor.getText());
+        int dFactor = Integer.parseInt(distancefactor.getText());
 
         // set duration
-        int hours= Integer.parseInt(time.getText().split(":")[0]);
-        int minutes= Integer.parseInt(time.getText().split(":")[1]);
-        int seconds= Integer.parseInt(time.getText().split(":")[2]);
+        int hours = Integer.parseInt(time.getText().split(":")[0]);
+        int minutes = Integer.parseInt(time.getText().split(":")[1]);
+        int seconds = Integer.parseInt(time.getText().split(":")[2]);
 
-        int totalSeconds= hours*3600+minutes*60+seconds;
-        System.out.println("duur"+totalSeconds);
+        int totalSeconds = hours * 3600 + minutes * 60 + seconds;
+        System.out.println("duur" + totalSeconds);
 
         // set problem
-        String problemString=problem.getText();
-        System.out.println("problem : "+ problemString);
+        String problemString = problem.getText();
+        System.out.println("problem : " + problemString);
 
         config.update(temp, numberofTrucks, mt, jbs, annealingType, tFactor, oFactor, fFactor, dFactor, totalSeconds, problemString);
 
     }
 
-    public void runProgram(){
+    public void runProgram() {
         setConfig();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String INPUT_FILE = config.getProblem()+".txt";
-                String OUTPUT_FILE = config.getProblem()+"_out.txt";
+                String INPUT_FILE = "files/" + config.getProblem() + ".txt";
+                String OUTPUT_FILE = "files/" + config.getProblem() + "_out.txt";
 
                 System.out.println(INPUT_FILE);
                 File inputFile = new File(INPUT_FILE);
                 long startTime = System.currentTimeMillis();
 
-                try{
+                try {
                     Problem problem = Problem.newInstance(inputFile);
                     Solution solution = problem.solve(config);
-                    solution.writeToFile(OUTPUT_FILE, INPUT_FILE);
-                    System.out.println("Calculation time: "+(System.currentTimeMillis()-startTime)+"ms");
+                    solution.writeToFile(OUTPUT_FILE, config.getProblem()+".txt");
+                    System.out.println("Calculation time: " + (System.currentTimeMillis() - startTime) + "ms");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -138,15 +138,15 @@ public class ConfigController {
 
     }
 
-    public void loadConfig(){
-        System.out.println("laden van file "+file+ " in GUI");
-        String filestring= file.getText();
-        File fileConfig = new File(filestring+".txt");
+    public void loadConfig() {
+        System.out.println("laden van file " + file + " in GUI");
+        String filestring = file.getText();
+        File fileConfig = new File("configs/"+filestring + ".txt");
 
         Scanner sc = null;
         try {
             sc = new Scanner(fileConfig).useLocale(Locale.US);
-            String [] eigenschappen=sc.nextLine().split(", ");
+            String[] eigenschappen = sc.nextLine().split(", ");
 
             temperature.setText(eigenschappen[0]);
             trucks.setText(eigenschappen[1]);
@@ -159,7 +159,7 @@ public class ConfigController {
             distancefactor.setText(eigenschappen[8]);
             problem.setText(eigenschappen[9]);
 
-            long runtime = Integer.parseInt(eigenschappen[10])*1000;
+            long runtime = Integer.parseInt(eigenschappen[10]) * 1000;
             String formattedTime = String.format("%02d:%02d:%02d",
                     TimeUnit.MILLISECONDS.toHours(runtime),
                     TimeUnit.MILLISECONDS.toMinutes(runtime) -
@@ -172,14 +172,14 @@ public class ConfigController {
         }
     }
 
-    public void autoLoadConfig(String configFile){
+    public void autoLoadConfig(String configFile) {
         file.setText(configFile);
         loadConfig();
     }
 
-    public void saveConfig(){
+    public void saveConfig() {
         setConfig();
-        config.writeToFile(file.getText()+".txt");
+        config.writeToFile(file.getText() + ".txt");
     }
 
 }
