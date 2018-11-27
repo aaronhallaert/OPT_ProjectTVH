@@ -257,7 +257,7 @@ public class Problem {
         }
 
 
-        System.out.println(best);
+        //System.out.println(best);
         System.out.println("DEBUG:");
         System.out.println("Init: " + initial.getTotalDistance());
         System.out.println("Best: " + best.getTotalDistance());

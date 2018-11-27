@@ -26,6 +26,9 @@ public class Main extends Application{
         //Configfile doorgeven aan controller
         if(!getParameters().getRaw().isEmpty()) {
             configc.autoLoadConfig(getParameters().getRaw().get(0));
+            if(getParameters().getRaw().size() == 2 && getParameters().getRaw().get(1).equals("-start")){
+                configc.runProgram();
+            }
         }
 
         primaryStage.setTitle("Configurations");
