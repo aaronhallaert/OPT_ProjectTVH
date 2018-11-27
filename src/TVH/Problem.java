@@ -355,29 +355,15 @@ public class Problem {
                     }
                     break;
                 case TRUCK:
-                    if(r.nextInt() < 0.3) {
-                        //Standaard Jern algoritme: een truck volledig verwijderen
-                        Set<Truck> selectedTrucks = new HashSet<>();
-                        while (selectedTrucks.size() < nTrucksToRemove) {
-                            Truck t = trucks.get(r.nextInt(trucks.size()));
-                            if (!t.isIdle()) {
-                                selectedTrucks.add(t);
-                            }
-                        }
-                        for (Truck t : selectedTrucks) {
-                            selectedJobs.addAll(t.getJobMoveMap().keySet());
+                    Set<Truck> selectedTrucks = new HashSet<>();
+                    while (selectedTrucks.size() < nTrucksToRemove) {
+                        Truck t = trucks.get(r.nextInt(trucks.size()));
+                        if (!t.isIdle()) {
+                            selectedTrucks.add(t);
                         }
                     }
-                    else{
-                        //Algoritme van Aaron dat stukken verwijderd
-                        Truck selectedTruck = null;
-                        while(selectedTruck == null){
-                            Truck t = trucks.get(r.nextInt(trucks.size()));
-                            if(!t.isIdle()){
-                                selectedTruck = t;
-                            }
-                        }
-                        addTruckToList(selectedJobs, selectedTruck, nTrucksToRemove);
+                    for (Truck t : selectedTrucks) {
+                        addTruckToList(selectedJobs, t, 1);
                     }
                     break;
                 case NEARBY:
@@ -474,7 +460,7 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if (counter == 20) {
+            if (counter == 50) {
                 currentTemp = 0.995 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
@@ -524,8 +510,6 @@ public class Problem {
                             selectedTrucks.add(t);
                         }
                     }
-
-
                     for (Truck t : selectedTrucks) {
                         addTruckToList(selectedJobs, t, 1);
                     }
