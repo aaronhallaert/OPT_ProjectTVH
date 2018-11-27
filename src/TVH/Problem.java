@@ -10,7 +10,6 @@ import com.google.common.collect.HashMultimap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -34,6 +33,9 @@ public class Problem {
     public HashMap<Job, Truck> jobTruckMap = new HashMap<>();                   //niet-statisch object
     public HashMap<Location, Job> locationJobMap = new HashMap<>();
     public double currentTemp = 0;
+    public int minJobsNotAdded = 0;
+    //public boolean feasibleSolution = false;
+
 
     public static Problem getInstance() {
         return instance;
@@ -317,7 +319,10 @@ public class Problem {
             i++;
 
             if (j.notDone()) {
-                if (!assignJobToBestTruck(j, true)) System.out.println("error");
+                if (!assignJobToBestTruck(j, true)){
+                    minJobsNotAdded++;
+                }
+
             }
         }
     }
@@ -340,7 +345,7 @@ public class Problem {
             List<Job> selectedJobs = new ArrayList<>();
 
             switch (mode) {
-                case MACHINETYPE:
+                case MTYPE:
                     //We selecteren nMachineTypes om Jobs van te verwijderen
                     Set<MachineType> randomMachineTypes = new HashSet<>();
                     while (randomMachineTypes.size() < nMachineTypesToRemove) {
@@ -395,14 +400,14 @@ public class Problem {
 
             Collections.shuffle(selectedJobs);
 
-            boolean allJobsAdded = true;
+            int nJobsNotAdded = 0;
             switch (mode) {
-                case MACHINETYPE:
+                case MTYPE:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) {
                             if (!assignJobToBestTruck2(j)) {
-                                allJobsAdded = false;
-                                break;
+                                nJobsNotAdded++;
+                                if(minJobsNotAdded == 0) break;
                             }
                         }
                     }
@@ -411,8 +416,8 @@ public class Problem {
                     for (Job j : selectedJobs) {
                         if (j.notDone()) { //Enkel als je job nog niet vervolledigd is willen we hem opnieuw toevoegen
                             if (!assignJobToBestTruck(j, true)) {
-                                allJobsAdded = false;
-                                break;
+                                nJobsNotAdded++;
+                                if(minJobsNotAdded == 0) break;
                             }
                         }
                     }
@@ -420,23 +425,24 @@ public class Problem {
                     for (Job j : selectedJobs) {
                         if (j.notDone()) {
                             if (!assignJobToBestTruck2(j)) {
-                                allJobsAdded = false;
-                                break;
+                                nJobsNotAdded++;
+                                if(minJobsNotAdded == 0) break;
                             }
                         }
                     }
             }
-            if (allJobsAdded) {
+            if (nJobsNotAdded <= minJobsNotAdded) {
                 Solution candidate = new Solution();
-                //Candidate is better than local
-                if (candidate.getTotalDistance() < localOptimum.getTotalDistance()) {
-                    //counter++;
+                //candidate.writeToFile("temp.txt", Main.INPUT_FILE);
+                //Candidate is better than local, or Candidate implements more jobs than best
+                if (candidate.getTotalDistance() < localOptimum.getTotalDistance() || nJobsNotAdded < minJobsNotAdded) {
                     localOptimum = new Solution();
                     long timestamp = System.currentTimeMillis() - (endTime - duration);
-                    if (localOptimum.getTotalDistance() < best.getTotalDistance()) {
+                    if (localOptimum.getTotalDistance() < best.getTotalDistance() || nJobsNotAdded < minJobsNotAdded) {
                         best = localOptimum;
                     }
-                    System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode);
+                    minJobsNotAdded = nJobsNotAdded;
+                    System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "!f"));
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
                     if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
@@ -488,7 +494,7 @@ public class Problem {
             List<Job> selectedJobs = new ArrayList<>();
 
             switch (mode) {
-                case MACHINETYPE:
+                case MTYPE:
                     //We selecteren nMachineTypes om Jobs van te verwijderen
                     Set<MachineType> randomMachineTypes = new HashSet<>();
                     while (randomMachineTypes.size() < nMachineTypesToRemove) {
@@ -545,7 +551,7 @@ public class Problem {
 
             boolean allJobsAdded = true;
             switch (mode) {
-                case MACHINETYPE:
+                case MTYPE:
                     for (Job j : selectedJobs) {
                         if (j.notDone()) {
                             if (!assignJobToBestTruck2(j)) {
@@ -615,48 +621,41 @@ public class Problem {
     }
 
     public void addTruckToList(List<Job> selectedJobs, Truck t, int n_trucks) {
+        ArrayList<Job> truckJobs = new ArrayList<>(t.getJobMoveMap().keySet());
+        Random r = new Random();
 
-        try {
-            ArrayList<Job> truckJobs = new ArrayList<>(t.getJobMoveMap().keySet());
-            Random r = new Random();
+        int begin = r.nextInt(t.getJobMoveMap().keySet().size());
+        int end = r.nextInt(t.getJobMoveMap().keySet().size());
+        int difference = end - begin;
+        int minDifference = t.getJobMoveMap().keySet().size() / 7;
+        int maxDifference = t.getJobMoveMap().keySet().size();
 
-            int begin = r.nextInt(t.getJobMoveMap().keySet().size());
-            int end = r.nextInt(t.getJobMoveMap().keySet().size());
-            int difference = end - begin;
-            int minDifference = t.getJobMoveMap().keySet().size() / 7;
-            int maxDifference = t.getJobMoveMap().keySet().size();
+        //TODO: Geeft deze methode niet veel meer voorkeur voor punten die in het midden liggen dan punten aan de zijkanten van routes?
+        boolean distanceBool = false;
+        while (end < begin && difference < minDifference && difference < maxDifference) {
+            begin = r.nextInt(t.getJobMoveMap().keySet().size());
+            end = r.nextInt(t.getJobMoveMap().keySet().size());
+            difference = end - begin;
+            //if (difference > 0) {
+                //distanceBool = isSubRouteCompact(truckJobs.subList(begin, end));
+                //distanceBool = true;
+            //}
+        }
 
-            //TODO: Geeft deze methode niet veel meer voorkeur voor punten die in het midden liggen dan punten aan de zijkanten van routes?
-            boolean distanceBool = false;
-            while (end < begin && difference < minDifference && difference < maxDifference) {
-                begin = r.nextInt(t.getJobMoveMap().keySet().size());
-                end = r.nextInt(t.getJobMoveMap().keySet().size());
-                difference = end - begin;
-                //if (difference > 0) {
-                    //distanceBool = isSubRouteCompact(truckJobs.subList(begin, end));
-                    //distanceBool = true;
-                //}
-            }
+        //todo: de jobs in de jobmovemap zitten niet in dezelfde volgorde als de route, dus er worden gewoon random stukken verwijderd uit de route
+        for (int i = begin; i < end; i++) {
+            selectedJobs.add(truckJobs.get(i));
+        }
 
-            //todo: de jobs in de jobmovemap zitten niet in dezelfde volgorde als de route, dus er worden gewoon random stukken verwijderd uit de route
-            for (int i = begin; i < end; i++) {
-                selectedJobs.add(truckJobs.get(i));
-            }
-
-            if (n_trucks > 1) {
-                for (Edge edge : truckJobs.get(begin).getFixedLocation().getSortedEdgeList()) {
-                    Truck nextTruck = jobTruckMap.get(locationJobMap.get(edge.getTo()));
-                    if (nextTruck != null && nextTruck != t && !nextTruck.isIdle()) {
-                        addTruckToList(selectedJobs, nextTruck, n_trucks-1);
-                        break;
-                    }
+        if (n_trucks > 1) {
+            for (Edge edge : truckJobs.get(begin).getFixedLocation().getSortedEdgeList()) {
+                Truck nextTruck = jobTruckMap.get(locationJobMap.get(edge.getTo()));
+                if (nextTruck != null && nextTruck != t && !nextTruck.isIdle()) {
+                    addTruckToList(selectedJobs, nextTruck, n_trucks-1);
+                    break;
                 }
             }
         }
-        catch(IllegalArgumentException iae){
-            System.out.println("stop");
-        }
-
     }
 
     /**
@@ -733,10 +732,18 @@ public class Problem {
         //TODO: random job combinatie uitkiezen vooralleer de proposals te vragen, zal voor veel meer snelheid zorgen
         Random r = new Random();
         HashMultimap<Job, Move> secondJobMoveMap = HashMultimap.create();
-        for (Move m : j.generatePossibleMoves()) {
+        List<Move> possibleMoves = new ArrayList<>(j.generatePossibleMoves());
+        for (Move m : possibleMoves) {
             secondJobMoveMap.put(m.completesSecondJob(j), m);
         }
+
         List<Job> secondaryJobs = new ArrayList<>(secondJobMoveMap.keySet());
+        if(secondaryJobs.isEmpty()){
+            //In sommige gevallen kan het zijn dat een dropjob geen mogelijke moves meer vindt.
+            //Bijvoorbeeld als alle collects van dit type al terug toegevoegd zijn en er geen machines in het depot staan.
+            //Vandaar deze check
+            return false;
+        }
         Job selectedSecondaryJob = secondaryJobs.get(r.nextInt(secondaryJobs.size()));
         Set<Move> toCheckMoves = secondJobMoveMap.get(selectedSecondaryJob);
 
@@ -803,15 +810,15 @@ public class Problem {
     }*/
 
     private static enum Mode {
-        MACHINETYPE, TRUCK, NEARBY;
+        MTYPE, TRUCK, NEARBY;
 
         //Methode om de volgende te vinden;
         public static Queue<Mode> createQueue() {
             Queue<Mode> modeQueue = new LinkedList<>();
-            modeQueue.offer(Mode.MACHINETYPE);
+            modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.NEARBY);
             modeQueue.offer(Mode.TRUCK);
-            modeQueue.offer(Mode.MACHINETYPE);
+            modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.NEARBY);
             modeQueue.offer(Mode.TRUCK);
             return modeQueue;

@@ -2,7 +2,7 @@
   <configuration default="false" name="Main" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="TVH.Main" />
     <module name="OPT_ProjectTVH" />
-    <option name="PROGRAM_PARAMETERS" value="configJeroen" />
+    <option name="PROGRAM_PARAMETERS" value="config5" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="TVH.*" />

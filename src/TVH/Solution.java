@@ -100,33 +100,38 @@ public class Solution {
         return i;
     }
 
-    public void writeToFile(String outputfile, String inputfile) throws IOException {
-        PrintWriter writer = new PrintWriter(outputfile);
-        writer.println("PROBLEM: "+ inputfile);
-        writer.println("DISTANCE: "+String.valueOf(totalDistance));
-        writer.println("TRUCKS: "+String.valueOf(getTotalUsedTrucks()));
+    public void writeToFile(String outputfile, String inputfile){
+        try {
+            PrintWriter writer = new PrintWriter(outputfile);
+            writer.println("PROBLEM: " + inputfile);
+            writer.println("DISTANCE: " + String.valueOf(totalDistance));
+            writer.println("TRUCKS: " + String.valueOf(getTotalUsedTrucks()));
 
-        for(Truck t: trucks){
-            if(t.getRoute().getTotalDistance() > 0){
-                writer.print(String.valueOf(t.getTruckId()) + " ");
-                writer.print(String.valueOf(t.getRoute().getTotalDistance()) + " ");
-                writer.print(String.valueOf(t.getRoute().getTotalTime()));
-                for(Stop s: t.getRoute().getStops()){
-                    writer.print(" ");
-                    writer.print(s.getLocation().getLocationID());
-                    for(Machine m: s.getCollect()){
-                        writer.print(':');
-                        writer.print(m.getId());
+            for (Truck t : trucks) {
+                if (t.getRoute().getTotalDistance() > 0) {
+                    writer.print(String.valueOf(t.getTruckId()) + " ");
+                    writer.print(String.valueOf(t.getRoute().getTotalDistance()) + " ");
+                    writer.print(String.valueOf(t.getRoute().getTotalTime()));
+                    for (Stop s : t.getRoute().getStops()) {
+                        writer.print(" ");
+                        writer.print(s.getLocation().getLocationID());
+                        for (Machine m : s.getCollect()) {
+                            writer.print(':');
+                            writer.print(m.getId());
+                        }
+                        for (Machine m : s.getDrop()) {
+                            writer.print(':');
+                            writer.print(m.getId());
+                        }
                     }
-                    for(Machine m: s.getDrop()){
-                        writer.print(':');
-                        writer.print(m.getId());
-                    }
+                    writer.println();
                 }
-                writer.println();
             }
+            writer.close();
         }
-        writer.close();
+        catch(IOException ioe){
+            ioe.printStackTrace();
+        }
     }
 
     public String toString(){
