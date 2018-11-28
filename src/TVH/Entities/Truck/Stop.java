@@ -7,8 +7,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 
 /**
- * Elke Route bevat een lijst van Stops. Deze bepalen waar de truck rijdt en wat hij doet op die locatie.
- * Het is een dynamische klasse
+ * Elke Route bevat een lijst van Stops. Deze bepalen waar de truck passeert en wat hij doet op die locatie.
  */
 
 public class Stop {
@@ -17,7 +16,7 @@ public class Stop {
     private LinkedList<Machine> collect;
     private LinkedList<Machine> drop;
     private int timespend = 0;
-    private int deltaFillRate = 0;
+    private int deltaFillRate = 0; //Hoeveelheid waarmee de fillrate van de truck verandert na deze stop
 
     public Stop(Location location) {
         this.location = location;
@@ -35,6 +34,10 @@ public class Stop {
         this.deltaFillRate = s.deltaFillRate;
     }
 
+    /**
+     * Merge 2 stops met elkaar
+     * @param s Stop die in deze stop gemerged moet worden
+     */
     public void merge(Stop s){
         collect.addAll(s.getCollect());
         drop.addAll(s.getDrop());
@@ -47,8 +50,7 @@ public class Stop {
      * @return true als er niets wordt uitgevoerd
      */
     public boolean isEmpty() {
-        if (collect.isEmpty() && drop.isEmpty()) return true;
-        return false;
+        return collect.isEmpty() && drop.isEmpty();
     }
 
     public void addToCollect(Machine m) {

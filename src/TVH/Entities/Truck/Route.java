@@ -10,8 +10,7 @@ import java.util.*;
 
 /**
  * De klasse Route geeft aan langs waar een truck rijdt.
- * Een route kan zijn eigen kost bepalen en zichzelf optimaliseren
- * Het is een dynamiche klasse
+ * Moves kunnen toegevoegd en verwijderd worden uit de Route.
  */
 
 public class Route {
@@ -28,14 +27,10 @@ public class Route {
     private ArrayList<Stop> stops;
     private int totalDistance = 0;
     private int cost = 0;
-    private int orderViolations = 0;
     private int timeViolations = 0;
     private int fillRateViolations = 0;
-    private int avgStopsOnTruck = 0;
     private int totalTime = 0;
-
-    public boolean changed;
-    //private String wut;
+    private boolean changed;
 
 
     public Route(Stop first, Stop last, Truck truck) {
@@ -61,10 +56,8 @@ public class Route {
         }
         this.totalDistance = r.totalDistance;
         this.cost = r.cost;
-        this.orderViolations = r.orderViolations;
         this.timeViolations = r.timeViolations;
         this.fillRateViolations = r.fillRateViolations;
-        this.avgStopsOnTruck = r.avgStopsOnTruck;
         this.totalTime = r.totalTime;
         this.changed = r.changed;
     }
@@ -73,10 +66,8 @@ public class Route {
         this.stops = r.stops;
         this.totalDistance = r.totalDistance;
         this.cost = r.cost;
-        this.orderViolations = r.orderViolations;
         this.timeViolations = r.timeViolations;
         this.fillRateViolations = r.fillRateViolations;
-        this.avgStopsOnTruck = r.avgStopsOnTruck;
         this.totalTime = r.totalTime;
         this.changed = r.changed;
     }
@@ -101,17 +92,16 @@ public class Route {
         //Stops inserten op beste plek
         int[] indices = insertStops(collectStop, dropStop);
 
-        //changed = true;
-        //De optimalisatie geeft geen garantie van feasibility, er moet dus nog gekeken worden als de rit feasible is
+        //Feasiblity checken
         if (!isFeasible()) {
-            //Zo niet herstellen, verwijderen we de move terug en zetten we de volgorde terug naar de originele
-            removeMove(m, false);
+            //Originele route herstellen
+            removeMove(m);
             loadRoute(backup);
 
             return false;
         }
 
-        //Stops met zelfde locatie mergen met elkaar
+        //Sequentiële stops met zelfde locatie mergen met elkaar
         mergeStops(indices);
 
         return true;
@@ -120,34 +110,29 @@ public class Route {
     /**
      * Deze methode verwijdert een move terug van de route
      *
-     * @param m
-     * @param optimize
+     * @param m Move die verwijderd moet worden
      */
 
-    public void removeMove(Move m, boolean optimize) {
+    public void removeMove(Move m) {
         Stop collectStop = null;
         Stop dropStop = null;
 
         //Respectieve stops waar de move effect op had opzoeken en de machine verwijderen van collect en drop
         for (Stop s : stops) {
             if (s.getLocation() == m.getCollect()) {
-                if(s.removeFromCollect(m.getMachine())){
+                if (s.removeFromCollect(m.getMachine())) {
                     collectStop = s;
                 }
 
             }
             if (s.getLocation() == m.getDrop()) {
-                if(s.removeFromDrop(m.getMachine())){
+                if (s.removeFromDrop(m.getMachine())) {
                     dropStop = s;
                 }
             }
         }
-        //Als er bij een bepaalde stop niets meer gedaan moet worden kan deze verwijderd worden uit de route behalve
-        //als het de eerste of laatste stop i
-        if (collectStop == null || dropStop == null) {
-            System.out.println("stop");
-        }
-
+        //Als we op een bepaalde locatie (behalve start en eind) passeren zonder iets te droppen of collecten kan deze
+        //Stop worden verwijderd.
         if (collectStop.isEmpty() && collectStop != stops.get(0) && collectStop != stops.get(stops.size() - 1)) {
             stops.remove(collectStop);
         }
@@ -158,26 +143,34 @@ public class Route {
         changed = true;
     }
 
+    /**
+     * Deze methode insert 2 nieuwe stops op de beste locatie mogelijk
+     *
+     * @param stop1
+     * @param stop2
+     * @return de 2 indices waar de nieuwe stops zich bevinden
+     */
     private int[] insertStops(Stop stop1, Stop stop2) {
         int stop1Index = -1;
         int stop2Index = -1;
 
-        //Safety measure
-        if(changed){
+        //Aangezien we verder op met delta kost gaan werken is het belangrijk om te zorgen dat de kost nu correct is
+        if (changed) {
             calculateCost();
         }
 
         int minCost = Integer.MAX_VALUE;
         Route best = null;
+
         for (int i = 1; i < getStops().size(); i++) {
             for (int j = 1; j < getStops().size(); j++) {
                 if (i <= j) {
+                    //Kopie van de route nemen zonder stops de deepcopien
                     Route candidate = new Route(this, false);
                     candidate.getStops().add(i, stop1);
                     candidate.getStops().add(j + 1, stop2);
                     candidate.setChanged(true);
-                    //Het is enkel nuttig om de feasiblity te checken als de distance lager ligt dan het minimum
-                    if (candidate.calculateCost(i, j+1) < minCost) {
+                    if (candidate.calculateCost(i, j + 1) < minCost) {
                         best = candidate;
                         minCost = candidate.getCost();
                         stop1Index = i;
@@ -186,13 +179,19 @@ public class Route {
                 }
             }
         }
+        //beste gevonden route inladen
         loadRoute(best);
 
         return new int[]{stop1Index, stop2Index};
     }
 
+    /**
+     * Deze methode plakt sequentiele stops tesamen die dezelfde locatie hebben
+     *
+     * @param indices indices van de net toegevoegde stops
+     */
     private void mergeStops(int[] indices) {
-        //todo: bug nog te fixen: soms wordt de eindstop niet gemerged
+        //TODO: bug nog te fixen: soms worden depots niet goed gemerged (zowel start als stop), zorgt niet voor infeasibility, maar is een beetje knullig
         Stop stop1 = stops.get(indices[0]);
         Stop stop2 = stops.get(indices[1]);
 
@@ -212,16 +211,12 @@ public class Route {
             stops.get(indices[1] + 1).merge(stop2);
             stop2merged = true;
         }
-        try {
 
-            if (stop1merged && stop2merged) {
-                stops.remove(indices[0]);
-                stops.remove(indices[1] - 1);
-            } else if (stop1merged) stops.remove(indices[0]);
-            else if (stop2merged) stops.remove(indices[1]);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("verwijder");
-        }
+        if (stop1merged && stop2merged) {
+            stops.remove(indices[0]);
+            stops.remove(indices[1] - 1);
+        } else if (stop1merged) stops.remove(indices[0]);
+        else if (stop2merged) stops.remove(indices[1]);
     }
 
     /**
@@ -231,52 +226,19 @@ public class Route {
      */
     public boolean isFeasible() {
         if (changed) calculateCost();
-        //if (orderViolations > 0) return false;
-        if (timeViolations > 0) return false;
-        if (fillRateViolations > 0) return false;
-        return true;
+        return timeViolations == 0 && fillRateViolations == 0;
     }
 
-    //Bedoelt voor 2opt
-    public boolean quickFeasiblityCheck() {
-        Set<Machine> onTruck = new HashSet<>(stops.get(0).getCollect());
-        int totalTime = stops.get(0).getTimeSpend();
-        int fillrate = stops.get(0).getDeltaFillRate();
-        for (int i = 1; i < stops.size(); i++) {
-            Stop selected = stops.get(i);
-            //Order
-            onTruck.addAll(selected.getCollect());
-            for (Machine m : selected.getDrop()) {
-                if (!onTruck.remove(m)) return false;
-            }
-            //Fillrate
-            fillrate += selected.getDeltaFillRate();
-            if (fillrate > TRUCK_CAPACITY) return false;
-
-            //Time
-            totalTime += selected.getLocation().timeTo(stops.get(i - 1).getLocation());
-            totalTime += selected.getTimeSpend();
-            if (totalTime > TRUCK_WORKING_TIME) return false;
-        }
-        return true;
-    }
-
-    /*
-     * Update the cost factors and return the total cost if not changed
-     * */
+    /**
+     * Berekent de kost volledig opnieuw indienen de Route gewijzigd is.
+     * @return kost
+     */
     private int calculateCost() {
         if (changed) {
 
             totalDistance = 0;
             timeViolations = 0;
-            orderViolations = 0;
             fillRateViolations = 0;
-
-            //boolean[] onTruck = new boolean[Problem.getInstance().machines.size()];
-
-            /*for(Machine m: stops.get(0).getCollect()){
-                onTruck[m.getId()] = true;
-            }*/
 
             totalTime = stops.get(0).getTimeSpend();
             int fillrate = stops.get(0).getDeltaFillRate();
@@ -290,30 +252,23 @@ public class Route {
                 Location A = selected.getLocation();
                 Location B = stops.get(i - 1).getLocation();
                 totalDistance += A.distanceTo(B);
-                //Calculate total time
+
+                //Total time
                 totalTime += A.timeTo(B);
                 totalTime += selected.getTimeSpend();
 
-                /*//order violations
-                for(Machine m: selected.getCollect()){
-                    onTruck[m.getId()] = true;
-                }
-                for(Machine m: selected.getDrop()){
-                    if(!onTruck[m.getId()]) orderViolations++;
-                }*/
-
-                //FillRateViolations
+                //FillRate violations
                 fillrate += selected.getDeltaFillRate();
                 if (fillrate > TRUCK_CAPACITY) {
                     fillRateViolations += fillrate - TRUCK_CAPACITY;
                 }
             }
 
+            //Time violations
             timeViolations = (totalTime > TRUCK_WORKING_TIME) ? totalTime - TRUCK_WORKING_TIME : 0;
 
             cost = DISTANCE_FACTOR * totalDistance
                     + TIME_FACTOR * timeViolations
-                    //+ ORDER_FACTOR * orderViolations
                     + FILL_RATE_VIOLATIONS_FACTOR * fillRateViolations;
             changed = false;
 
@@ -321,14 +276,21 @@ public class Route {
         return cost;
     }
 
+    /**
+     * Berekent de kost (delta) bij toevoegen van 2 nieuwe stops. Sneller dan algemene kost berekening.
+     * @param firstAddedIndex index van de eerste nieuwe stop
+     * @param secondAddedIndex index van de tweede nieuwe stop
+     * @return nieuwe kost
+     */
     private int calculateCost(int firstAddedIndex, int secondAddedIndex) {
-        if(changed) {
+        if (changed) {
             if (firstAddedIndex < secondAddedIndex - 1) {
-                // A - B is nu  A - X - B geworden
+                //A1 - B1 is nu  A1 - X1 - B1 geworden
                 Stop A1 = stops.get(firstAddedIndex - 1);
                 Stop X1 = stops.get(firstAddedIndex);
                 Stop B1 = stops.get(firstAddedIndex + 1);
 
+                //A2 - B2 is nu  A2 - X2 - B2 geworden
                 Stop A2 = stops.get(secondAddedIndex - 1);
                 Stop X2 = stops.get(secondAddedIndex);
                 Stop B2 = stops.get(secondAddedIndex + 1);
@@ -347,7 +309,7 @@ public class Route {
 
                 totalTime += X1.getTimeSpend() + X2.getTimeSpend();
             } else {
-                //A - B is nu A - X - Y - B
+                //A - B is nu A - X - Y - B geworden
                 Stop A = stops.get(firstAddedIndex - 1);
                 Stop X = stops.get(firstAddedIndex);
                 Stop Y = stops.get(secondAddedIndex);
@@ -364,8 +326,9 @@ public class Route {
             }
 
             timeViolations = (totalTime > TRUCK_WORKING_TIME) ? totalTime - TRUCK_WORKING_TIME : 0;
-            fillRateViolations = 0;
 
+            //Fillrate violations worden wel telkens opnieuw berekend
+            fillRateViolations = 0;
             int fillrate = 0;
             for (Stop s : stops) {
                 fillrate += s.getDeltaFillRate();
@@ -373,109 +336,15 @@ public class Route {
                     fillRateViolations += fillrate - TRUCK_CAPACITY;
                 }
             }
+
             cost = DISTANCE_FACTOR * totalDistance
                     + TIME_FACTOR * timeViolations
-                    //+ ORDER_FACTOR * orderViolations
                     + FILL_RATE_VIOLATIONS_FACTOR * fillRateViolations;
 
             changed = false;
         }
         return cost;
 
-    }
-
-    private int calculateTime() {
-        int totalTime = 0;
-        Stop prevStop = stops.get(0);
-        //Time to drive to each stop
-        for (int i = 1; i < stops.size(); i++) {
-            totalTime += prevStop.getLocation().timeTo(stops.get(i).getLocation());
-            prevStop = stops.get(i);
-        }
-        //Time spend at each stop to load/unload
-        for (Stop s : stops) {
-            totalTime += s.getTimeSpend();
-        }
-        return totalTime;
-    }
-
-    private int calculateTimeViolations() {
-        int timeTooMuch = calculateTime() - Problem.getInstance().TRUCK_WORKING_TIME;
-        if (timeTooMuch > 0) {
-            return timeTooMuch;
-        } else return 0;
-    }
-
-    private int calculateOrderViolations() {
-        List<Machine> onTruck = new LinkedList<>();
-        int orderViolations = 0;
-        for (Stop s : stops) {
-            onTruck.addAll(s.getCollect());
-            for (Machine m : s.getDrop()) {
-                if (!onTruck.remove(m)) {
-                    //Een item van de truck halen die er niet opzit!
-                    orderViolations++;
-                }
-            }
-        }
-        return orderViolations;
-    }
-
-    private int calculateFillRateViolations() {
-        List<Machine> onTruck = new LinkedList<>();
-        int fillRateViolations = 0;
-        for (Stop s : stops) {
-            onTruck.addAll(s.getCollect());
-            onTruck.removeAll(s.getDrop());
-            int fillRate = calculateFillRate(onTruck);
-            if (fillRate > Problem.getInstance().TRUCK_CAPACITY) {
-                fillRateViolations += 100 + fillRate - Problem.getInstance().TRUCK_CAPACITY;
-            }
-        }
-        return fillRateViolations;
-    }
-
-    private int calculateFillRate(List<Machine> machines) {
-        int fillrate = 0;
-        for (Machine m : machines) {
-            fillrate += m.getType().getVolume();
-        }
-        return fillrate;
-    }
-
-    private int calculateAvgStopsOnTruck() {
-        List<Machine> onTruck = new LinkedList<>();
-        HashMap<Machine, Integer> nStopsOnTruck = new HashMap<>();
-        for (Stop s : stops) {
-            onTruck.addAll(s.getCollect());
-            onTruck.removeAll(s.getDrop());
-            for (Machine m : onTruck) {
-                if (nStopsOnTruck.containsKey(m)) {
-                    nStopsOnTruck.put(m, nStopsOnTruck.get(m) + 1);
-                } else {
-                    nStopsOnTruck.put(m, 1);
-                }
-            }
-
-        }
-        if (nStopsOnTruck.size() == 0) return 0;
-
-        int avgStopsOnTruck = 0;
-        for (Integer i : nStopsOnTruck.values()) {
-            avgStopsOnTruck += i;
-        }
-        return avgStopsOnTruck / nStopsOnTruck.size();
-
-    }
-
-    private int calculateDistance() {
-        int totalDistance = 0;
-        for (int i = 0; i < stops.size() - 1; i++) {
-            Location A = stops.get(i).getLocation();
-            Location B = stops.get(i + 1).getLocation();
-            totalDistance += A.distanceTo(B);
-        }
-        return totalDistance;
     }
 
     public ArrayList<Stop> getStops() {
@@ -488,64 +357,27 @@ public class Route {
     }
 
     public int getTotalDistance() {
-        //int hash = Objects.hashCode(stops);
-        //if(hash != hash1){
-        totalDistance = calculateDistance();
-        //    hash1 = hash;
-        //}
+        if(changed) calculateCost();
         return totalDistance;
     }
 
     public int getCost() {
-        //int hash = Objects.hashCode(stops);
-        //if(hash != hash2){
-        //    hash2 = hash;
-        //}
+        if(changed) calculateCost();
         return calculateCost();
     }
 
-    public int getOrderViolations() {
-        //int hash = Objects.hashCode(stops);
-        //if(hash != hash3){
-        orderViolations = calculateOrderViolations();
-        //    hash3 = hash;
-        //}
-        return orderViolations;
-    }
-
     public int getTimeViolations() {
-        //int hash = Objects.hashCode(stops);
-        //if(hash != hash4){
-        timeViolations = calculateTimeViolations();
-        //    hash4 = hash;
-        //}
+        if(changed) calculateCost();
         return timeViolations;
     }
 
     public int getFillRateViolations() {
-        //int hash = Objects.hashCode(stops);
-        //if(hash != hash5){
-        fillRateViolations = calculateFillRateViolations();
-        //    hash5 = hash;
-        //}
+        if(changed) calculateCost();
         return fillRateViolations;
     }
 
-    public int getAvgStopsOnTruck() {
-        //int hash = Objects.hashCode(stops);
-        //if(hash != hash6){
-        avgStopsOnTruck = calculateAvgStopsOnTruck();
-        //    hash6 = hash;
-        //}
-        return avgStopsOnTruck;
-    }
-
     public int getTotalTime() {
-        //int hash = Objects.hashCode(stops);
-        //if(hash != hash7){
-        totalTime = calculateTime();
-        //    hash7 = hash;
-        //}
+        if(changed) calculateCost();
         return totalTime;
     }
 
@@ -555,6 +387,5 @@ public class Route {
 
     public void setChanged(boolean changed) {
         this.changed = changed;
-        //getCost();
     }
 }

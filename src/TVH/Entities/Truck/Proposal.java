@@ -11,13 +11,15 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * NEGEER VOORLOPIG
+ * Een proposal kan vergeleken worden met een offerte die wordt opgemaakt door een truck. Een bepaalde truck zegt dat
+ * het een bepaalde Job (en eventueel een 2de Job) kan vervolledigen door een bepaalde Move te implementeren in zijn
+ * Route en geeft ook aan hoeveel dit zal kosten.
  */
 
 public class Proposal {
     Truck truck;
     Job primaryJob;
-    Job secondaryJob;
+    Job secondaryJob; //Soms vervolledigd een bepaalde move ook een 2de Job
     Move move;
     int cost;
 
@@ -47,31 +49,6 @@ public class Proposal {
     }
 
     public int getCost() {
-
-        //return secondaryJob == null ? cost : cost/2;
         return cost;
-    }
-
-    public static List<Proposal> getBestProposalPerJobCombination(List<Proposal> allProposals){
-        HashMap<Job, Proposal> bestProposalPerSecondJob = new HashMap<>();
-        for(Proposal p: allProposals){
-            if(p.getSecondaryJob() == null){
-                if(!bestProposalPerSecondJob.containsKey(p.primaryJob)){
-                    bestProposalPerSecondJob.put(p.primaryJob, p);
-                }
-                else if(bestProposalPerSecondJob.get(p.primaryJob).cost > p.cost){
-                    bestProposalPerSecondJob.put(p.primaryJob, p);
-                }
-            }
-            else{
-                if(!bestProposalPerSecondJob.containsKey(p.secondaryJob)){
-                    bestProposalPerSecondJob.put(p.secondaryJob, p);
-                }
-                else if(bestProposalPerSecondJob.get(p.secondaryJob).cost > p.cost){
-                    bestProposalPerSecondJob.put(p.secondaryJob, p);
-                }
-            }
-        }
-        return new ArrayList<>(bestProposalPerSecondJob.values());
     }
 }
