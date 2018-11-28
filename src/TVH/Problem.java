@@ -61,6 +61,8 @@ public class Problem {
         info = sc.nextLine().split(": ")[1];
         TRUCK_CAPACITY = Integer.parseInt(sc.nextLine().split(": ")[1]);
         TRUCK_WORKING_TIME = Integer.parseInt(sc.nextLine().split(": ")[1]);
+        Route.TRUCK_CAPACITY = TRUCK_CAPACITY;
+        Route.TRUCK_WORKING_TIME  = TRUCK_WORKING_TIME;
 
         sc.nextLine(); //weggooilijn
 
@@ -841,9 +843,9 @@ public class Problem {
             Queue<Mode> modeQueue = new LinkedList<>();
             modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.NEARBY);
+            modeQueue.offer(Mode.TRUCK);
             modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.NEARBY);
-            modeQueue.offer(Mode.MTYPE);
             modeQueue.offer(Mode.TRUCK);
             return modeQueue;
         }

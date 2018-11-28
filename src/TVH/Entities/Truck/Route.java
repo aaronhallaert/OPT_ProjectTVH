@@ -21,6 +21,10 @@ public class Route {
     public static int FILL_RATE_VIOLATIONS_FACTOR = 0;
     public static int DISTANCE_FACTOR = 0;
 
+    //Dit bespaart redelijk wat tijd (anders moet telkens problem object worden opgevraagd)
+    public static int TRUCK_CAPACITY;
+    public static int TRUCK_WORKING_TIME;
+
     private ArrayList<Stop> stops;
     private int totalDistance = 0;
     private int cost = 0;
@@ -247,12 +251,12 @@ public class Route {
             }
             //Fillrate
             fillrate += selected.getDeltaFillRate();
-            if (fillrate > Problem.getInstance().TRUCK_CAPACITY) return false;
+            if (fillrate > TRUCK_CAPACITY) return false;
 
             //Time
             totalTime += selected.getLocation().timeTo(stops.get(i - 1).getLocation());
             totalTime += selected.getTimeSpend();
-            if (totalTime > Problem.getInstance().TRUCK_WORKING_TIME) return false;
+            if (totalTime > TRUCK_WORKING_TIME) return false;
         }
         return true;
     }
@@ -276,8 +280,8 @@ public class Route {
 
             totalTime = stops.get(0).getTimeSpend();
             int fillrate = stops.get(0).getDeltaFillRate();
-            if (fillrate > Problem.getInstance().TRUCK_CAPACITY) {
-                fillRateViolations += fillrate - Problem.getInstance().TRUCK_CAPACITY;
+            if (fillrate > TRUCK_CAPACITY) {
+                fillRateViolations += fillrate - TRUCK_CAPACITY;
             }
 
             for (int i = 1; i < stops.size(); i++) {
@@ -300,12 +304,12 @@ public class Route {
 
                 //FillRateViolations
                 fillrate += selected.getDeltaFillRate();
-                if (fillrate > Problem.getInstance().TRUCK_CAPACITY) {
-                    fillRateViolations += fillrate - Problem.getInstance().TRUCK_CAPACITY;
+                if (fillrate > TRUCK_CAPACITY) {
+                    fillRateViolations += fillrate - TRUCK_CAPACITY;
                 }
             }
 
-            timeViolations = (totalTime > Problem.getInstance().TRUCK_WORKING_TIME) ? totalTime - Problem.getInstance().TRUCK_WORKING_TIME : 0;
+            timeViolations = (totalTime > TRUCK_WORKING_TIME) ? totalTime - TRUCK_WORKING_TIME : 0;
 
             cost = DISTANCE_FACTOR * totalDistance
                     + TIME_FACTOR * timeViolations
@@ -359,14 +363,14 @@ public class Route {
 
             }
 
-            timeViolations = (totalTime > Problem.getInstance().TRUCK_WORKING_TIME) ? totalTime - Problem.getInstance().TRUCK_WORKING_TIME : 0;
+            timeViolations = (totalTime > TRUCK_WORKING_TIME) ? totalTime - TRUCK_WORKING_TIME : 0;
             fillRateViolations = 0;
 
             int fillrate = 0;
             for (Stop s : stops) {
                 fillrate += s.getDeltaFillRate();
-                if (fillrate > Problem.getInstance().TRUCK_CAPACITY) {
-                    fillRateViolations += fillrate - Problem.getInstance().TRUCK_CAPACITY;
+                if (fillrate > TRUCK_CAPACITY) {
+                    fillRateViolations += fillrate - TRUCK_CAPACITY;
                 }
             }
             cost = DISTANCE_FACTOR * totalDistance
