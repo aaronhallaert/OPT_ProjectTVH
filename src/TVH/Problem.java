@@ -463,7 +463,7 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if (counter == 200) {
+            if (counter == 1000) {
                 currentTemp = 0.995 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
