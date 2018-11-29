@@ -117,17 +117,23 @@ public class Route {
         Stop collectStop = null;
         Stop dropStop = null;
 
+        int collectIndex = -1;
+        int dropIndex = -1;
+
         //Respectieve stops waar de move effect op had opzoeken en de machine verwijderen van collect en drop
-        for (Stop s : stops) {
+        for (int i = 0; i < stops.size(); i++) {
+            Stop s = stops.get(i);
             if (s.getLocation() == m.getCollect()) {
                 if (s.removeFromCollect(m.getMachine())) {
                     collectStop = s;
+                    collectIndex = i;
                 }
 
             }
             if (s.getLocation() == m.getDrop()) {
                 if (s.removeFromDrop(m.getMachine())) {
                     dropStop = s;
+                    dropIndex = i;
                 }
             }
         }
@@ -139,6 +145,8 @@ public class Route {
         if (dropStop.isEmpty() && dropStop != stops.get(0) && dropStop != stops.get(stops.size() - 1)) {
             stops.remove(dropStop);
         }
+
+        //TODO: opnieuw mergen rond de verwijderde indices
 
         changed = true;
     }
@@ -191,32 +199,39 @@ public class Route {
      * @param indices indices van de net toegevoegde stops
      */
     private void mergeStops(int[] indices) {
-        //TODO: bug nog te fixen: soms worden depots niet goed gemerged (zowel start als stop), zorgt niet voor infeasibility, maar is een beetje knullig
         Stop stop1 = stops.get(indices[0]);
         Stop stop2 = stops.get(indices[1]);
 
-        boolean stop1merged = false;
-        boolean stop2merged = false;
-        //Normaal zijn de nieuwe stops altijd toegevoegd voor de oude (behalve bij de eerste)
-        if (stop1.getLocation() == stops.get(indices[0] + 1).getLocation()) {
-            stops.get(indices[0] + 1).merge(stop1);
-            stop1merged = true;
-        }
-        //Speciaal voor 1ste stop in de route
-        else if (stop1.getLocation() == stops.get(indices[0] - 1).getLocation()) {
-            stops.get(indices[0] - 1).merge(stop1);
-            stop1merged = true;
-        }
-        if (stop2.getLocation() == stops.get(indices[1] + 1).getLocation()) {
-            stops.get(indices[1] + 1).merge(stop2);
-            stop2merged = true;
-        }
+        //Als de 2 toegevoegde stops niet op dezelfde locatie liggen
+        if(stop1.getLocation() != stop2.getLocation()) {
+            boolean stop1merged = false;
+            boolean stop2merged = false;
+            //Normaal zijn de nieuwe stops altijd toegevoegd voor de oude (behalve bij de eerste)
+            if (stop1.getLocation() == stops.get(indices[0] + 1).getLocation()) {
+                stops.get(indices[0] + 1).merge(stop1);
+                stop1merged = true;
+            }
+            //Speciaal voor 1ste stop in de route
+            else if (stop1.getLocation() == stops.get(indices[0] - 1).getLocation()) {
+                stops.get(indices[0] - 1).merge(stop1);
+                stop1merged = true;
+            }
+            if (stop2.getLocation() == stops.get(indices[1] + 1).getLocation()) {
+                stops.get(indices[1] + 1).merge(stop2);
+                stop2merged = true;
+            }
 
-        if (stop1merged && stop2merged) {
-            stops.remove(indices[0]);
-            stops.remove(indices[1] - 1);
-        } else if (stop1merged) stops.remove(indices[0]);
-        else if (stop2merged) stops.remove(indices[1]);
+            if (stop1merged && stop2merged) {
+                stops.remove(indices[0]);
+                stops.remove(indices[1] - 1);
+            } else if (stop1merged) stops.remove(indices[0]);
+            else if (stop2merged) stops.remove(indices[1]);
+        }
+        //Als de 2 toegevoegde stops wel op dezelfde locatie liggen
+        else{
+            stop1.merge(stop2);
+            stops.remove(indices[1]);
+        }
     }
 
     /**
