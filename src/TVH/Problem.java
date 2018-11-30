@@ -440,6 +440,7 @@ public class Problem {
                     }
                     minJobsNotAdded = nJobsNotAdded;
                     System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "nf"));
+                    Listener.getInstance().newSolutionFound(localOptimum);
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
                     if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
@@ -452,7 +453,7 @@ public class Problem {
                             long timestamp = System.currentTimeMillis() - (endTime - duration);
                             DecimalFormat df = new DecimalFormat("#.##");
                             System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + df.format(acceptRate * 100) + "%\t\t" + df.format(currentTemp));
-
+                            Listener.getInstance().newSolutionFound(candidate);
                         }
                     }
                 }
@@ -463,7 +464,7 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if (counter == 180) {
+            if (counter == 75) {
                 currentTemp = 0.995 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;

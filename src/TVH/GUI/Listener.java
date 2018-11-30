@@ -44,7 +44,8 @@ public class Listener {
     }
 
     public void newSolutionFound(Solution s){
-        if(s.getTotalDistance() < lowestDistance){
+        //if(s.getTotalDistance() < lowestDistance){
+        if(true){
             lowestDistance = s.getTotalDistance();
             int timestamp = (int)(System.currentTimeMillis() - startTime);
             Platform.runLater(() -> {

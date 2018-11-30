@@ -46,7 +46,7 @@ public class Solution {
 
         // hier moet ik de listener triggeren
         // inderdaad tibo, maar dat deed je niet grt
-        Listener.getInstance().newSolutionFound(this);
+
     }
 
     public void loadSolution(){
