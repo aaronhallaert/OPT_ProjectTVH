@@ -116,9 +116,22 @@ public class Stop {
         return drop;
     }
 
-
     public String toString() {
         return location.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Stop)) return false;
+        Stop stop = (Stop) o;
+        return Objects.equals(location, stop.location) &&
+                Objects.equals(collect, stop.collect) &&
+                Objects.equals(drop, stop.drop);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(location, collect, drop);
+    }
 }

@@ -336,6 +336,7 @@ public class Problem {
         int timesRun = 0;
         Queue<Mode> modeQueue = Mode.createQueue();
         Mode mode = modeQueue.poll();
+        List<Solution> cache = new LinkedList<>();
 
         while (System.currentTimeMillis() < endTime) {
 
@@ -433,6 +434,7 @@ public class Problem {
                 //candidate.writeToFile("temp.txt", Main.INPUT_FILE);
                 //Candidate is better than local, or Candidate implements more jobs than best
                 if (candidate.getTotalDistance() < localOptimum.getTotalDistance() || nJobsNotAdded < minJobsNotAdded) {
+                    cache.clear();
                     localOptimum = new Solution();
                     long timestamp = System.currentTimeMillis() - (endTime - duration);
                     if (localOptimum.getTotalDistance() < best.getTotalDistance() || nJobsNotAdded < minJobsNotAdded) {
@@ -442,17 +444,20 @@ public class Problem {
                     System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "nf"));
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
-                    if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
+
+                    if (cache.contains(candidate)) System.out.println("ESKEREEEEEEEEE");
+                    if (!cache.contains(candidate) && localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
                         double acceptRate = Math.exp((localOptimum.getTotalDistance() - candidate.getTotalDistance()) / currentTemp);
                         if (localOptimum.getTotalDistance() == candidate.getTotalDistance()) acceptRate = 0;
                         double random = r.nextDouble();
                         if (random <= acceptRate) {
                             //counter++;
                             localOptimum = candidate;
+                            cache.add(candidate);
                             long timestamp = System.currentTimeMillis() - (endTime - duration);
                             DecimalFormat df = new DecimalFormat("#.##");
                             System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + df.format(acceptRate * 100) + "%\t\t" + df.format(currentTemp));
-
+                            //TODO: Cache de shit
                         }
                     }
                 }

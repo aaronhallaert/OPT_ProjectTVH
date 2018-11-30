@@ -403,4 +403,19 @@ public class Route {
     public void setChanged(boolean changed) {
         this.changed = changed;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Route)) return false;
+        Route route = (Route) o;
+        return totalDistance == route.totalDistance &&
+                cost == route.cost &&
+                Objects.equals(stops, route.stops);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stops, totalDistance, cost);
+    }
 }

@@ -7,6 +7,7 @@ import com.google.common.collect.HashMultimap;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * De klasse Depot bevat elke Node waar machines beschikbaar zijn zonder verplichtingen. Een Depot heeft een lijst
@@ -87,5 +88,13 @@ public class Depot implements Node{
 
     public List<Machine> getAvailableMachines(){
         return new ArrayList<>(machines.values());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Depot)) return false;
+        Depot depot = (Depot) o;
+        return Objects.equals(location, depot.location);
     }
 }

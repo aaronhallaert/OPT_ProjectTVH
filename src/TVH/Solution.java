@@ -40,9 +40,8 @@ public class Solution {
         }
 
         //Hash maken
-        for(Truck t: trucks){
-            hash += Objects.hash(t.getTruckId(),t.getRoute().getStops());
-        }
+
+        hash = hashCode();
 
         // hier moet ik de listener triggeren
         // inderdaad tibo, maar dat deed je niet grt
@@ -145,5 +144,18 @@ public class Solution {
 
     public int getHash() {
         return hash;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Solution)) return false;
+        Solution solution = (Solution) o;
+        return hashCode() == solution.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(trucks);
     }
 }

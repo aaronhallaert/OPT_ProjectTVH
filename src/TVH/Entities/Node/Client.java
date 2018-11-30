@@ -112,4 +112,13 @@ public class Client implements Node{
     public List<MachineType> getToDrop() {
         return toDrop;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Client)) return false;
+        Client client = (Client) o;
+        return Objects.equals(location, client.location);
+    }
 }
+

@@ -180,11 +180,11 @@ public class Truck {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Truck truck = (Truck) o;
-        return truckId == truck.truckId;
+        return hashCode() == truck.hashCode();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(truckId);
+        return Objects.hash(truckId, route);
     }
 }
