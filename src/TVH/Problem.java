@@ -444,6 +444,7 @@ public class Problem {
                     long timestamp = System.currentTimeMillis() - (endTime - duration);
                     if (localOptimum.getTotalDistance() < best.getTotalDistance() || nJobsNotAdded < minJobsNotAdded) {
                         best = localOptimum;
+                        //Listener.getInstance().newSolutionFound(localOptimum);
                     }
                     minJobsNotAdded = nJobsNotAdded;
                     System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "nf"));
