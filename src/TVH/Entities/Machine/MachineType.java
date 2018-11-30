@@ -16,11 +16,6 @@ public class MachineType {
         this.serviceTime = serviceTime;
     }
 
-    //Constructor die enkel dient om machinetypes op te zoeken
-    public MachineType(int id) {
-        this.id = id;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -2,8 +2,8 @@ package TVH.Entities.Machine;
 
 //Statische klasse
 public class Machine {
-    private int id;
-    private MachineType type;
+    private final int id;
+    private final MachineType type;
 
     public Machine(int id, MachineType type) {
         this.id = id;
@@ -27,16 +27,8 @@ public class Machine {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public MachineType getType() {
         return type;
-    }
-
-    public void setType(MachineType type) {
-        this.type = type;
     }
 
     @Override

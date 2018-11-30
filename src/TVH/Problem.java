@@ -325,7 +325,7 @@ public class Problem {
         }
     }
 
-    public Solution simulatedAnnealing(long endTime, double temperature, int nJobsToRemove, int nMachineTypesToRemove, int nTrucksToRemove) {
+    public Solution simulatedAnnealing(long endTime, double temperature, int avgJobs, int nMachineTypesToRemove, int nTrucksToRemove) {
         long duration = endTime - System.currentTimeMillis();
         Solution best = new Solution();
         Solution localOptimum = new Solution();
@@ -339,11 +339,14 @@ public class Problem {
 
         while (System.currentTimeMillis() < endTime) {
 
+            int nJobsToRemove = r.nextInt(avgJobs*2);
+
             List<Job> selectedJobs = new ArrayList<>();
 
             switch (mode) {
                 case MTYPE:
                     //We selecteren nMachineTypes om Jobs van te verwijderen
+
                     Set<MachineType> randomMachineTypes = new HashSet<>();
                     while (randomMachineTypes.size() < nMachineTypesToRemove) {
                         MachineType mt = machineTypes.get(r.nextInt(machineTypes.size()));
@@ -464,7 +467,7 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if (counter == 75) {
+            if (counter == 70) {
                 currentTemp = 0.995 * currentTemp;
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
