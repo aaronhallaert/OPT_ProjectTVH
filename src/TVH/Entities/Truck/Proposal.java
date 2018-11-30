@@ -17,11 +17,11 @@ import java.util.List;
  */
 
 public class Proposal {
-    Truck truck;
-    Job primaryJob;
-    Job secondaryJob; //Soms vervolledigd een bepaalde move ook een 2de Job
-    Move move;
-    int cost;
+    private final Truck truck;
+    private final Job primaryJob;
+    private final Job secondaryJob; //Soms vervolledigd een bepaalde move ook een 2de Job
+    private final Move move;
+    private final int cost;
 
     public Proposal(Truck truck, Job job, Move move, int cost) {
         this.truck = truck;

@@ -4,10 +4,10 @@ import java.util.Objects;
 
 //Statische klasse
 public class MachineType {
-    private int id;
-    private String name;
-    private int volume;
-    private int serviceTime;
+    private final int id;
+    private final String name;
+    private final int volume;
+    private final int serviceTime;
 
     public MachineType(int id, String name, int volume, int serviceTime) {
         this.id = id;
@@ -33,32 +33,16 @@ public class MachineType {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public int getVolume() {
         return volume;
     }
 
-    public void setVolume(int volume) {
-        this.volume = volume;
-    }
-
     public int getServiceTime() {
         return serviceTime;
-    }
-
-    public void setServiceTime(int serviceTime) {
-        this.serviceTime = serviceTime;
     }
 
     public String toString(){

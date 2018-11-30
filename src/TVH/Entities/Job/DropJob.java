@@ -16,9 +16,9 @@ import java.util.List;
 //Statische klasse
 
 public class DropJob implements Job {
-    private Location drop;
-    private List<Location> collect;
-    private MachineType machineType;
+    private final Location drop;
+    private final List<Location> collect;
+    private final MachineType machineType;
     //private List<Move> allMoves;
 
     public DropJob(Location drop, List<Location> collect, MachineType mt) {
@@ -58,24 +58,12 @@ public class DropJob implements Job {
         return drop;
     }
 
-    public void setDrop(Location drop) {
-        this.drop = drop;
-    }
-
     public List<Location> getCollect() {
         return collect;
     }
 
-    public void setCollect(List<Location> collect) {
-        this.collect = collect;
-    }
-
     public MachineType getMachineType() {
         return machineType;
-    }
-
-    public void setMachineType(MachineType machineType) {
-        this.machineType = machineType;
     }
 
     public int getRemoteFactor(){
@@ -99,10 +87,6 @@ public class DropJob implements Job {
         }
         return moves;
     }
-
-    /*public List<Move> getAllMoves() {
-        return allMoves;
-    }*/
 
     public String toString(){
         return getFixedLocation().toString() + " ("+getMachineType()+")";

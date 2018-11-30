@@ -15,8 +15,8 @@ public class Truck {
 
     private int truckId;
     private Route route;
-    private Location startLocation;
-    private Location endLocation;
+    private final Location startLocation;
+    private final Location endLocation;
     private HashMap<Job, Move> jobMoveMap;
 
     public Truck(int truckId, Location startLocation, Location endLocation){
@@ -104,14 +104,6 @@ public class Truck {
 
     public Location getStartLocation() {
         return startLocation;
-    }
-
-    public void setStartLocation(Location startLocation) {
-        this.startLocation = startLocation;
-    }
-
-    public void setEndLocation(Location endLocation) {
-        this.endLocation = endLocation;
     }
 
     public Route getRoute() {

@@ -13,9 +13,9 @@ import java.util.Objects;
 //Statische klasse
 
 public class Move {
-    Machine machine;
-    Location collect;
-    Location drop;
+    private final Machine machine;
+    private final Location collect;
+    private final Location drop;
 
     public Move(Machine machine, Location collect, Location drop) {
         this.machine = machine;

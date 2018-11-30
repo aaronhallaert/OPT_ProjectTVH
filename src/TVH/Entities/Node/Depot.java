@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class Depot implements Node{
 
-    private Location location;
+    private final Location location;
     private HashMultimap<MachineType, Machine> machines;
     private LinkedList<Machine> dropped;
 
@@ -75,10 +75,6 @@ public class Depot implements Node{
 
     public Location getLocation() {
         return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     public HashMultimap<MachineType, Machine> getTypeMachineMap() {

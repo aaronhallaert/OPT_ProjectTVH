@@ -10,13 +10,13 @@ import java.util.LinkedList;
  * Het bevat ook een gesorteerde lijst van deze edges op basis van afstand.
  */
 public class Location {
-    private int locationID;
-    private double latitude;
-    private double longitude;
-    private String name;
+    private final int locationID;
+    private final double latitude;
+    private final double longitude;
+    private final String name;
     //snelle manier om van de ene location naar de andere te gaan;
-    private HashMap<Location ,Edge> edgeMap;
-    private LinkedList<Edge> sortedEdgeList;
+    private final HashMap<Location ,Edge> edgeMap;
+    private final LinkedList<Edge> sortedEdgeList;
 
     public Location(int locationID,String name ,double latitude, double longitude) {
         this.locationID = locationID;
@@ -36,6 +36,7 @@ public class Location {
     public int distanceTo(Location l){
         return edgeMap.get(l).getDistance();
     }
+
     public int timeTo(Location l){
         return edgeMap.get(l).getTime();
     }
@@ -44,48 +45,24 @@ public class Location {
         return locationID;
     }
 
-    public void setLocationID(int locationID) {
-        this.locationID = locationID;
-    }
-
     public double getLatitude() {
         return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
     }
 
     public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public HashMap<Location, Edge> getEdgeMap() {
         return edgeMap;
     }
 
-    public void setEdgeMap(HashMap<Location, Edge> edgeMap) {
-        this.edgeMap = edgeMap;
-    }
-
     public LinkedList<Edge> getSortedEdgeList() {
         return sortedEdgeList;
-    }
-
-    public void setSortedEdgeList(LinkedList<Edge> sortedEdgeList) {
-        this.sortedEdgeList = sortedEdgeList;
     }
 
     @Override

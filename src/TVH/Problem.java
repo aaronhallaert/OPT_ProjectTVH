@@ -230,6 +230,8 @@ public class Problem {
 
             }
         }
+        Route.distanceMatrix = distanceMatrix;
+        Route.timeMatrix = timeMatrix;
         //System.out.println("Input read");
 
     }
@@ -277,7 +279,7 @@ public class Problem {
                 List<Location> from = new ArrayList<>();
                 for (Edge e : loc.getSortedEdgeList()) {
                     Node node = nodesMap.get(e.getTo());
-                    if (node.hasMachineAvailableOfType(mt)) {
+                    if(node != null && node.hasMachineAvailableOfType(mt)){
                         from.add(node.getLocation());
                     }
                 }
@@ -288,7 +290,7 @@ public class Problem {
                 List<Location> to = new ArrayList<>();
                 for (Edge e : loc.getSortedEdgeList()) {
                     Node node = nodesMap.get(e.getTo());
-                    if (node.canPutMachineType(m.getType())) {
+                    if (node != null && node.canPutMachineType(m.getType())) {
                         to.add(node.getLocation());
                     }
                 }
@@ -327,9 +329,11 @@ public class Problem {
 
     public Solution simulatedAnnealing(long endTime, double temperature, int avgJobs, int nMachineTypesToRemove, int nTrucksToRemove) {
         long duration = endTime - System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         Solution best = new Solution();
         Solution localOptimum = new Solution();
         //LinkedList<Integer> tabu = new LinkedList<>();
+
         currentTemp = temperature;
         Listener.getInstance().updateTemperature(currentTemp);
         int counter = 0;
@@ -467,8 +471,9 @@ public class Problem {
 
             timesRun++;
             counter++;
-            if (counter == 70) {
-                currentTemp = 0.995 * currentTemp;
+            if (counter == 50) {
+                double x_value = ((double)(System.currentTimeMillis() - startTime))/((double) duration)*750;
+                currentTemp = temperature * Math.pow(0.995, x_value); //temperatuur functie
                 Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
             }

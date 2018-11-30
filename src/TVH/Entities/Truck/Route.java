@@ -23,6 +23,8 @@ public class Route {
     //Dit bespaart redelijk wat tijd (anders moet telkens problem object worden opgevraagd)
     public static int TRUCK_CAPACITY;
     public static int TRUCK_WORKING_TIME;
+    public static int[][] distanceMatrix;
+    public static int[][] timeMatrix;
 
     private ArrayList<Stop> stops;
     private int totalDistance = 0;
@@ -301,42 +303,42 @@ public class Route {
         if (changed) {
             if (firstAddedIndex < secondAddedIndex - 1) {
                 //A1 - B1 is nu  A1 - X1 - B1 geworden
-                Stop A1 = stops.get(firstAddedIndex - 1);
-                Stop X1 = stops.get(firstAddedIndex);
-                Stop B1 = stops.get(firstAddedIndex + 1);
+                int A1 = stops.get(firstAddedIndex - 1).getLocation().getLocationID();
+                int X1 = stops.get(firstAddedIndex).getLocation().getLocationID();
+                int B1 = stops.get(firstAddedIndex + 1).getLocation().getLocationID();
 
                 //A2 - B2 is nu  A2 - X2 - B2 geworden
-                Stop A2 = stops.get(secondAddedIndex - 1);
-                Stop X2 = stops.get(secondAddedIndex);
-                Stop B2 = stops.get(secondAddedIndex + 1);
+                int A2 = stops.get(secondAddedIndex - 1).getLocation().getLocationID();
+                int X2 = stops.get(secondAddedIndex).getLocation().getLocationID();
+                int B2 = stops.get(secondAddedIndex + 1).getLocation().getLocationID();
 
-                totalDistance -= A1.getLocation().distanceTo(B1.getLocation());
-                totalDistance += A1.getLocation().distanceTo(X1.getLocation()) + X1.getLocation().distanceTo(B1.getLocation());
+                totalDistance -= distanceMatrix[A1][B1];
+                totalDistance += distanceMatrix[A1][X1]  + distanceMatrix[X1][B1];
 
-                totalDistance -= A2.getLocation().distanceTo(B2.getLocation());
-                totalDistance += A2.getLocation().distanceTo(X2.getLocation()) + X2.getLocation().distanceTo(B2.getLocation());
+                totalDistance -= distanceMatrix[A2][B2];
+                totalDistance += distanceMatrix[A2][X2] +distanceMatrix[X2][B2];
 
-                totalTime -= A1.getLocation().timeTo(B1.getLocation());
-                totalTime += A1.getLocation().timeTo(X1.getLocation()) + X1.getLocation().timeTo(B1.getLocation());
+                totalTime -= timeMatrix[A1][B1];
+                totalTime += timeMatrix[A1][X1] + timeMatrix[X1][B1];
 
-                totalTime -= A2.getLocation().timeTo(B2.getLocation());
-                totalTime += A2.getLocation().timeTo(X2.getLocation()) + X2.getLocation().timeTo(B2.getLocation());
+                totalTime -= timeMatrix[A2][B2];
+                totalTime += timeMatrix[A2][X2] + timeMatrix[X2][B2];
 
-                totalTime += X1.getTimeSpend() + X2.getTimeSpend();
+                totalTime += stops.get(firstAddedIndex).getTimeSpend() + stops.get(secondAddedIndex).getTimeSpend();
             } else {
                 //A - B is nu A - X - Y - B geworden
-                Stop A = stops.get(firstAddedIndex - 1);
-                Stop X = stops.get(firstAddedIndex);
-                Stop Y = stops.get(secondAddedIndex);
-                Stop B = stops.get(secondAddedIndex + 1);
+                int A = stops.get(firstAddedIndex - 1).getLocation().getLocationID();
+                int X = stops.get(firstAddedIndex).getLocation().getLocationID();
+                int Y = stops.get(secondAddedIndex).getLocation().getLocationID();
+                int B = stops.get(secondAddedIndex + 1).getLocation().getLocationID();
 
-                totalDistance -= A.getLocation().distanceTo(B.getLocation());
-                totalDistance += A.getLocation().distanceTo(X.getLocation()) + X.getLocation().distanceTo(Y.getLocation()) + Y.getLocation().distanceTo(B.getLocation());
+                totalDistance -= distanceMatrix[A][B];
+                totalDistance += distanceMatrix[A][X] + distanceMatrix[X][Y] + distanceMatrix[Y][B];
 
-                totalTime -= A.getLocation().timeTo(B.getLocation());
-                totalTime += A.getLocation().timeTo(X.getLocation()) + X.getLocation().timeTo(Y.getLocation()) + Y.getLocation().timeTo(B.getLocation());
+                totalTime -= timeMatrix[A][B];
+                totalTime += timeMatrix[A][X] + timeMatrix[X][Y] + timeMatrix[Y][B];
 
-                totalTime += X.getTimeSpend() + Y.getTimeSpend();
+                totalTime += stops.get(firstAddedIndex).getTimeSpend() + stops.get(secondAddedIndex).getTimeSpend();
 
             }
 

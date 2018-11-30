@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class Client implements Node{
 
-    private Location location;
+    private final Location location;
     private ArrayList<Machine> toCollect;
     private ArrayList<MachineType> toDrop;
 
@@ -99,10 +99,6 @@ public class Client implements Node{
 
     public Location getLocation() {
         return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     public List<Machine> getToCollect() {

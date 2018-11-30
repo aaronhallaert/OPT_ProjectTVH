@@ -12,9 +12,9 @@ import java.util.Objects;
 
 public class Stop {
 
-    private Location location;
-    private LinkedList<Machine> collect;
-    private LinkedList<Machine> drop;
+    private final Location location;
+    private final LinkedList<Machine> collect;
+    private final LinkedList<Machine> drop;
     private int timespend = 0;
     private int deltaFillRate = 0; //Hoeveelheid waarmee de fillrate van de truck verandert na deze stop
 
@@ -100,16 +100,8 @@ public class Stop {
         return location;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
     public LinkedList<Machine> getCollect() {
         return collect;
-    }
-
-    public void setCollect(LinkedList<Machine> collect) {
-        this.collect = collect;
     }
 
     public LinkedList<Machine> getDrop() {
