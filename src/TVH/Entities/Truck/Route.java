@@ -169,8 +169,17 @@ public class Route {
             calculateCost();
         }
 
+        //Fillrates cachen
+        int[] fillRateArray = new int[stops.size()];
+        fillRateArray[0] = stops.get(0).getDeltaFillRate();
+        for (int i = 1; i < stops.size(); i++) {
+            fillRateArray[i] = fillRateArray[i-1] + stops.get(i).getDeltaFillRate();
+        }
+
+
         int minCost = Integer.MAX_VALUE;
         Route best = null;
+        int minFillRateViolations = Integer.MAX_VALUE;
 
         for (int i = 1; i < getStops().size(); i++) {
             for (int j = 1; j < getStops().size(); j++) {
@@ -180,9 +189,10 @@ public class Route {
                     candidate.getStops().add(i, stop1);
                     candidate.getStops().add(j + 1, stop2);
                     candidate.setChanged(true);
-                    if (candidate.calculateCost(i, j + 1) < minCost) {
+                    if (candidate.calculateCost(i, j + 1, fillRateArray, minFillRateViolations) < minCost) {
                         best = candidate;
                         minCost = candidate.getCost();
+                        minFillRateViolations = candidate.getFillRateViolations();
                         stop1Index = i;
                         stop2Index = j + 1;
                     }
@@ -299,7 +309,7 @@ public class Route {
      * @param secondAddedIndex index van de tweede nieuwe stop
      * @return nieuwe kost
      */
-    private int calculateCost(int firstAddedIndex, int secondAddedIndex) {
+    private int calculateCost(int firstAddedIndex, int secondAddedIndex, int[] fillrateArray, int minFillRateViolations) {
         if (changed) {
             if (firstAddedIndex < secondAddedIndex - 1) {
                 //A1 - B1 is nu  A1 - X1 - B1 geworden
@@ -344,13 +354,17 @@ public class Route {
 
             timeViolations = (totalTime > TRUCK_WORKING_TIME) ? totalTime - TRUCK_WORKING_TIME : 0;
 
-            //Fillrate violations worden wel telkens opnieuw berekend
+            //Fillrate violations worden opnieuw berekend vanaf de firstAddedIndex, en vanaf we meer uitkomen dan het minimum, stoppen we met rekenen
             fillRateViolations = 0;
-            int fillrate = 0;
-            for (Stop s : stops) {
-                fillrate += s.getDeltaFillRate();
+            int fillrate = fillrateArray[firstAddedIndex-1];
+            for(int i = firstAddedIndex; i < fillrateArray.length; i++){
+                fillrate += stops.get(i).getDeltaFillRate();
                 if (fillrate > TRUCK_CAPACITY) {
                     fillRateViolations += fillrate - TRUCK_CAPACITY;
+                    if(fillRateViolations > minFillRateViolations){
+                        cost = Integer.MAX_VALUE;
+                        return cost;
+                    }
                 }
             }
 
