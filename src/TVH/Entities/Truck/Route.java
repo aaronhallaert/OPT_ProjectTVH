@@ -377,6 +377,15 @@ public class Route {
         return cost;
 
     }
+    public int indexOf(Location l){
+        int i = 0;
+        for(Stop s: stops){
+            if(s.getLocation() == l) return i;
+            i++;
+        }
+        return -1;
+    }
+
 
     public ArrayList<Stop> getStops() {
         return stops;

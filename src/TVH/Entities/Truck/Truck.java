@@ -45,6 +45,7 @@ public class Truck {
         for(Map.Entry<Job, Move> entry: t.jobMoveMap.entrySet()){
             jobMoveMap.put(entry.getKey(), entry.getValue());
         }
+
     }
 
     /**
@@ -62,6 +63,10 @@ public class Truck {
             Node drop = nodesMap.get(m.getDrop());
             collect.takeMachine(m.getMachine());
             drop.putMachine(m.getMachine());
+
+            Problem.getInstance().locationJobMap.put(m.getDrop(), j);
+            Problem.getInstance().locationJobMap.put(m.getCollect(), j);
+
             return true;
         }
 
@@ -87,6 +92,10 @@ public class Truck {
         Node drop =  nodesMap.get(move.getDrop());
         collect.undoTakeMachine(move.getMachine());
         drop.undoPutMachine(move.getMachine());
+
+        Problem.getInstance().locationJobMap.remove(move.getDrop(), j);
+        Problem.getInstance().locationJobMap.remove(move.getCollect(), j);
+
 
     }
 

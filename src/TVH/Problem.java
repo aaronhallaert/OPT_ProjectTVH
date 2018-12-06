@@ -31,7 +31,7 @@ public class Problem {
     public List<Job> jobs = new ArrayList<>();                                  //statisch object
     public HashMultimap<MachineType, Job> jobTypeMap = HashMultimap.create();   //statisch object
     public HashMap<Job, Truck> jobTruckMap = new HashMap<>();                   //niet-statisch object
-    public HashMap<Location, Job> locationJobMap = new HashMap<>();
+    public HashMultimap<Location, Job> locationJobMap = HashMultimap.create();
     public double currentTemp = 0;
     public int minJobsNotAdded = 0;
     Random r = new Random();
@@ -299,7 +299,6 @@ public class Problem {
         }
         for (Job j : jobs) {
             jobTypeMap.put(j.getMachineType(), j);
-            locationJobMap.put(j.getFixedLocation(), j);
         }
     }
 
@@ -365,22 +364,32 @@ public class Problem {
                     break;
                 case TRUCK:
                     Set<Truck> selectedTrucks = new HashSet<>();
-                    while (selectedTrucks.size() < nTrucksToRemove) {
-                        Truck t = trucks.get(r.nextInt(trucks.size()));
-                        if (!t.isIdle()) {
-                            selectedTrucks.add(t);
-                        }
+                    Truck randomTruck = null;
+                    Job jobOfRandomTruck = null;
+                    while(randomTruck == null) {
+                        jobOfRandomTruck = jobs.get(r.nextInt(jobs.size()));
+                        randomTruck = jobTruckMap.get(jobOfRandomTruck);
                     }
-                    for (Truck t : selectedTrucks) {
-                        selectedJobs.addAll(removePartOfRoute(t));
+                    selectedTrucks.add(randomTruck);
+                    selectedJobs.addAll(removePartOfRoute(randomTruck, jobOfRandomTruck.getFixedLocation(), nJobsToRemove/nTrucksToRemove));
+                    for(Edge e : jobOfRandomTruck.getFixedLocation().getSortedEdgeList()){
+                        if(selectedTrucks.size() == nTrucksToRemove) break;
+                        if(locationJobMap.containsKey(e.getTo()) && !depotMap.containsKey(e.getTo())){
+                            Job j = (Job) locationJobMap.get(e.getTo()).toArray()[0];
+                            Truck t = jobTruckMap.get(j);
+                            if(selectedTrucks.add(t)) {
+                                selectedJobs.addAll(removePartOfRoute(t, e.getTo(), nJobsToRemove / nTrucksToRemove));
+                            }
+                        }
                     }
                     break;
                 case NEARBY:
                     Job randomJob = jobs.get(r.nextInt(jobs.size()));
+                    selectedJobs.addAll(locationJobMap.get(randomJob.getFixedLocation()));
                     for (Edge e : randomJob.getFixedLocation().getSortedEdgeList()) {
-                        if (locationJobMap.containsKey(e.getTo())) {
-                            selectedJobs.add(locationJobMap.get(e.getTo()));
-                            if (selectedJobs.size() == nJobsToRemove) {
+                        if (locationJobMap.containsKey(e.getTo()) && !depotMap.containsKey(e.getTo())) {
+                            selectedJobs.addAll(locationJobMap.get(e.getTo()));
+                            if (selectedJobs.size() > nJobsToRemove) {
                                 break;
                             }
                         }
@@ -490,20 +499,20 @@ public class Problem {
      * @param t Truck waarvan een deel van de Route moet worden afgebroken worden
      * @return Lijst van Jobs die moeten verwijderd worden
      */
-    public List<Job> removePartOfRoute(Truck t){
+    public List<Job> removePartOfRoute(Truck t, Location middleLoc, int avgRange){
         List<Job> deletedJobs = new ArrayList<>();
         //Aantal stops die de Truck maakt (zonder start en eind)
         int nStops = t.getRoute().getStops().size()-2;
         //Aantal stops die verwijderd moeten worden
-        int range = r.nextInt(nStops+1);
-        int start;
+        int range = Math.min(nStops+1, avgRange);
+        int middle = t.getRoute().indexOf(middleLoc);
 
-        if(range == nStops) start = 1;
-        else start = r.nextInt(nStops - range)+1;
+        int start = Math.max(middle-(range/2), 1);
+        int end = Math.min(middle+(range/2), nStops);
 
         //We selecteren alle machines die op deze stops worden gedropt/gecollect
         Set<Machine> machinesToRemove = new HashSet<>();
-        for (int i = start; i < (start+range); i++) {
+        for (int i = start; i < end+1; i++) {
             machinesToRemove.addAll(t.getRoute().getStops().get(i).getDrop());
             machinesToRemove.addAll(t.getRoute().getStops().get(i).getCollect());
         }

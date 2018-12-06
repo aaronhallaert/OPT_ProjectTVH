@@ -8,4 +8,6 @@
 }
 .default-color0.chart-line-symbol {
     -fx-background-color: rgb(106,0,6);
+    -fx-background-radius: 3px;
+    -fx-padding: 3px;
 }
