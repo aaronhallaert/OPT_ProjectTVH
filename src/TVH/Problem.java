@@ -5,7 +5,6 @@ import TVH.Entities.Machine.Machine;
 import TVH.Entities.Machine.MachineType;
 import TVH.Entities.Node.*;
 import TVH.Entities.Truck.*;
-import TVH.GUI.Listener;
 import com.google.common.collect.HashMultimap;
 
 import java.io.File;
@@ -42,8 +41,8 @@ public class Problem {
         return instance;
     }
 
-    public static Problem newInstance(File inputFile) throws FileNotFoundException {
-        instance = new Problem(inputFile);
+    public static Problem newInstance(File inputFile, long SEED) throws FileNotFoundException {
+        instance = new Problem(inputFile, SEED);
         instance.createJobs();
         return instance;
     }
@@ -54,7 +53,8 @@ public class Problem {
      * @param inputFile
      * @throws FileNotFoundException
      */
-    private Problem(File inputFile) throws FileNotFoundException {
+    private Problem(File inputFile, long SEED) throws FileNotFoundException {
+        r = new Random(SEED);
 
         Scanner sc = new Scanner(inputFile).useLocale(Locale.US);
 
@@ -334,7 +334,6 @@ public class Problem {
         //LinkedList<Integer> tabu = new LinkedList<>();
 
         currentTemp = temperature;
-        Listener.getInstance().updateTemperature(currentTemp);
         int counter = 0;
         int timesRun = 0;
         Queue<Mode> modeQueue = Mode.createQueue();
@@ -457,7 +456,6 @@ public class Problem {
                     }
                     minJobsNotAdded = nJobsNotAdded;
                     System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "nf"));
-                    Listener.getInstance().newSolutionFound(localOptimum);
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
                     if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
@@ -470,7 +468,6 @@ public class Problem {
                             long timestamp = System.currentTimeMillis() - (endTime - duration);
                             DecimalFormat df = new DecimalFormat("#.##");
                             System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + df.format(acceptRate * 100) + "%\t\t" + df.format(currentTemp));
-                            Listener.getInstance().newSolutionFound(candidate);
                         }
                     }
                 }
@@ -484,7 +481,6 @@ public class Problem {
             if (counter == 50) {
                 double x_value = ((double)(System.currentTimeMillis() - startTime))/((double) duration)*750;
                 currentTemp = temperature * Math.pow(0.995, x_value); //temperatuur functie
-                Listener.getInstance().updateTemperature(currentTemp);
                 counter = 0;
             }
 

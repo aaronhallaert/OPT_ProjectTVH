@@ -6,7 +6,6 @@ import TVH.Entities.Node.Client;
 import TVH.Entities.Node.Depot;
 import TVH.Entities.Truck.Stop;
 import TVH.Entities.Truck.Truck;
-import TVH.GUI.Listener;
 
 import java.io.*;
 import java.util.ArrayList;

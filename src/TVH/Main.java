@@ -1,41 +1,58 @@
 package TVH;
 
-import TVH.GUI.ConfigController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-public class Main extends Application{
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+
+public class Main{
 
     static String INPUT_FILE;
     static String OUTPUT_FILE ;
+    static long SEED;
+    static int DURATION;
     static long BEGIN_TIME;
 
+
     public static void main(String[] args) {
-
-        launch(args);
-
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("GUI/ConfigGUI.fxml"));
-        Parent root = loader.load();
-        ConfigController configc = loader.getController();
-        //Configfile doorgeven aan controller
-        if(!getParameters().getRaw().isEmpty()) {
-            configc.autoLoadConfig(getParameters().getRaw().get(0));
-            if(getParameters().getRaw().size() == 2 && getParameters().getRaw().get(1).equals("-start")){
-                configc.runProgram();
+        for(String s: args){
+            String argument = s.split("=")[0];
+            String value = s.split("=")[1];
+            switch(argument){
+                case "--problem":
+                    INPUT_FILE = value;
+                    break;
+                case "--solution":
+                    OUTPUT_FILE = value;
+                    break;
+                case "--seed" :
+                    SEED = Long.parseLong(value);
+                    break;
+                case "--time":
+                    DURATION = Integer.parseInt(value);
+                    break;
             }
         }
+        Config config = new Config();
 
-        primaryStage.setTitle("Configurations");
-        Scene startScene= new Scene(root);
-        primaryStage.setScene(startScene);
-        primaryStage.setResizable(false);
-        primaryStage.show();
+        config.update(30, 3, 1, 20, "Jeroen", 100, 1000, 1000,1, DURATION, INPUT_FILE);
+
+        File inputFile = new File(INPUT_FILE);
+        long BEGIN_TIME = System.currentTimeMillis();
+
+        try {
+            Problem problem = Problem.newInstance(inputFile, SEED);
+            Solution solution = problem.solve(config);
+            solution.writeToFile(OUTPUT_FILE, INPUT_FILE);
+            System.out.println("Calculation time: " + (System.currentTimeMillis() - BEGIN_TIME) + "ms");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 }
