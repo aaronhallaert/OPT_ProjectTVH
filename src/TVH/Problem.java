@@ -377,7 +377,7 @@ public class Problem {
                         if(locationJobMap.containsKey(e.getTo()) && !depotMap.containsKey(e.getTo())){
                             Job j = (Job) locationJobMap.get(e.getTo()).toArray()[0];
                             Truck t = jobTruckMap.get(j);
-                            if(selectedTrucks.add(t)) {
+                            if(t != null && selectedTrucks.add(t)) {
                                 selectedJobs.addAll(removePartOfRoute(t, e.getTo(), nJobsToRemove / nTrucksToRemove));
                             }
                         }
@@ -502,7 +502,8 @@ public class Problem {
     public List<Job> removePartOfRoute(Truck t, Location middleLoc, int avgRange){
         List<Job> deletedJobs = new ArrayList<>();
         //Aantal stops die de Truck maakt (zonder start en eind)
-        int nStops = t.getRoute().getStops().size()-2;
+        int nStops = t.getRoute().getStops().size() - 2;
+
         //Aantal stops die verwijderd moeten worden
         int range = Math.min(nStops+1, avgRange);
         int middle = t.getRoute().indexOf(middleLoc);
