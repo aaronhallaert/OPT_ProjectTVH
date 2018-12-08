@@ -141,14 +141,16 @@ public class Route {
         }
         //Als we op een bepaalde locatie (behalve start en eind) passeren zonder iets te droppen of collecten kan deze
         //Stop worden verwijderd.
+        int stopsRemoved = 0;
         if (collectStop.isEmpty() && collectStop != stops.get(0) && collectStop != stops.get(stops.size() - 1)) {
+            stopsRemoved++;
             stops.remove(collectStop);
         }
         if (dropStop.isEmpty() && dropStop != stops.get(0) && dropStop != stops.get(stops.size() - 1)) {
             stops.remove(dropStop);
+            stopsRemoved++;
         }
 
-        //TODO: opnieuw mergen rond de verwijderde indices
 
         changed = true;
     }
@@ -210,7 +212,7 @@ public class Route {
      *
      * @param indices indices van de net toegevoegde stops
      */
-    private void mergeStops(int[] indices) {
+    public void mergeStops(int[] indices) {
         Stop stop1 = stops.get(indices[0]);
         Stop stop2 = stops.get(indices[1]);
 

@@ -4,6 +4,7 @@ import TVH.Entities.Job.Job;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Client;
 import TVH.Entities.Node.Depot;
+import TVH.Entities.Truck.Route;
 import TVH.Entities.Truck.Stop;
 import TVH.Entities.Truck.Truck;
 import TVH.GUI.Listener;
@@ -25,23 +26,23 @@ public class Solution {
     public Solution() {
         Problem problem = Problem.getInstance();
         //Current state van trucks kopiëren;
-        for(Truck t: problem.trucks){
+        for (Truck t : problem.trucks) {
             //Diepe kopie nemen van een truck
             Truck copy = new Truck(t);
             trucks.add(copy);
             totalDistance += copy.getRoute().getTotalDistance();
         }
         //diepe kopies nemen van clients en depots
-        for(Client c: problem.clientMap.values()){
+        for (Client c : problem.clientMap.values()) {
             clients.add(new Client(c));
         }
-        for(Depot d: problem.depotMap.values()){
+        for (Depot d : problem.depotMap.values()) {
             depots.add(new Depot(d));
         }
 
         //Hash maken
-        for(Truck t: trucks){
-            hash += Objects.hash(t.getTruckId(),t.getRoute().getStops());
+        for (Truck t : trucks) {
+            hash += Objects.hash(t.getTruckId(), t.getRoute().getStops());
         }
 
         // hier moet ik de listener triggeren
@@ -49,17 +50,17 @@ public class Solution {
 
     }
 
-    public void loadSolution(){
+    public void loadSolution() {
         Problem problem = Problem.getInstance();
         problem.nodesMap = new HashMap<>();
         problem.clientMap = new HashMap<>();
         problem.depotMap = new HashMap<>();
-        for(Client c: clients){
+        for (Client c : clients) {
             Client copy = new Client(c);
             problem.clientMap.put(c.getLocation(), copy);
             problem.nodesMap.put(c.getLocation(), copy);
         }
-        for(Depot d: depots){
+        for (Depot d : depots) {
             Depot copy = new Depot(d);
             problem.depotMap.put(d.getLocation(), copy);
             problem.nodesMap.put(d.getLocation(), copy);
@@ -68,10 +69,10 @@ public class Solution {
         //De links tussen Jobs en trucks opnieuw maken in de hashmap
         problem.trucks = new ArrayList<>();
         problem.jobTruckMap = new HashMap<>();
-        for(Truck t: trucks){
+        for (Truck t : trucks) {
             Truck copy = new Truck(t);
             problem.trucks.add(copy);
-            for(Job j: t.getJobMoveMap().keySet()){
+            for (Job j : t.getJobMoveMap().keySet()) {
                 problem.jobTruckMap.put(j, copy);
             }
         }
@@ -81,9 +82,9 @@ public class Solution {
         return totalDistance;
     }
 
-    public void recalculateDistance(){
+    public void recalculateDistance() {
         totalDistance = 0;
-        for(Truck t: trucks){
+        for (Truck t : trucks) {
             totalDistance += t.getRoute().getTotalDistance();
         }
     }
@@ -92,15 +93,26 @@ public class Solution {
         return trucks;
     }
 
-    public int getTotalUsedTrucks(){
+    public int getTotalUsedTrucks() {
         int i = 0;
-        for(Truck t: trucks){
-            if(t.getRoute().getTotalDistance() > 0) i++;
+        for (Truck t : trucks) {
+            if (t.getRoute().getTotalDistance() > 0) i++;
         }
         return i;
     }
 
-    public void writeToFile(String outputfile, String inputfile){
+    public void writeToFile(String outputfile, String inputfile) {
+        //Vuile oplossing, maar het werkt wel
+        //Alle eindes van routes nog eens mergen
+        //TODO: hier een properdere implementatie voor vinden
+        for (Truck t : trucks) {
+            if (!t.isIdle()) {
+                Route r = t.getRoute();
+                r.mergeStops(new int[]{r.getStops().size() - 3, r.getStops().size() - 2});
+            }
+        }
+
+
         try {
             PrintWriter writer = new PrintWriter(outputfile);
             writer.println("PROBLEM: " + inputfile);
@@ -128,15 +140,14 @@ public class Solution {
                 }
             }
             writer.close();
-        }
-        catch(IOException ioe){
+        } catch (IOException ioe) {
             ioe.printStackTrace();
         }
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(totalDistance+"\n");
+        sb.append(totalDistance + "\n");
         for (Truck t : trucks) {
             sb.append(t);
         }
