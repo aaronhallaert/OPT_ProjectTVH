@@ -2,7 +2,7 @@
   <configuration default="false" name="TVH4" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="TVH.Main" />
     <module name="OPT_ProjectTVH" />
-    <option name="PROGRAM_PARAMETERS" value="config4" />
+    <option name="PROGRAM_PARAMETERS" value="--problem=files/tvh_problem_4.txt --solution=files/tvh_solution_4.txt --seed=420 --time=1800" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="TVH.*" />

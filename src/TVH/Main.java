@@ -40,7 +40,7 @@ public class Main{
         }
         Config config = new Config();
 
-        config.update(30, 3, 1, 20, "Jeroen", 100, 1000, 1000,1, DURATION, INPUT_FILE);
+        config.update(30, 1, 1, 10, "Jeroen", 100, 1000, 1000,1, DURATION, INPUT_FILE);
 
         File inputFile = new File(INPUT_FILE);
         long BEGIN_TIME = System.currentTimeMillis();

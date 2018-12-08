@@ -105,7 +105,7 @@ public class Solution {
         //Alle eindes van routes nog eens mergen
         //TODO: hier een properdere implementatie voor vinden
         for (Truck t : trucks) {
-            if (!t.isIdle()) {
+            if (t.getRoute().getStops().size() > 3) {
                 Route r = t.getRoute();
                 r.mergeStops(new int[]{r.getStops().size() - 3, r.getStops().size() - 2});
             }
