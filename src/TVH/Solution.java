@@ -4,6 +4,7 @@ import TVH.Entities.Job.Job;
 import TVH.Entities.Machine.Machine;
 import TVH.Entities.Node.Client;
 import TVH.Entities.Node.Depot;
+import TVH.Entities.Truck.Route;
 import TVH.Entities.Truck.Stop;
 import TVH.Entities.Truck.Truck;
 
@@ -100,6 +101,16 @@ public class Solution {
     }
 
     public void writeToFile(String outputfile, String inputfile){
+        //Vuile oplossing, maar het werkt wel
+        //Alle eindes van routes nog eens mergen
+        //TODO: hier een properdere implementatie voor vinden
+        for (Truck t : trucks) {
+            if (!t.isIdle()) {
+                Route r = t.getRoute();
+                r.mergeStops(new int[]{r.getStops().size() - 3, r.getStops().size() - 2});
+            }
+        }
+
         try {
             PrintWriter writer = new PrintWriter(outputfile);
             writer.println("PROBLEM: " + inputfile);

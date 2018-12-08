@@ -210,7 +210,7 @@ public class Route {
      *
      * @param indices indices van de net toegevoegde stops
      */
-    private void mergeStops(int[] indices) {
+    public void mergeStops(int[] indices) {
         Stop stop1 = stops.get(indices[0]);
         Stop stop2 = stops.get(indices[1]);
 
