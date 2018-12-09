@@ -260,9 +260,9 @@ public class Problem {
         best = simulatedAnnealing(endTime, config.getTemperature(), config.getJobs(), config.getMachinetypes(), config.getTrucks());
 
         //System.out.println(best);
-        System.out.println("DEBUG:");
-        System.out.println("Init: " + initial.getTotalDistance());
-        System.out.println("Best: " + best.getTotalDistance());
+        System.out.println("RESULTS:");
+        System.out.println("Initial: " + initial.getTotalDistance());
+        System.out.println("Best:    " + best.getTotalDistance());
 
         return best;
     }
@@ -312,11 +312,7 @@ public class Problem {
 
 
         //Wijs elke Job toe aan de Truck die hem het best kan uitvoeren met het minst extra afstand
-        int i = 0;
         for (Job j : jobs) {
-            System.out.println(i);
-            i++;
-
             if (j.notDone()) {
                 if (!assignJobToBestTruck(j)){
                     minJobsNotAdded++;
@@ -455,7 +451,7 @@ public class Problem {
                         //Listener.getInstance().newSolutionFound(localOptimum);
                     }
                     minJobsNotAdded = nJobsNotAdded;
-                    //System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "nf") +"\t\t" + nJobsToRemove);
+                    System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + mode + "\t\t" + (nJobsNotAdded == 0 ? "f": "nf"));
                 } else {
                     //Candidate not better than local, but maybe it will be accepted with simulated annealing
                     if (localOptimum.getTotalDistance() < candidate.getTotalDistance()) {
@@ -467,7 +463,7 @@ public class Problem {
                             localOptimum = candidate;
                             long timestamp = System.currentTimeMillis() - (endTime - duration);
                             DecimalFormat df = new DecimalFormat("#.##");
-                            //System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + df.format(acceptRate * 100) + "%\t\t" + df.format(currentTemp));
+                            System.out.println(timestamp + "\t\t" + localOptimum.getTotalDistance() + "\t\t" + df.format(acceptRate * 100) + "%\t\t" + df.format(currentTemp));
                         }
                     }
                 }
