@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import jdk.nashorn.internal.scripts.JO;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +18,11 @@ public class Main{
     static long SEED;
     static int DURATION;
     static long BEGIN_TIME;
+    static int TEMPERATUUR;
+    static int TRUCKS;
+    static int MACHINETYPES;
+    static int JOBS;
+
 
 
     public static void main(String[] args) {
@@ -27,20 +33,40 @@ public class Main{
                 case "--problem":
                     INPUT_FILE = value;
                     break;
+
                 case "--solution":
                     OUTPUT_FILE = value;
                     break;
+
                 case "--seed" :
                     SEED = Long.parseLong(value);
                     break;
+
                 case "--time":
                     DURATION = Integer.parseInt(value);
                     break;
+
+                case "--temp":
+                    TEMPERATUUR = Integer.parseInt(value);
+                    break;
+
+                case "--atrucks":
+                    TRUCKS = Integer.parseInt(value);
+                    break;
+
+                case "--amtypes":
+                    MACHINETYPES = Integer.parseInt(value);
+                    break;
+
+                case "--ajobs":
+                    JOBS = Integer.parseInt(value);
+
             }
         }
+
         Config config = new Config();
 
-        config.update(30, 1, 1, 10, "Jeroen", 100, 1000, 1000,1, DURATION, INPUT_FILE);
+        config.update(TEMPERATUUR, TRUCKS, MACHINETYPES, JOBS, "Jeroen", 100, 1000, 1000,1, 600, INPUT_FILE);
 
         File inputFile = new File(INPUT_FILE);
         long BEGIN_TIME = System.currentTimeMillis();
